@@ -14,6 +14,7 @@ var http    = require('http'),
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
 _ = require( __dirname + "/lib/underscore.js");
+WORLD = require( __dirname + "/lib/world.js");
 //---
 
 
@@ -50,13 +51,20 @@ io.configure('production', function(){
     ]);
 });
 
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+
+
+
+
+var world = new WORLD("myworld");
 
 
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 
 io.of('/play').authorization(function (handshake, callback) {
-    // ------------------------------------------------------- MASTER --- Auth
+    // ------------------------------------------------------- play --- Auth
 
     if((handshake.query.password && handshake.query.password == "trackit") || handshake.address.address == "127.0.0.1") {
         callback(null, true);
@@ -66,17 +74,28 @@ io.of('/play').authorization(function (handshake, callback) {
 
 
 }).on('connection', function (socket) {
-        // ------------------------------------------------------- MASTER --- Connection
+    // ------------------------------------------------------- play --- Connection
 
-        socket.join("room1");
+    socket.join("myworld");
 
+    var playername = "testor";
 
-        socket.emit("initial", {whazup:"juhu"});
-
-        socket.on("disconnect", function() {
-
-        });
+    socket.emit("initial", {
+        playername: playername
     });
 
+    var statusinterval = setInterval(function() {
+        socket.volatile.emit("worldupdate", world.objects);
+    }, 1000);
+
+    socket.on("disconnect", function() {
+        clearInterval(statusinterval);
+    });
+});
 //------------------------------------------------------------------
 //------------------------------------------------------------------
+
+setInterval(function() {
+    world.update();
+},10);
+

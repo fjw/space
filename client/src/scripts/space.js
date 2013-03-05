@@ -1,4 +1,4 @@
-define(["underscore", "jquery", "rafpolyfill"], function(_, $, rafpolyfill) { return function() {
+define(["underscore", "jquery", "rafpolyfill", "world"], function(_, $, rafpolyfill, WORLD) { return function() {
 var obj = {
 
     //--------------------
@@ -6,11 +6,17 @@ var obj = {
     bgctx: null,
     vgcanvas: null,
     vgctx: null,
-    w: null,
-    h: null,
+    cw: 0,
+    ch: 0,
+
+    mx: 0,
+    my: 0,
     //--------------------
 
-    objects: [],
+    world: null,
+    playername: null,
+    player: null,
+    oldtranslation: {x:0,y:0},
 
     started: false,
 
@@ -25,24 +31,44 @@ var obj = {
         this.vgcanvas = $("#vg")[0];
         this.vgctx = this.vgcanvas.getContext("2d");
 
-        this.bgctx.translate(0.5, 0.5);
-        this.vgctx.translate(0.5, 0.5);
+        //this.bgctx.translate(0.5, 0.5);
+        //this.vgctx.translate(0.5, 0.5);
 
         //inital einen resize triggern
         this._onResize();
 
         // ------------------------------------------------
 
-        socket.on("initial", function(data) {
+        this.world = new WORLD("myworld");
 
+
+        // ------------------------------------------------
+
+        socket.on("initial", function(data) {
+            _this.playername = data.playername;
+        });
+
+        socket.on("worldupdate", function(worldobjects) {
+
+            _this.world.updateFromServer(worldobjects);
+
+            _this.player = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == _this.playername; });
+
+            //Koordinatensystem transformieren
+            var xx = Math.floor(_this.player.x + _this.mx);
+            var yy = Math.floor(_this.player.y + _this.my);
+
+            _this.vgctx.translate( xx - _this.oldtranslation.x, yy - _this.oldtranslation.y );
+
+            _this.oldtranslation.x = xx;
+            _this.oldtranslation.y = yy;
         });
 
         // ------------------------------------------------
-        window.onresize = function()     { _this._onResize(); };
-
-        window.onkeydown = function(e)   { _this._onKeydown(e.keyCode); };
-        window.onkeyup = function(e)     { _this._onKeyup(e.keyCode); };
-        window.onblur = function(e)      { _this._onBlur(); }
+        window.onresize = function() { _this._onResize(); };
+        window.onkeydown = function(e) { _this._onKeydown(e.keyCode); };
+        window.onkeyup = function(e) { _this._onKeyup(e.keyCode); };
+        window.onblur = function() { _this._onBlur(); };
         // ------------------------------------------------
     },
 
@@ -62,15 +88,21 @@ var obj = {
 
     _onResize: function() {
 
-        var w = $(window).width();
-        var h = $(window).height();
+        var w = window.innerWidth;
+        var h = window.innerHeight;
 
         this.bgcanvas.width = w;
         this.bgcanvas.height = h;
         this.vgcanvas.width = w;
         this.vgcanvas.height = h;
-        this.w = w;
-        this.h = h;
+        this.cw = w;
+        this.ch = h;
+
+        this.mx = Math.floor(w / 2);
+        this.my = Math.floor(h / 2);
+
+        this.vgctx.translate( this.oldtranslation.x, this.oldtranslation.y );
+        console.log(this.oldtranslation);
     },
 
     _onBlur: function() {
@@ -113,10 +145,17 @@ var obj = {
     _update: function() {
         var _this = this;
 
-
         //clear
-        this.vgctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.vgctx.clearRect(0, 0, this.cw, this.ch);
 
+        _this.vgctx.fillStyle = "#000";
+        _.each(this.world.objects, function(obj) {
+            _this.vgctx.fillRect(Math.floor(obj.x), Math.floor(obj.y), 10, 10);
+        });
+
+
+        //clientside-World-Berechnung
+        this.world.update();
     }
 
 

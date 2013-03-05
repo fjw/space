@@ -19,13 +19,12 @@ require([   "jquery",
             "socket"
 ], function( $, _, SPACE, SOCKET) {
 
+    //window.debug = true;
 
     if (document.location.href == "http://localhost:4004/") {
         window.env = "dev";
-        window.debug = true;
     } else {
         window.env = "production";
-        window.debug = false;
     }
 
 
