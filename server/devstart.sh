@@ -1,1 +1,1 @@
-NODE_ENV=development node-dev trackserver.js
+NODE_ENV=development node-dev sserver.js

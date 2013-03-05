@@ -17,20 +17,22 @@ require([   "jquery",
             "underscore",
             "space",
             "socket"
-], function( $, _, funnelv, socket) {
+], function( $, _, SPACE, SOCKET) {
 
 
     if (document.location.href == "http://localhost:4004/") {
         window.env = "dev";
+        window.debug = true;
     } else {
         window.env = "production";
+        window.debug = false;
     }
 
 
     $(document).ready(function() {
 
-        window.socket = new socket();
-        window.space = new space();
+        window.socket = new SOCKET();
+        window.space = new SPACE();
 
 
         if (!!document.createElement("canvas").getContext) {
@@ -42,8 +44,8 @@ require([   "jquery",
 
                     $("#login").fadeOut(100, function() {
 
-                        $("#main").fadeIn(100);
-                        window.fv.start();
+                        $("canvas").fadeIn(100);
+                        window.space.start();
 
                     });
 

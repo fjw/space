@@ -2,7 +2,7 @@ define(["socketio", "underscore"], function(sio, _) { return function() {
 var obj = {
 
 	sock: null,
-    namespace: "/master",
+    namespace: "/play",
     hostname: "t.toolset.io:443",
     preOns: [],
 
