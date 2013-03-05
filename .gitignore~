@@ -1,0 +1,4 @@
+.idea
+server/node_modules
+tracker/node_modules
+tracker/build

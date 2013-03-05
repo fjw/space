@@ -1,0 +1,21 @@
+@import url("reset.css");
+
+body {
+    position: fixed;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 13px;
+    color: #666;
+
+    margin:0; padding: 0;
+}
+
+.clear {
+    clear: both;
+}
+
+/* -------- */
+
+
+
+
+
