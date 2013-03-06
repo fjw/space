@@ -16,7 +16,6 @@ var obj = {
     world: null,
     playername: null,
     player: null,
-    oldtranslation: {x:0,y:0},
 
     started: false,
 
@@ -31,8 +30,8 @@ var obj = {
         this.vgcanvas = $("#vg")[0];
         this.vgctx = this.vgcanvas.getContext("2d");
 
-        //this.bgctx.translate(0.5, 0.5);
-        //this.vgctx.translate(0.5, 0.5);
+        this.bgctx.translate(0.5, 0.5);
+        this.vgctx.translate(0.5, 0.5);
 
         //inital einen resize triggern
         this._onResize();
@@ -55,13 +54,23 @@ var obj = {
             _this.player = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == _this.playername; });
 
             //Koordinatensystem transformieren
-            var xx = Math.floor(_this.player.x + _this.mx);
-            var yy = Math.floor(_this.player.y + _this.my);
+            var xx = Math.round(_this.player.x - _this.mx);
+            var yy = Math.round(_this.player.y - _this.my);
 
-            _this.vgctx.translate( xx - _this.oldtranslation.x, yy - _this.oldtranslation.y );
+            /*
+            _this.vgctx.translate(  _this.oldtranslation.x - xx, _this.oldtranslation.y - yy );
 
             _this.oldtranslation.x = xx;
             _this.oldtranslation.y = yy;
+            */
+
+            _.each(_this.world.objects, function(obj) {
+
+                
+
+            });
+
+
         });
 
         // ------------------------------------------------
@@ -101,8 +110,6 @@ var obj = {
         this.mx = Math.floor(w / 2);
         this.my = Math.floor(h / 2);
 
-        this.vgctx.translate( this.oldtranslation.x, this.oldtranslation.y );
-        console.log(this.oldtranslation);
     },
 
     _onBlur: function() {
@@ -147,12 +154,15 @@ var obj = {
 
         //clear
         this.vgctx.clearRect(0, 0, this.cw, this.ch);
+        this.bgctx.clearRect(0, 0, this.cw, this.ch);
 
-        _this.vgctx.fillStyle = "#000";
+        this.vgctx.fillStyle = "#000";
         _.each(this.world.objects, function(obj) {
-            _this.vgctx.fillRect(Math.floor(obj.x), Math.floor(obj.y), 10, 10);
+            _this.vgctx.fillRect(Math.floor(obj.x) - 5, Math.floor(obj.y) - 5, 10, 10);
         });
 
+        this.bgctx.fillStyle = "#f00";
+        this.bgctx.fillRect(_this.mx - 1, _this.my - 1, 2, 2);
 
         //clientside-World-Berechnung
         this.world.update();

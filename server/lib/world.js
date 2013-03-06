@@ -3,9 +3,9 @@ exports = module.exports = function(name) {
     var obj = {
 
         objects: [
-            { type: "bullet",                 x: 50, y: 50, dx: 0, dy: 0 },
-            { type: "player", name: "testor", x: 5, y: 50, dx: 0, dy: 0 },
-            { type: "player", name: "anderor",x: 100, y: 50, dx: 0, dy: 0 }
+            { type: "bullet",                 x: 50,  y: 10, dx: 1, dy: 0 },
+            { type: "player", name: "testor", x: 5,   y: 10, dx: 1, dy: 0 },
+            { type: "player", name: "anderor",x: 100, y: 0, dx: 0, dy: 0 }
         ],
 
         lastupdate: Date.now(),
