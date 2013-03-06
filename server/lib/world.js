@@ -3,12 +3,14 @@ exports = module.exports = function(name) {
     var obj = {
 
         objects: [
-            { type: "bullet",                 x: 50,  y: 10, dx: 1, dy: 0 },
-            { type: "player", name: "testor", x: 5,   y: 10, dx: 1, dy: 0 },
-            { type: "player", name: "anderor",x: 100, y: 0, dx: 0, dy: 0 }
+            { type: "bullet",                 x: 50,  y: 10, ma: 0,    s: 0  },
+            { type: "player", name: "testor", x: 5,   y: 10, ma: 0,    s: 0, va: 135  },
+            { type: "player", name: "anderor",x: 100, y: 0,  ma: 225,  s: 20, va: 225 }
         ],
 
         lastupdate: Date.now(),
+
+        worldfunctions: require( __dirname + "/worldfunctions.js")(),
 
         _init: function(name) {
 
@@ -25,16 +27,8 @@ exports = module.exports = function(name) {
 
 
             _.each(this.objects, function(obj) {
-                _this._updateObjPosition(obj, secselapsed);
+                _this.worldfunctions.updateObj(obj, secselapsed);
             });
-        },
-
-        _updateObjPosition: function(obj, secselapsed) {
-
-            //dx = x-Änderung pro Sec
-            obj.x += obj.dx * secselapsed;
-            obj.y += obj.dy * secselapsed;
-
         }
         // ============================================
 

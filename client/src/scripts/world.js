@@ -2,7 +2,7 @@ define(["underscore"], function(_) { return function(name) {
     var obj = {
 
         objects: [],
-        player: null,
+        worldfunctions: null,
 
         lastupdate: Date.now(),
 
@@ -25,18 +25,13 @@ define(["underscore"], function(_) { return function(name) {
             var secselapsed = (thistime - this.lastupdate) / 1000;
             this.lastupdate = thistime;
 
+            if (this.worldfunctions) {
 
-            _.each(this.objects, function(obj) {
-                _this._updateObjPosition(obj, secselapsed);
-            });
-        },
+                _.each(this.objects, function(obj) {
+                    _this.worldfunctions.updateObj(obj, secselapsed);
+                });
 
-        _updateObjPosition: function(obj, secselapsed) {
-
-            //dx = x-Änderung pro Sec
-            obj.x += obj.dx * secselapsed;
-            obj.y += obj.dy * secselapsed;
-
+            }
         }
         // --------------------------------------------
 

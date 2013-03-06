@@ -1,4 +1,4 @@
-define(["underscore", "jquery", "rafpolyfill", "world"], function(_, $, rafpolyfill, WORLD) { return function() {
+define(["underscore", "jquery", "rafpolyfill", "world", "res"], function(_, $, rafpolyfill, WORLD, RES) { return function() {
 var obj = {
 
     //--------------------
@@ -14,6 +14,8 @@ var obj = {
     //--------------------
 
     world: null,
+    res: null,
+
     playername: null,
     player: null,
 
@@ -36,41 +38,28 @@ var obj = {
         //inital einen resize triggern
         this._onResize();
 
+
         // ------------------------------------------------
 
         this.world = new WORLD("myworld");
-
+        this.res = new RES();
 
         // ------------------------------------------------
 
         socket.on("initial", function(data) {
             _this.playername = data.playername;
+
+            var wf = function() {
+                eval(data.worldfunctions);
+                return { updateObj: updateObj };
+            };
+
+            _this.world.worldfunctions = wf();
         });
 
         socket.on("worldupdate", function(worldobjects) {
-
             _this.world.updateFromServer(worldobjects);
-
             _this.player = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == _this.playername; });
-
-            //Koordinatensystem transformieren
-            var xx = Math.round(_this.player.x - _this.mx);
-            var yy = Math.round(_this.player.y - _this.my);
-
-            /*
-            _this.vgctx.translate(  _this.oldtranslation.x - xx, _this.oldtranslation.y - yy );
-
-            _this.oldtranslation.x = xx;
-            _this.oldtranslation.y = yy;
-            */
-
-            _.each(_this.world.objects, function(obj) {
-
-                
-
-            });
-
-
         });
 
         // ------------------------------------------------
@@ -152,14 +141,51 @@ var obj = {
     _update: function() {
         var _this = this;
 
+
+
         //clear
         this.vgctx.clearRect(0, 0, this.cw, this.ch);
         this.bgctx.clearRect(0, 0, this.cw, this.ch);
 
-        this.vgctx.fillStyle = "#000";
+
+        // ----- Operationen mit Welt-Koordinaten -----
+        this.vgctx.save();
+
+        if (this.player) {
+            //Koordinatensystem transformieren
+            var xx = Math.round(this.mx - this.player.x);
+            var yy = Math.round(this.my - this.player.y);
+
+            this.vgctx.translate(  xx, yy );
+        }
+
+
+        this.vgctx.fillStyle = "#444";
         _.each(this.world.objects, function(obj) {
-            _this.vgctx.fillRect(Math.floor(obj.x) - 5, Math.floor(obj.y) - 5, 10, 10);
+
+            if (obj.type == "player") {
+
+                _this.res.drawSprite(_this.vgctx, "player", obj.x, obj.y, obj.va);
+
+            } else {
+                _this.vgctx.fillRect(Math.round(obj.x) - 3, Math.round(obj.y) - 3, 6, 6);
+            }
+
+            if (window.debug) {
+                //zeichne vektor
+                var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
+                var vy = Math.sin((obj.ma-90) * 0.0174532) * obj.s * 0.5;
+                _this.vgctx.beginPath();
+                _this.vgctx.moveTo(obj.x, obj.y);
+                _this.vgctx.lineTo(obj.x + vx, obj.y + vy);
+                _this.vgctx.strokeStyle = "#f00";
+                _this.vgctx.stroke();
+            }
+
         });
+
+        this.vgctx.restore();
+        // -----
 
         this.bgctx.fillStyle = "#f00";
         this.bgctx.fillRect(_this.mx - 1, _this.my - 1, 2, 2);
@@ -167,7 +193,6 @@ var obj = {
         //clientside-World-Berechnung
         this.world.update();
     }
-
 
 
 

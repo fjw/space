@@ -19,7 +19,7 @@ require([   "jquery",
             "socket"
 ], function( $, _, SPACE, SOCKET) {
 
-    //window.debug = true;
+    window.debug = 1;
 
     if (document.location.href == "http://localhost:4004/") {
         window.env = "dev";

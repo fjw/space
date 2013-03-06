@@ -66,8 +66,10 @@ var obj = {
 
             this.sock.on(msg, function(resp) {
                 if (window.debug) {
-                    console.info("received '"+msg+"'");
-                    console.log(resp);
+                    if (msg != "worldupdate" || window.debug >= 2) {
+                        console.info("received '"+msg+"'");
+                        console.log(resp);
+                    }
                 }
 
                 callback(resp);
