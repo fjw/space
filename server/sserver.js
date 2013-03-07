@@ -95,7 +95,8 @@ io.of('/play').authorization(function (handshake, callback) {
     // Begrüßung senden
     socket.emit("initial", {
         playername: playername,
-        worldfunctions: worldfunctionsstring
+        worldfunctions: worldfunctionsstring,
+        statics: world.statics
     });
 
     // World-Update-Interval einrichten

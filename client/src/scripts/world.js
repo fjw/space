@@ -3,6 +3,7 @@ define(["underscore"], function(_) { return function(name) {
 
         objects: [],
         worldfunctions: null,
+        statics: [],
 
         lastupdate: Date.now(),
 
@@ -25,10 +26,11 @@ define(["underscore"], function(_) { return function(name) {
             var secselapsed = (thistime - this.lastupdate) / 1000;
             this.lastupdate = thistime;
 
+
             if (this.worldfunctions) {
 
                 _.each(this.objects, function(obj) {
-                    _this.worldfunctions.updateObj(obj, secselapsed);
+                    _this.worldfunctions.updateObj(obj, _this.statics, secselapsed);
                 });
 
             }

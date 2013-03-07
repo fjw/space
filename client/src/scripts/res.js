@@ -4,8 +4,13 @@ var obj = {
 
     imgs: {
         player: {
-            uri: "/res/ship.gif",
+            uri: "/res/ship2.gif",
             center: {x:18, y:18}
+        },
+
+        walltest: {
+            uri: "/res/walltest.png",
+            center: {x:0, y:0}
         }
     },
 

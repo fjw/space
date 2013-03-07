@@ -47,8 +47,13 @@ var obj = {
         // ------------------------------------------------
 
         socket.on("initial", function(data) {
+            //register playername
             _this.playername = data.playername;
 
+            //register statics
+            _this.world.statics = data.statics;
+
+            //register worldfunctions
             var wf = function() {
                 eval(data.worldfunctions);
                 return { updateObj: updateObj };
@@ -160,12 +165,19 @@ var obj = {
         }
 
 
+        _.each(this.world.statics, function(obj) {
+
+
+            _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
+
+        });
+
         this.vgctx.fillStyle = "#444";
         _.each(this.world.objects, function(obj) {
 
             if (obj.type == "player") {
 
-                _this.res.drawSprite(_this.vgctx, "player", obj.x, obj.y, obj.va);
+                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, obj.va);
 
             } else {
                 _this.vgctx.fillRect(Math.round(obj.x) - 3, Math.round(obj.y) - 3, 6, 6);
