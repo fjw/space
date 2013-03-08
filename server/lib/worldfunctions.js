@@ -3,7 +3,7 @@ exports = module.exports = function() {
     ////
 
     // Vektorumwandlung -  Winkel, Betrag -> Koordinaten
-    var angleAbs2vektor = function(a, s) {
+    var angleAbs2vector = function(a, s) {
 
         var x = Math.cos((a-90) * 0.0174532) * s;
         var y = Math.sin((a-90) * 0.0174532) * s;
@@ -12,7 +12,7 @@ exports = module.exports = function() {
     };
 
     // Vektorumwandlung - Koordinaten -> Winkel, Betrag
-    var vektor2angleAbs = function(x, y) {
+    var vector2angleAbs = function(x, y) {
         var s = Math.sqrt(x*x + y*y);
 
         var a = 0;
@@ -36,6 +36,17 @@ exports = module.exports = function() {
         return a;
     };
 
+    // Winkel für Linien, die keine Richtung haben (0-179)
+    var directionlessAngle = function(a) {
+
+        a = angleInBoundaries(a);
+        if(a >= 180 ) {
+            a = a - 180;
+        }
+
+        return a;
+    };
+
     // Abstand eines Punkts von einer Linie errechnen
     var distancePointFromPath = function(px, py, x1, y1, x2, y2) {
         var dx = x2 - x1; //j
@@ -48,7 +59,7 @@ exports = module.exports = function() {
         var sy = y1 + a * dy;
 
         //Abstand
-        return Math.sqrt( Math.pow(sx-px, 2) + Math.pow(sy-py, 2) );
+        return { d: Math.sqrt( Math.pow(sx-px, 2) + Math.pow(sy-py, 2) ), sx: sx, sy };
     };
 
     // Weltobjekt updaten
@@ -56,8 +67,9 @@ exports = module.exports = function() {
 
         if(obj) {
 
-            var v = {x:0,y:0}; // richtungsändernder Beschleunigungsvektor
 
+            var breakfaktor = 0; // Faktor um den durch eine Kollision gebremst wird
+            var collided = false;
 
             // Kollision mit static finden
             if (obj.cr) {
@@ -75,24 +87,52 @@ exports = module.exports = function() {
 
 
                             // in Reichweite dieses statics, checke ob pfade kollidieren
-                            var clp = _.find(static.cp, function(cp) {
-                                var d = distancePointFromPath(obj.x, obj.y, cp.x1 + static.x, cp.y1 + static.y, cp.x2 + static.x, cp.y2 + static.y);
-                                return d < obj.cr;
+                            var clplist = [];
+                            _.each(static.cp, function(cp) {
+
+                                var dpp = distancePointFromPath(obj.x, obj.y, cp.x1 + static.x, cp.y1 + static.y, cp.x2 + static.x, cp.y2 + static.y);
+
+                                if (dpp.d < obj.cr) {
+
+                                    clplist.push({
+                                        dpp: dpp,
+                                        cp: cp
+                                    });
+                                }
                             });
 
-                            if (clp) {
-                                // !Kollision!
+                            if (clplist) {
+
+                                // bei mehreren Kollisionen den mit dem grössten Winkelunterschied nehmen
+                                var clp = _.max(clplist, function(clp) {
+                                    var cp = clp.cp;
+                                    var a = directionlessAngle(obj.ma) - cp.a;
+                                    var b = cp.a - directionlessAngle(obj.ma);
+
+                                    if (a < b) {
+                                        return b;
+                                    } else {
+                                        return a;
+                                    }
+                                });
+
+                                if (clp) {
+                                    // !Kollision!
+
+                                    // Einfallswinkel gleich Ausfallswinkel
+                                    obj.ma = angleInBoundaries(2 * clp.a - obj.ma);
 
 
-                                var cpa = vektor2angleAbs(clp.x2-clp.x1, clp.y2-clp.y1).a; //Winkel des Pfads //todo: kann vorberechnet werden
-
-                                //todo: manchmal bleibt er hängen ( bei annäherung von der seite oder bremsen?)
 
 
-                                // Einfallswinkel gleich Ausfallswinkel
-                                obj.ma = angleInBoundaries(2 * cpa - obj.ma);
+                                    //todo: Idee: Obj erst im RechtenWinkel verschieben
+                                    
 
-                                obj.s = obj.s ; //Bremsen //todo: ?
+
+                                    breakfaktor = static.bf; //todo: checken ob notwendig
+                                    collided = true; //todo: checken
+                                }
+
                             }
 
                         }
@@ -103,10 +143,17 @@ exports = module.exports = function() {
             }
 
 
+            // Vektor aus aktueller Geschwindigkeit bestimmen
+            var m = angleAbs2vector(obj.ma, obj.s);
+
+
             if (obj.type == "player") {
+
+                var v = {x:0,y:0};
 
                 var playervelocity = 5; //pro sek
                 var playerrotationspeed = 3;
+                var playermaxspeed = 200;
 
                 if (obj.rturning) {
                     obj.va = angleInBoundaries(obj.va + playerrotationspeed);
@@ -115,35 +162,52 @@ exports = module.exports = function() {
                     obj.va = angleInBoundaries(obj.va - playerrotationspeed);
                 }
 
-                if (obj.thrusting) {
-                    v = angleAbs2vektor(obj.va, playervelocity);
-                }
-                if (obj.breaking) {
-                    v = angleAbs2vektor( angleInBoundaries(obj.va-180), playervelocity);
+                if (!collided) { //nur wenn gerade nicht kollidiert wurde (tunneling verhindern)
+                    if (obj.thrusting) {
+                        v = angleAbs2vector(obj.va, playervelocity);
+                    }
+                    if (obj.breaking) {
+                        v = angleAbs2vector( angleInBoundaries(obj.va-180), playervelocity);
+                    }
+
+                    if (obj.thrusting || obj.breaking) {
+                        // Beschleunigungsvektor addieren (falls vorhanden)
+                        m.x += v.x;
+                        m.y += v.y;
+
+                        // neue Werte im Objekt vermerken
+                        var as = vector2angleAbs(m.x, m.y);
+
+                        obj.s = as.s;
+                        obj.ma = as.a;
+
+                        if (obj.s > playermaxspeed) {
+                            obj.s = playermaxspeed;
+                        }
+                    }
                 }
             }
 
-            // Vektor aus Geschwindigkeit bestimmen
-            var m = angleAbs2vektor(obj.ma, obj.s);
-
-            if (v.x != 0 || v.y != 0) {
-                // Beschleunigungsvektor addieren (falls vorhanden)
-                m.x += v.x;
-                m.y += v.y;
-
-                // neue Werte im Objekt vermerken
-                var as = vektor2angleAbs(m.x, m.y);
-
-                obj.s = as.s;
-                obj.ma = as.a;
-            }
 
             // Änderung pro Sekunde
             obj.x += m.x * secselapsed;
             obj.y += m.y * secselapsed;
+
+
+            // Geschwindigkeit durch Kollision verringern (nachdem das letzte Frame berechnet wurde)
+            if (breakfaktor) {
+                obj.s *= breakfaktor;
+            }
         }
     };
 
     ////
-    return { updateObj:updateObj };
+    return {
+        updateObj: updateObj,
+        angleAbs2vector: angleAbs2vector,
+        vector2angleAbs: vector2angleAbs,
+        angleInBoundaries: angleInBoundaries,
+        distancePointFromPath: distancePointFromPath,
+        directionlessAngle: directionlessAngle
+    };
 };

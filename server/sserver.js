@@ -15,7 +15,6 @@ log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
 _ = require( __dirname + "/lib/underscore.js");
 WORLD = require( __dirname + "/lib/world.js");
-VEKTOR = require( __dirname + "/lib/vektor.js");
 //---
 
 
@@ -58,7 +57,7 @@ io.configure('production', function(){
 
 
 
-var world = new WORLD("myworld");
+var world = new WORLD();
 
 
 var worldfunctionsstring = "";
