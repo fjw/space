@@ -59,7 +59,8 @@ exports = module.exports = function() {
         var sy = y1 + a * dy;
 
         //Abstand
-        return { d: Math.sqrt( Math.pow(sx-px, 2) + Math.pow(sy-py, 2) ), sx: sx, sy };
+        var d = Math.sqrt( Math.pow(sx-px, 2) + Math.pow(sy-py, 2) );
+        return { d: d, sx: sx, sy:sy };
     };
 
     // Weltobjekt updaten
@@ -120,13 +121,13 @@ exports = module.exports = function() {
                                     // !Kollision!
 
                                     // Einfallswinkel gleich Ausfallswinkel
-                                    obj.ma = angleInBoundaries(2 * clp.a - obj.ma);
+                                    obj.ma = angleInBoundaries(2 * clp.cp.a - obj.ma);
 
 
 
 
                                     //todo: Idee: Obj erst im RechtenWinkel verschieben
-                                    
+
 
 
                                     breakfaktor = static.bf; //todo: checken ob notwendig
