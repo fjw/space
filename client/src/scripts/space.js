@@ -169,8 +169,28 @@ var obj = {
 
         _.each(this.world.statics, function(obj) {
 
+            if(obj.type == "ni") {
 
-            _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
+                // Static ohne Bild mit Pfad
+                _this.vgctx.beginPath();
+
+                _.each(obj.p, function(p, i) {
+                    if( i == 0 ) {
+                        _this.vgctx.moveTo(p.x + obj.x, p.y + obj.y);
+                    } else {
+                        _this.vgctx.lineTo(p.x + obj.x, p.y + obj.y);
+                    }
+                });
+                _this.vgctx.closePath();
+                _this.vgctx.fillStyle = obj.c;
+                _this.vgctx.fill();
+
+            } else {
+
+                // Static mit Bild
+                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
+
+            }
 
         });
 
