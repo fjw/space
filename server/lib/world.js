@@ -86,11 +86,19 @@ exports = module.exports = function() {
                 }
             });
 
-            //alte Bullets entfernen
+            //alte Bullets & Bombs entfernen
             var bulletlifetime = 6; //sec
+            var bomblifetime = 20; //sec
 
             this.objects = _.filter(this.objects, function(item) {
-                return (item.type != "bullet" || item.t + bulletlifetime * 1000 > thistime);
+
+                if(item.type == "bullet") {
+                    return item.t + bulletlifetime * 1000 > thistime;
+                } else if(item.type == "bomb") {
+                    return item.t + bomblifetime * 1000 > thistime;
+                } else {
+                    return true;
+                }
             });
 
 
@@ -100,9 +108,11 @@ exports = module.exports = function() {
 
             // Schießen
             if (obj.shooting) {
+
                 var bulletspeed = 400;
                 var shotspersec = 0.3;
-
+                var type = "bullet";
+                var cr = 8;
                 var lastshot = obj.lastshot;
 
                 if(!lastshot || lastshot + shotspersec * 1000 < thistime ) {
@@ -113,12 +123,13 @@ exports = module.exports = function() {
                     var bas = this.worldfunctions.vector2angleAbs(pv.x + bv.x, pv.y + bv.y);
 
                     var bullet = {
-                        type: "bullet",
+                        type: type,
+
                         x: obj.x, y: obj.y,
                         ma: bas.a,
                         s: bas.s,
                         o: obj.name,
-                        cr: 8,
+                        cr: cr,
                         t: thistime
                     };
 
@@ -126,7 +137,39 @@ exports = module.exports = function() {
 
                     obj.lastshot = thistime;
                 }
+            }
 
+            // Bomben
+            if (obj.shooting2) {
+
+                var bulletspeed = 250;
+                var shotspersec = 1;
+                var type = "bomb";
+                var cr = 10;
+                var lastshot = obj.lastshot2;
+
+                if(!lastshot || lastshot + shotspersec * 1000 < thistime ) {
+
+                    var pv = this.worldfunctions.angleAbs2vector(obj.ma, obj.s);
+                    var bv = this.worldfunctions.angleAbs2vector(obj.va, bulletspeed);
+
+                    var bas = this.worldfunctions.vector2angleAbs(pv.x + bv.x, pv.y + bv.y);
+
+                    var bullet = {
+                        type: type,
+
+                        x: obj.x, y: obj.y,
+                        ma: bas.a,
+                        s: bas.s,
+                        o: obj.name,
+                        cr: cr,
+                        t: thistime
+                    };
+
+                    this.objects.push(bullet);
+
+                    obj.lastshot2 = thistime;
+                }
             }
 
         }

@@ -214,14 +214,14 @@ var obj = {
         this.vgctx.fillStyle = "#444";
         _.each(this.world.objects, function(obj) {
 
-            if (obj.type == "player") {
+
+            if (obj.type != "player" || obj.name != _this.playername) { //aktuellen Spieler nicht zeichnen
 
                 _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, obj.va);
 
-            } else {
-                _this.vgctx.fillRect(Math.round(obj.x) - 3, Math.round(obj.y) - 3, 6, 6);
             }
 
+            // ---- Debug Vektoren
             if (window.debug >= 2) {
                 //zeichne vektor
                 var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
@@ -232,8 +232,13 @@ var obj = {
                 _this.vgctx.strokeStyle = "#f00";
                 _this.vgctx.stroke();
             }
+            // ----
 
         });
+
+        //aktuellen Spieler zeichnen
+        this.res.drawSprite(this.vgctx, "player", this.player.x, this.player.y, this.player.va);
+
 
         this.vgctx.restore();
         // -----

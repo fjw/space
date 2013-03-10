@@ -66,7 +66,7 @@ var obj = {
 
         var sprite = this.imgs[sprite];
 
-        if (sprite.img.complete) {
+        if (sprite && sprite.img.complete) {
 
             var img = sprite.img;
 
@@ -78,6 +78,11 @@ var obj = {
                 Math.round(x - sprite.center.x),
                 Math.round(y - sprite.center.y)
             );
+
+        } else {
+
+            //kein Bild vorhanden, Platzhalter zeichnen
+            ctx.fillRect(Math.round(x - 2), Math.round(y - 2), 5, 5);
 
         }
 
