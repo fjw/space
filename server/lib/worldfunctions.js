@@ -11,9 +11,15 @@ exports = module.exports = function() {
         return {x:x, y:y};
     };
 
+    // Vektorbetrag
+    var vectorAbs = function(x, y) {
+        return Math.sqrt(x*x + y*y);
+    };
+
+
     // Vektorumwandlung - Koordinaten -> Winkel, Betrag
     var vector2angleAbs = function(x, y) {
-        var s = Math.sqrt(x*x + y*y);
+        var s = vectorAbs(x,y);
 
         var a = 0;
         if ( x >= 0) {
@@ -69,7 +75,6 @@ exports = module.exports = function() {
         if(obj) {
 
 
-            var breakfaktor = 0; // Faktor um den durch eine Kollision gebremst wird
             var collided = false;
 
             // Kollision mit static finden
@@ -123,15 +128,15 @@ exports = module.exports = function() {
                                     // Einfallswinkel gleich Ausfallswinkel
                                     obj.ma = angleInBoundaries(2 * clp.cp.a - obj.ma);
 
+                                    // Objekt im rechten Winkel verschieben aus dem Kollisionsradius schieben
+                                    var cdx = obj.x - clp.dpp.sx;
+                                    var cdy = obj.y - clp.dpp.sy;
+                                    var b = vectorAbs(cdx, cdy);
+                                    obj.x = clp.dpp.sx + (cdx / b * obj.cr);
+                                    obj.y = clp.dpp.sy + (cdy / b * obj.cr);
 
-
-
-                                    //todo: Idee: Obj erst im RechtenWinkel verschieben
-
-
-
-                                    breakfaktor = static.bf; //todo: checken ob notwendig
-                                    collided = true; //todo: checken
+                                    obj.s *= 0.9;
+                                    collided = true;
                                 }
 
                             }
@@ -153,8 +158,9 @@ exports = module.exports = function() {
                 var v = {x:0,y:0};
 
                 var playervelocity = 5; //pro sek
+                var playerbackvelocity = 3;
                 var playerrotationspeed = 3;
-                var playermaxspeed = 200;
+                var playermaxspeed = 300;
 
                 if (obj.rturning) {
                     obj.va = angleInBoundaries(obj.va + playerrotationspeed);
@@ -168,7 +174,7 @@ exports = module.exports = function() {
                         v = angleAbs2vector(obj.va, playervelocity);
                     }
                     if (obj.breaking) {
-                        v = angleAbs2vector( angleInBoundaries(obj.va-180), playervelocity);
+                        v = angleAbs2vector( angleInBoundaries(obj.va-180), playerbackvelocity );
                     }
 
                     if (obj.thrusting || obj.breaking) {
@@ -186,6 +192,12 @@ exports = module.exports = function() {
                             obj.s = playermaxspeed;
                         }
                     }
+
+                    if (obj.breakingtostop) {
+                        obj.s = obj.s * 0.99;
+                        if (obj.s < 2) { obj.s = 0; }
+                    }
+
                 }
             }
 
@@ -194,11 +206,6 @@ exports = module.exports = function() {
             obj.x += m.x * secselapsed;
             obj.y += m.y * secselapsed;
 
-
-            // Geschwindigkeit durch Kollision verringern (nachdem das letzte Frame berechnet wurde)
-            if (breakfaktor) {
-                obj.s *= breakfaktor;
-            }
         }
     };
 

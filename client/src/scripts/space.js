@@ -120,6 +120,7 @@ var obj = {
             if(code == 40) { socket.emit("break", "start"); }
             if(code == 39) { socket.emit("tright", "start"); }
             if(code == 37) { socket.emit("tleft", "start"); }
+            if(code == 78) { socket.emit("breaktostop", "start"); }
 
         }
 
@@ -133,6 +134,7 @@ var obj = {
         if(code == 40) { socket.emit("break", "stop"); }
         if(code == 39) { socket.emit("tright", "stop"); }
         if(code == 37) { socket.emit("tleft", "stop"); }
+        if(code == 78) { socket.emit("breaktostop", "stop"); }
 
     },
 

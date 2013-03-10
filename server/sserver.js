@@ -124,12 +124,18 @@ io.of('/play').authorization(function (handshake, callback) {
         else { player.lturning = false; }
     });
 
+    socket.on("breaktostop", function(msg) {
+        if(msg == "start") { player.breakingtostop = true; }
+        else { player.breakingtostop = false; }
+    });
+
     socket.on("allsystems", function(msg) {
         if(msg == "stop") {
             player.thrusting = false;
             player.breaking = false;
             player.rturning = false;
             player.lturning = false;
+            player.breakingtostop = false;
         }
     });
 
