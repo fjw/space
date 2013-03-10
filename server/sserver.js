@@ -129,6 +129,16 @@ io.of('/play').authorization(function (handshake, callback) {
         else { player.breakingtostop = false; }
     });
 
+    socket.on("shoot", function(msg) {
+        if(msg == "start") { player.shooting = true; }
+        else { player.shooting = false; }
+    });
+
+    socket.on("shoot2", function(msg) {
+        if(msg == "start") { player.shooting2 = true; }
+        else { player.shooting2 = false; }
+    });
+
     socket.on("allsystems", function(msg) {
         if(msg == "stop") {
             player.thrusting = false;
@@ -136,6 +146,8 @@ io.of('/play').authorization(function (handshake, callback) {
             player.rturning = false;
             player.lturning = false;
             player.breakingtostop = false;
+            player.shooting = false;
+            player.shooting2 = false;
         }
     });
 

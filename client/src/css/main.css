@@ -20,6 +20,18 @@ canvas {
     left: 0;
 }
 
+#map {
+    bottom: 10px;
+    left: 10px;
+
+    top: inherit;
+
+    border: 1px solid #ccc;
+    border-radius: 2px;
+
+    opacity: 0.7;
+}
+
 /* -------- */
 
 

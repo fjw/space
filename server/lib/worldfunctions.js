@@ -55,14 +55,24 @@ exports = module.exports = function() {
 
     // Abstand eines Punkts von einer Linie errechnen
     var distancePointFromPath = function(px, py, x1, y1, x2, y2) {
-        var dx = x2 - x1; //j
-        var dy = y2 - y1; //k
+        var dx = x2 - x1;
+        var dy = y2 - y1;
 
         var a = ( dx*(px-x1) + dy*(py-y1) ) / ( dx*dx + dy*dy );
 
-        //Schnittpunkt
-        var sx = x1 + a * dx;
-        var sy = y1 + a * dy;
+        var sx, sy;
+
+        if (a < 0) {
+            //links von der strecke, nehme x1
+            sx = x1; sy = y1;
+        } else if (a > 1) {
+            //rechts von der strecke nehme x2
+            sx = x1; sy = y1;
+        } else {
+            //innerhalb der strecke, nehme den schnittpunkt der normalen
+            sx = x1 + a * dx;
+            sy = y1 + a * dy;
+        }
 
         //Abstand
         var d = Math.sqrt( Math.pow(sx-px, 2) + Math.pow(sy-py, 2) );
