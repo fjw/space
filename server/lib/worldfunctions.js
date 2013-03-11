@@ -91,22 +91,23 @@ exports = module.exports = function() {
             if (obj.cr) {
                 // dieses Object hat cr => kann kollidieren
 
-                _.each(statics, function(static) {
+                _.each(statics, function(stat) {
 
-                    if (static.cp) {
+                    if (stat.cp && !collided) {
                         // dieser static hat cp => kann kollidieren
+                        // es kann immer nur mit EINEM static pro Loop kollidiert werden!
 
-                        if(obj.x + obj.cr > static.x &&
-                           obj.x - obj.cr < static.x + static.w &&
-                           obj.y + obj.cr > static.y &&
-                           obj.y - obj.cr < static.y + static.h) {
+                        if(obj.x + obj.cr > stat.x &&
+                           obj.x - obj.cr < stat.x + stat.w &&
+                           obj.y + obj.cr > stat.y &&
+                           obj.y - obj.cr < stat.y + stat.h) {
 
 
                             // in Reichweite dieses statics, checke ob pfade kollidieren
                             var clplist = [];
-                            _.each(static.cp, function(cp) {
+                            _.each(stat.cp, function(cp) {
 
-                                var dpp = distancePointFromPath(obj.x, obj.y, cp.x1 + static.x, cp.y1 + static.y, cp.x2 + static.x, cp.y2 + static.y);
+                                var dpp = distancePointFromPath(obj.x, obj.y, cp.x1 + stat.x, cp.y1 + stat.y, cp.x2 + stat.x, cp.y2 + stat.y);
 
                                 if (dpp.d < obj.cr) {
 
@@ -117,8 +118,9 @@ exports = module.exports = function() {
                                 }
                             });
 
-                            if (clplist) {
+                            if (clplist.length > 0) {
 
+/*                              //todo: entfernen wenn alles nach der neuen methode gut funktioniert
                                 // bei mehreren Kollisionen den mit dem grössten Winkelunterschied nehmen
                                 var clp = _.max(clplist, function(clp) {
                                     var cp = clp.cp;
@@ -148,6 +150,41 @@ exports = module.exports = function() {
                                     obj.s *= 0.9;
                                     collided = true;
                                 }
+*/
+
+
+                                var clpa, sx, sy;
+                                if (clplist.length > 1) {
+                                    //mehrere Kollisionen, zwischenwinkel ermitteln
+                                    var sum = _.reduce(clplist, function(memo, item){ return memo + directionlessAngle(item.cp.a); }, 0);
+                                    clpa = sum / clplist.length;
+
+                                    var xsum = _.reduce(clplist, function(memo, item){ return memo + item.dpp.sx; }, 0);
+                                    sx = xsum / clplist.length;
+
+                                    var ysum = _.reduce(clplist, function(memo, item){ return memo + item.dpp.sy; }, 0);
+                                    sy = ysum / clplist.length;
+
+                                } else {
+                                    clpa = clplist[0].cp.a;
+                                    sx = clplist[0].dpp.sx;
+                                    sy = clplist[0].dpp.sy;
+                                }
+
+                                // !Kollision!
+
+                                // Einfallswinkel gleich Ausfallswinkel
+                                obj.ma = angleInBoundaries(2 * clpa - obj.ma);
+
+                                // Objekt im rechten Winkel verschieben aus dem Kollisionsradius schieben
+                                var cdx = obj.x - sx;
+                                var cdy = obj.y - sy;
+                                var b = vectorAbs(cdx, cdy);
+                                obj.x = sx + (cdx / b * (obj.cr + 2)); // 2 mehr für die spitzen winkel //todo: klappt das so?
+                                obj.y = sy + (cdy / b * (obj.cr + 2));
+
+                                obj.s *= 0.9;
+                                collided = true;
 
                             }
 

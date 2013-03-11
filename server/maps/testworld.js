@@ -406,6 +406,12 @@ exports = module.exports = {
             c: "#444"
         },
 
+        //Test spitzer Winkel
+        {
+            type: "ni", x: 0, y: -1700,
+            p: [ { x: 300, y: 0 }, { x: 400, y: 400 }, { x: 400, y: 450 }, { x: 300, y: 20 }, { x: 20, y: 500 }, { x: 0, y: 450 } ],
+            c: "#444"
+        },
 
 
         //Seitenwände
