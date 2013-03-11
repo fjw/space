@@ -7,7 +7,7 @@ body {
     color: #fff;
 
     margin:0; padding: 0;
-    /* background: #000; */
+    background: #000;
 }
 
 .clear {
@@ -29,6 +29,7 @@ canvas {
     border: 1px solid #ccc;
     border-radius: 2px;
 
+    background: #000;
     opacity: 0.7;
 }
 

@@ -4,13 +4,19 @@ var obj = {
 
     imgs: {
         player: {
-            uri: "/res/ship2.gif", //"/res/ship3.png",
-            center: {x:18, y:18}
+            uri: "/res/ship3.png", // "/res/ship2.gif",
+            center: {x:18, y:18},
+            rotations: true
         },
 
         walltest: {
             uri: "/res/walltest.png",
             center: {x:0, y:0}
+        },
+
+        station: {
+            uri: "/res/stationt.png",
+            buri: "/res/stationb.png"
         }
     },
 
@@ -22,8 +28,15 @@ var obj = {
             item.img = new Image();
             item.img.src = item.uri;
 
+            if (item.buri) {
+                item.bimg = new Image();
+                item.bimg.src = item.buri;
+            }
+
             item.img.onload = function() {
-                _this._preloadRotations(item);
+                if(item.rotations) {
+                    _this._preloadRotations(item);
+                }
             };
 
         });
@@ -62,22 +75,47 @@ var obj = {
         resitem.angleimgs = imgs;
     },
 
-    drawSprite: function(ctx, sprite, x, y, angle) {
+    drawSprite: function(ctx, sprite, x, y, angle, back, zoom) {
 
         var sprite = this.imgs[sprite];
 
-        if (sprite && sprite.img.complete) {
+        if (sprite) {
 
-            var img = sprite.img;
-
-            if(sprite.angleimgs && angle) {
-                img = _.min(sprite.angleimgs, function(item) { return Math.abs(angle - item.d); }).img;
+            var img;
+            if (back && sprite.buri) {
+                img = sprite.bimg;
+            } else {
+                img = sprite.img;
             }
 
-            ctx.drawImage( img,
-                Math.round(x - sprite.center.x),
-                Math.round(y - sprite.center.y)
-            );
+            if (img.complete) {
+
+                if(sprite.angleimgs && angle) {
+                    img = _.min(sprite.angleimgs, function(item) { return Math.abs(angle - item.d); }).img;
+                }
+
+                var cx = 0;
+                var cy = 0;
+                if (sprite.center) {
+                    cx = sprite.center.x;
+                    cy = sprite.center.y;
+                }
+
+                if(zoom) {
+                    ctx.drawImage( img,
+                        Math.round((x - cx)*zoom),
+                        Math.round((y - cy)*zoom),
+                        Math.round((img.width)*zoom),
+                        Math.round((img.height)*zoom)
+                    );
+                } else {
+                    ctx.drawImage( img,
+                        Math.round(x - cx),
+                        Math.round(y - cy)
+                    );
+                }
+
+            }
 
         } else {
 

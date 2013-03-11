@@ -214,7 +214,7 @@ var obj = {
             } else {
 
                 // Static mit Bild
-                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
+                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, 0, true);
 
             }
 
@@ -247,6 +247,21 @@ var obj = {
 
         //aktuellen Spieler zeichnen
         this.res.drawSprite(this.vgctx, "player", this.player.x, this.player.y, this.player.va);
+
+
+        //Vordergrund statics zeichnen //todo: gescheites layersystem muss her
+        _.each(this.world.statics, function(obj) {
+
+            if (obj.type != "ni") {
+
+                // Static mit Bild
+                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, 0, false);
+
+            }
+
+        });
+
+
 
 
         this.vgctx.restore();
@@ -290,6 +305,7 @@ var obj = {
     _mapY: 0,
     _mapbuffer: null,
     _prepareMinimap: function() { //todo: diese Function refakturisieren
+        var _this = this;
 
         var zoom = this.zoom;
         var max_x = _.max(this.world.statics, function(item) { return item.x + item.w; });
@@ -332,8 +348,9 @@ var obj = {
 
             } else {
 
+
                 // Static mit Bild
-                //todo: collisionspfade zeichnen
+                _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), 0, false, zoom);
             }
 
         });
