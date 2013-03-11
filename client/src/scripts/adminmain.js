@@ -14,14 +14,14 @@ require.config({
 
 
 require([   "jquery",
-            "underscore",
-            "space",
-            "socket"
+    "underscore",
+    "adminspace",
+    "socket"
 ], function( $, _, SPACE, SOCKET) {
 
-    window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
+    window.debug = 1;
 
-    if (document.location.href == "http://localhost:4004/") {
+    if (document.location.href == "http://localhost:4004/admin.html") {
         window.env = "dev";
     } else {
         window.env = "production";
@@ -30,7 +30,7 @@ require([   "jquery",
 
     $(document).ready(function() {
 
-        window.socket = new SOCKET("/play");
+        window.socket = new SOCKET("/admin");
         window.space = new SPACE();
 
 
@@ -62,7 +62,6 @@ require([   "jquery",
         } else {
             console.log("this browser sucks...");
         }
-
 
     });
 

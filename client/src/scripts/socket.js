@@ -1,13 +1,13 @@
-define(["socketio", "underscore"], function(sio, _) { return function() {
+define(["socketio", "underscore"], function(sio, _) { return function(namespace) {
 var obj = {
 
 	sock: null,
-    namespace: "/play",
+    namespace: null,
     hostname: "t.toolset.io:443",
     preOns: [],
 
-    _init: function() {
-
+    _init: function(namespace) {
+        this.namespace = namespace;
     },
 
     connect: function(user, password, callback) {
@@ -19,9 +19,11 @@ var obj = {
             'force new connection': true
         };
 
-        if (document.location.href == "http://localhost:4004/") {
+        var devhost = "http://localhost:4004/";
+
+        if (document.location.href == devhost || document.location.href == devhost + "admin.html") {
             //DEV MODE
-            this.hostname = document.location.href;
+            this.hostname = devhost;
         }
 
         if (window.debug) {
@@ -88,7 +90,7 @@ var obj = {
 };
 
 //mach den _init und gib das objekt aus
-obj._init();
+obj._init(namespace);
 return obj;
 
 };});

@@ -8,8 +8,8 @@ define(["underscore"], function(_) { return function(name) {
         lastupdate: Date.now(),
 
         _init: function(name) {
+            //name = Worldname
 
-            console.log(name);
         },
 
         updateFromServer: function(worldobjects) {

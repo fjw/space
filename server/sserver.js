@@ -28,8 +28,8 @@ app.configure('development', function () {
 
 //create servers
 log("info", "starting express & socket on port "+cfg.port);
-var server = http.createServer(app),
-    io = require('socket.io').listen(server);
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
 server.listen(cfg.port);
 
 //socket.io config
@@ -160,6 +160,33 @@ io.of('/play').authorization(function (handshake, callback) {
 });
 //------------------------------------------------------------------
 //------------------------------------------------------------------
+
+
+io.of('/admin').authorization(function (handshake, callback) {
+    // ------------------------------------------------------- play --- Auth
+
+    if((handshake.query.password && handshake.query.password == "trackit") || handshake.address.address == "127.0.0.1") {
+        callback(null, true);
+    } else {
+        callback(null, false);
+    }
+
+
+}).on('connection', function (socket) {
+        // ------------------------------------------------------- play --- Connection
+
+        socket.join("myworld");
+
+        // Begrüßung senden
+        socket.emit("initial", {
+            worldfunctions: worldfunctionsstring,
+            statics: world.statics
+        });
+
+    });
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+
 
 setInterval(function() {
     world.update();

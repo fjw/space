@@ -1,0 +1,29 @@
+@import url("reset.css");
+
+body {
+    position: fixed;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 13px;
+    color: #fff;
+
+    margin:0; padding: 0;
+    background: #fff;
+}
+
+.clear {
+    clear: both;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: 0.4;
+}
+
+/* -------- */
+
+
+
+
+
