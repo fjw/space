@@ -23,6 +23,7 @@ var obj = {
     player: null,
 
     started: false,
+    initiated: false,
 
     _init: function() {
         //einrichten und Listener starten... geloopt wird erst später
@@ -54,6 +55,14 @@ var obj = {
         // ------------------------------------------------
 
         socket.on("initial", function(data) {
+
+            if (_this.initiated) {
+                //wurde schonmal gestartet, Server restart? => Reload Page
+                document.location.reload(true);
+            }
+            _this.initiated = true;
+
+
             //register playername
             _this.playername = data.playername;
 
