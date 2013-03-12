@@ -5,10 +5,14 @@
     modules: [
         {
             name: "main"
+        },
+        {
+            name: "adminmain"
         }
     ],
 	paths: {
         'jquery':       'lib/jquery',
-        'underscore':   'lib/underscore'
+        'underscore':   'lib/underscore',
+        'socketio':     'lib/socketio'
     }
 })

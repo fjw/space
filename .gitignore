@@ -1,2 +1,4 @@
 .idea
 server/node_modules
+server/log
+client/build

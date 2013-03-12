@@ -25,6 +25,12 @@ app.configure('development', function () {
     cfg.port = 4004;
 });
 
+app.configure('production', function () {
+    //static content
+    app.use("/",        express.static(__dirname + '/../client/build'));
+    cfg.port = 443;
+});
+
 
 //create servers
 log("info", "starting express & socket on port "+cfg.port);
