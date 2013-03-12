@@ -126,6 +126,8 @@ var obj = {
         this.mx = Math.floor(w / 2);
         this.my = Math.floor(h / 2);
 
+        this._prepareStarLayers();
+
     },
 
     _onBlur: function() {
@@ -178,7 +180,6 @@ var obj = {
 
         //clear
         this.vgctx.clearRect(0, 0, this.cw, this.ch);
-        this.bgctx.clearRect(0, 0, this.cw, this.ch);
 
 
         // ----- Operationen mit Welt-Koordinaten -----
@@ -268,6 +269,7 @@ var obj = {
         // -----
 
         this.updateMinimap();
+        this.updateBackground();
 
         // -----
 
@@ -275,6 +277,37 @@ var obj = {
         this.world.update();
     },
 
+    updateBackground: function() {
+        var _this = this;
+
+        if (this.starlayers) {
+
+            var ls = this.starlayers[0].width;
+
+            this.bgctx.clearRect(0, 0, this.cw, this.ch);
+
+            _.each(this.starlayers, function(layer, i) {
+
+                var x = (_this.player.x / (i+2)) % ls;
+                var y = (_this.player.y / (i+2)) % ls;
+
+
+                for (var k = 0 - x - ls; k < _this.cw; k += ls) {
+                    for (var l = 0 - y - ls; l < _this.ch; l += ls) {
+
+                        _this.bgctx.drawImage(layer, Math.round(k), Math.round(l));
+
+                    }
+
+                }
+
+            });
+
+        }
+
+
+
+    },
 
     updateMinimap: function() {
 
@@ -354,6 +387,41 @@ var obj = {
             }
 
         });
+
+    },
+
+
+    starlayers: null,
+    _prepareStarLayers: function() {
+        var _this = this;
+
+        this.starlayers = [];
+
+        var getRandom = function(max) {
+            return parseInt(Math.random() * (max+1));
+        };
+
+        var layercolors = [ "#999", "#666", "#333" ];
+        var starsperlayer = 30;
+        var layersize = 1000;
+
+        _.each(layercolors, function(color) {
+
+            var layer = document.createElement("canvas");
+            var lctx = layer.getContext("2d");
+            layer.width = layersize;
+            layer.height = layersize;
+
+            lctx.fillStyle = color;
+            for(var i = 0; i < starsperlayer; i++) {
+                lctx.fillRect(getRandom(layersize), getRandom(layersize), 1, 1);
+            }
+
+            _this.starlayers.push(layer);
+        });
+
+
+
 
     }
 

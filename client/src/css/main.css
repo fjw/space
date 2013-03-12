@@ -31,7 +31,18 @@ canvas {
 
     background: #000;
     opacity: 0.7;
+
+    z-index: 3;
 }
+
+#vg {
+    z-index: 2;
+}
+
+#bg {
+    z-index: 1;
+}
+
 
 /* -------- */
 
