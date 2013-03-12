@@ -23,12 +23,14 @@ app.configure('development', function () {
     //static content
     app.use("/",        express.static(__dirname + '/../client/src'));
     cfg.port = 4004;
+    log("info", "starting dev");
 });
 
 app.configure('production', function () {
     //static content
     app.use("/",        express.static(__dirname + '/../client/build'));
     cfg.port = 443;
+    log("info", "starting prod");
 });
 
 
