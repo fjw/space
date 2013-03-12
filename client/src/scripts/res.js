@@ -17,6 +17,10 @@ var obj = {
         station: {
             uri: "/res/stationt.png",
             buri: "/res/stationb.png"
+        },
+
+        gasplanet1: {
+            uri: "/res/gasplanet1.png"
         }
     },
 

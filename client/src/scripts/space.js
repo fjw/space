@@ -262,10 +262,12 @@ var obj = {
 
         });
 
-
-
-
         this.vgctx.restore();
+
+        //Energielevel anzeigen
+        this.vgctx.fillStyle = "#ccd";
+        this.vgctx.fillText(Math.floor(this.player.e), 10, 10);
+
         // -----
 
         this.updateMinimap();
@@ -305,7 +307,13 @@ var obj = {
 
         }
 
+        _.each(world.statics, function(obj) {
+            if (obj.l && obj.l > 0) {
 
+                //todo: Planeten fertig machen, wenn gescheites Layersystem da ist
+                //_this.res.drawSprite(_this.bgctx,  obj.type, obj.x  - mx, obj.y - my, 0, false, false);
+            }
+        });
 
     },
 

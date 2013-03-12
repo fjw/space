@@ -5,11 +5,12 @@ exports = module.exports = {
 
         {
             type: "player",
-            x: 5, y: 10,    //Koordinaten
-            ma: 0,          //Bewegungswinkel
-            s: 0,           //Speed
-            va: 135,        //Sichtwinkel
-            cr: 18          //Kollisionsradius
+            x: 5, y: 10,     //Koordinaten
+            ma: 0,           //Bewegungswinkel
+            s: 0,            //Speed
+            va: 135,         //Sichtwinkel
+            cr: 18,          //Kollisionsradius
+            e: 100
         }
 
     ],
@@ -79,6 +80,13 @@ exports = module.exports = {
                 {x:121, y:221}
 
             ]
+        },
+
+        //Planet1
+        {
+            type: "gasplanet1",
+            x: -1000, y: -1000,
+            l: 1 //Layer 1, Hintergrund
         },
 
 

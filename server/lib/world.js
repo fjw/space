@@ -108,6 +108,13 @@ exports = module.exports = function() {
 
         playerFunctions: function(obj, secselapsed, thistime) {
 
+            // Recharge
+            var egenpersec = 14;
+            var maxenergy = 100;
+            obj.e += egenpersec * secselapsed;
+            if (obj.e > maxenergy) { obj.e = maxenergy; }
+
+
             // Schießen
             if (obj.shooting) {
 
@@ -116,8 +123,9 @@ exports = module.exports = function() {
                 var type = "bullet";
                 var cr = 8;
                 var lastshot = obj.lastshot;
+                var edrain = 15;
 
-                if(!lastshot || lastshot + shotspersec * 1000 < thistime ) {
+                if(obj.e > edrain && (!lastshot || lastshot + shotspersec * 1000 < thistime) ) {
 
                     var pv = this.worldfunctions.angleAbs2vector(obj.ma, obj.s);
                     var bv = this.worldfunctions.angleAbs2vector(obj.va, bulletspeed);
@@ -138,6 +146,9 @@ exports = module.exports = function() {
                     this.objects.push(bullet);
 
                     obj.lastshot = thistime;
+
+                    //energie abziehen
+                    obj.e = obj.e - edrain;
                 }
             }
 
@@ -149,8 +160,9 @@ exports = module.exports = function() {
                 var type = "bomb";
                 var cr = 10;
                 var lastshot = obj.lastshot2;
+                var edrain = 15;
 
-                if(!lastshot || lastshot + shotspersec * 1000 < thistime ) {
+                if(obj.e > edrain && (!lastshot || lastshot + shotspersec * 1000 < thistime )) {
 
                     var pv = this.worldfunctions.angleAbs2vector(obj.ma, obj.s);
                     var bv = this.worldfunctions.angleAbs2vector(obj.va, bulletspeed);
@@ -171,6 +183,9 @@ exports = module.exports = function() {
                     this.objects.push(bullet);
 
                     obj.lastshot2 = thistime;
+
+                    //energie abziehen
+                    obj.e = obj.e - edrain;
                 }
             }
 

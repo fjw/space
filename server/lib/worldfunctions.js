@@ -1,5 +1,7 @@
 exports = module.exports = function() {
 
+    //todo: worldfunctions minifien/obfuskieren
+
     ////
 
     // Vektorumwandlung -  Winkel, Betrag -> Koordinaten
@@ -119,39 +121,6 @@ exports = module.exports = function() {
                             });
 
                             if (clplist.length > 0) {
-
-/*                              //todo: entfernen wenn alles nach der neuen methode gut funktioniert
-                                // bei mehreren Kollisionen den mit dem grössten Winkelunterschied nehmen
-                                var clp = _.max(clplist, function(clp) {
-                                    var cp = clp.cp;
-                                    var a = directionlessAngle(obj.ma) - cp.a;
-                                    var b = cp.a - directionlessAngle(obj.ma);
-
-                                    if (a < b) {
-                                        return b;
-                                    } else {
-                                        return a;
-                                    }
-                                });
-
-                                if (clp) {
-                                    // !Kollision!
-
-                                    // Einfallswinkel gleich Ausfallswinkel
-                                    obj.ma = angleInBoundaries(2 * clp.cp.a - obj.ma);
-
-                                    // Objekt im rechten Winkel verschieben aus dem Kollisionsradius schieben
-                                    var cdx = obj.x - clp.dpp.sx;
-                                    var cdy = obj.y - clp.dpp.sy;
-                                    var b = vectorAbs(cdx, cdy);
-                                    obj.x = clp.dpp.sx + (cdx / b * obj.cr);
-                                    obj.y = clp.dpp.sy + (cdy / b * obj.cr);
-
-                                    obj.s *= 0.9;
-                                    collided = true;
-                                }
-*/
-
 
                                 var clpa, sx, sy;
                                 if (clplist.length > 1) {
