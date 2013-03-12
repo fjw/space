@@ -401,7 +401,7 @@ var obj = {
             return parseInt(Math.random() * (max+1));
         };
 
-        var layercolors = [ "#999", "#666", "#333" ];
+        var layercolors = [ 160, 70, 30 ];
         var starsperlayer = 30;
         var layersize = 1000;
 
@@ -412,9 +412,41 @@ var obj = {
             layer.width = layersize;
             layer.height = layersize;
 
-            lctx.fillStyle = color;
+
+
+            var c = color - 100;
+            var r = 1;
+
+            var star = document.createElement("canvas");
+            star.width = r*2;
+            star.height = r*2;
+            var sctx = star.getContext("2d");
+
+            if (color > 0) {
+/*
+                var gr = sctx.createRadialGradient(r, r ,0, r, r, r);
+                gr.addColorStop(0, 'rgba('+c+','+c+','+c+',0.5)');
+                gr.addColorStop(1, 'rgba('+c+','+c+','+c+',0)');
+
+                sctx.fillStyle = gr;
+                //lctx.rect(x - r, y - r, r*2, r*2);
+                sctx.arc(r, r, r, Math.PI*2, false);
+                sctx.fill();
+                */
+            }
+
+            // point
+            sctx.fillStyle = 'rgba('+color+','+color+','+color+',1)';
+            sctx.fillRect(r, r, 1, 1);
+
+
+
+
             for(var i = 0; i < starsperlayer; i++) {
-                lctx.fillRect(getRandom(layersize), getRandom(layersize), 1, 1);
+                var x = getRandom(layersize-(2*r));
+                var y = getRandom(layersize-(2*r));
+
+                lctx.drawImage(star,x,y);
             }
 
             _this.starlayers.push(layer);

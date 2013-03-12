@@ -75,6 +75,15 @@ var obj = {
         resitem.angleimgs = imgs;
     },
 
+    drawParticle: function(ctx) {
+
+        ctx.beginPath();
+        ctx.arc(100,100,50,Math.PI*2, false);
+        ctx.fill();
+
+
+    },
+
     drawSprite: function(ctx, sprite, x, y, angle, back, zoom) {
 
         var sprite = this.imgs[sprite];
