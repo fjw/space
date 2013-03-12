@@ -4,6 +4,7 @@ exports = module.exports = function() {
 
         statics:[],
         objects: [],
+        objecttypes: [],
 
         lastupdate: Date.now(),
 
@@ -14,6 +15,7 @@ exports = module.exports = function() {
             var map = require(__dirname + "/../maps/testworld.js");
             this.objects = map.objects;
             this.statics = map.statics;
+            this.objecttypes = map.objecttypes;
 
             this._prepareStatics();
 

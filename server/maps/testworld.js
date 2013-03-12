@@ -1,21 +1,22 @@
 exports = module.exports = {
 
-    objects: [
+
+    objecttypes: [
+
         {
-            type: "bullet",
-            x: 50, y: 10,   //Koordinaten
-            ma: 0,          //Bewegungswinkel
-            s: 0            //Speed
-        },
-        {
-            type: "player", name: "testor",
+            type: "player",
             x: 5, y: 10,    //Koordinaten
             ma: 0,          //Bewegungswinkel
             s: 0,           //Speed
             va: 135,        //Sichtwinkel
             cr: 18          //Kollisionsradius
-        },
-        { type: "player", name: "anderor",x: 100, y: 0,  ma: 225,  s: 20, va: 225,  cr: 18  }
+        }
+
+    ],
+
+
+    objects: [
+
     ],
 
     statics: [

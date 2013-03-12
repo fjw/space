@@ -82,7 +82,17 @@ require("fs").readFile(__dirname + "/lib/worldfunctions.js", "utf8", function(er
 io.of('/play').authorization(function (handshake, callback) {
     // ------------------------------------------------------- play --- Auth
 
-    if((handshake.query.password && handshake.query.password == "trackit") || handshake.address.address == "127.0.0.1") {
+    var username = handshake.query.user;
+    var password = handshake.query.password;
+
+    if (handshake.address.address == "127.0.0.1") {
+        username = "developer"; password = "trackit";
+    }
+
+
+    if((username && password && password == "trackit")) {
+        handshake.playername = username;
+
         callback(null, true);
     } else {
         callback(null, false);
@@ -92,12 +102,20 @@ io.of('/play').authorization(function (handshake, callback) {
 }).on('connection', function (socket) {
     // ------------------------------------------------------- play --- Connection
 
-    var playername = "testor"; //todo: aus login holen
+    var playername = socket.handshake.playername;
 
     socket.join("myworld");
 
     // Daten holen / erzeugen
     var player =  _.find(world.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
+    if(!player) {
+        //erzeuge neuen Spieler
+        var type = _.find(world.objecttypes, function(obj) { return obj.type == "player"; });
+        player = _.clone(type);
+        player.name = playername;
+        world.objects.push(player);
+    }
+
 
     // Begrüßung senden
     socket.emit("initial", {
