@@ -1,6 +1,8 @@
-define(["underscore"], function(_) { return function() {
+define(["underscore"], function(_) { return function(updateCallback, allLoadedCallback) {
 var obj = {
 
+    updateCallback: updateCallback,
+    allLoadedCallback: allLoadedCallback,
 
     resitems: {
         player: {
@@ -12,11 +14,6 @@ var obj = {
             h: 50
         },
 
-        walltest: {
-            uri: "/res/walltest.png",
-            center: {x:0, y:0}
-        },
-
         station: {
             uri: "/res/stationt.png",
             buri: "/res/stationb.png"
@@ -26,12 +23,54 @@ var obj = {
             uri: "/res/gasplanet1.png"
         },
 
+        asteroid1: {
+            uri: "/res/asteroid1.png"
+        },
+        asteroid2: {
+            uri: "/res/asteroid2.png"
+        },
+        asteroid3: {
+            uri: "/res/asteroid3.png"
+        },
+        asteroid4: {
+            uri: "/res/asteroid4.png"
+        },
+        asteroid5: {
+            uri: "/res/asteroid5.png"
+        },
+        asteroid6: {
+            uri: "/res/asteroid6.png"
+        },
+        asteroid7: {
+            uri: "/res/asteroid7.png"
+        },
+        asteroid8: {
+            uri: "/res/asteroid8.png"
+        },
+        asteroid9: {
+            uri: "/res/asteroid9.png"
+        },
+        asteroid10: {
+            uri: "/res/asteroid10.png"
+        },
+        asteroid11: {
+            uri: "/res/asteroid11.png"
+        },
+        asteroid12: {
+            uri: "/res/asteroid12.png"
+        },
+        asteroid13: {
+            uri: "/res/asteroid13.png"
+        },
+
+
         explosion: {
             create: "createParticle_Explosion",
             center: {x:15, y:15}
         }
     },
 
+    percentLoaded: 0,
     _init: function() {
         var _this = this;
 
@@ -58,18 +97,35 @@ var obj = {
                         _this._loadRotationSprite(item);
                     }
 
+                    _this._ressourceLoaded(item);
                 };
-            }
 
-            if(item.create) {
+            } else if(item.create) {
                 //Partikel erzeugen
                 _this[item.create](item);
 
+                _this._ressourceLoaded(item);
             }
 
         });
     },
 
+    _ressourceLoaded: function(item) {
+
+        item.complete = true;
+
+        var completeItems = _.filter(this.resitems, function(resitem) { return resitem.complete; });
+
+        this.percentLoaded = completeItems.length / _.size(this.resitems);
+
+        if (typeof(this.updateCallback) == "function") {
+            this.updateCallback(this.percentLoaded);
+        }
+
+        if (typeof(this.allLoadedCallback) == "function" && this.percentLoaded >= 1) {
+            this.allLoadedCallback();
+        }
+    },
 
     _loadRotationSprite: function(resitem) {
 

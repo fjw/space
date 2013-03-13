@@ -22,6 +22,7 @@ var obj = {
 
     started: false,
     initiated: false,
+    resloaded: false,
 
     _init: function() {
         //einrichten und Listener starten... geloopt wird erst später
@@ -62,7 +63,12 @@ var obj = {
         // ------------------------------------------------
 
         this.world = new WORLD("myworld");
-        this.res = new RES();
+        this.res = new RES(
+            function(per) { console.log(per); },
+            function() {
+                _this.resloaded = true;
+            }
+        );
 
         // ------------------------------------------------
 
@@ -81,7 +87,6 @@ var obj = {
             //register statics
             _this.world.statics = data.statics;
 
-            _this._prepareMinimap();
 
             //register worldfunctions
             var wf = function() {
@@ -109,7 +114,11 @@ var obj = {
     start: function() {
         var _this = this;
 
-        if (this.initiated) {
+        if (this.initiated && this.resloaded) {
+
+            //Map zeichnen
+            this._prepareMinimap();
+
             //Loop starten
             (function animloop(){
                 requestAnimationFrame(animloop);
@@ -118,7 +127,7 @@ var obj = {
 
             this.started = true;
         } else {
-            //noch keine Antwort vom Server, warte nochmal
+            //noch keine Antwort vom Server, oder nicht alle Grafiken geladen, warte nochmal
             setTimeout(function() { _this.start(); }, 500);
         }
     },
@@ -205,20 +214,23 @@ var obj = {
         });
 
         // ----- Operationen mit Welt-Koordinaten ----- Layer 2-7
-        var transX = Math.round(_this.mx - _this.player.x);
-        var transY = Math.round(_this.my - _this.player.y);
+        var transX = Math.round(this.mx - this.player.x);
+        var transY = Math.round(this.my - this.player.y);
 
         for (var i = 2; i <= 7; i++ ) {
-            _this.ctxs[i].save();
-            _this.ctxs[i].translate( transX , transY );
+            this.ctxs[i].save();
+            this.ctxs[i].translate( transX , transY );
         }
+        //modifizierter Trans für Layer 1
+        this.ctxs[1].save();
+        this.ctxs[1].translate( Math.round(this.mx - (this.player.x * 0.5)) , (this.my - (this.player.y * 0.5)) );
 
         this._updateStatics();
         this._updateObjects();
 
-        // ----- Welt-Koordinaten wiederherstellen----- Layer 2-7
-        for (i = 2; i <= 7; i++ ) {
-            _this.ctxs[i].restore();
+        // ----- Welt-Koordinaten wiederherstellen----- Layer 1-7
+        for (i = 1; i <= 7; i++ ) {
+            this.ctxs[i].restore();
         }
 
 
@@ -276,6 +288,12 @@ var obj = {
 
             }
 
+            if( obj.exploding ) {
+
+
+
+            }
+
 
             // ---- Debug Vektoren
             if (window.debug >= 2) {
@@ -299,6 +317,10 @@ var obj = {
 
         _.each(this.world.statics, function(obj) {
 
+            // 1 - Hintergrund Statics              - modifizierte welt-translation
+            // 2 - Rückseiten Statics               - welt-translation
+            // 6 - Vordergrund Statics              - welt-translation
+
             if(obj.type == "ni") {
 
                 var ctx = _this.ctxs[6];
@@ -319,10 +341,34 @@ var obj = {
 
             } else {
 
-                // Static mit Bild
-                _this.res.drawSprite(_this.ctxs[2], obj.type, obj.x, obj.y, {back: true});
-                _this.res.drawSprite(_this.ctxs[6], obj.type, obj.x, obj.y);
+                if (obj.bm) {
 
+                    // Static im Hintergrund
+                    _this.res.drawSprite(_this.ctxs[1], obj.type, obj.x, obj.y);
+
+                } else {
+
+                    // Static mit Bild
+                    _this.res.drawSprite(_this.ctxs[2], obj.type, obj.x, obj.y, {back: true});
+                    _this.res.drawSprite(_this.ctxs[6], obj.type, obj.x, obj.y);
+
+
+                    //Debug Collisionspfade
+                    if (window.debug >= 2) {
+                        var ctx = _this.ctxs[6];
+                        ctx.beginPath();
+                        _.each(obj.p, function(p, i) {
+                            if( i == 0 ) {
+                                ctx.moveTo(p.x + obj.x, p.y + obj.y);
+                            } else {
+                                ctx.lineTo(p.x + obj.x, p.y + obj.y);
+                            }
+                        });
+                        ctx.closePath();
+                        ctx.fillStyle = "#f00";
+                        ctx.fill();
+                    }
+                }
             }
 
         });
@@ -341,8 +387,8 @@ var obj = {
 
             _.each(this.starlayers, function(layer, i) {
 
-                var x = (_this.player.x / (i+2)) % ls;
-                var y = (_this.player.y / (i+2)) % ls;
+                var x = (_this.player.x / (i+3)) % ls;
+                var y = (_this.player.y / (i+3)) % ls;
 
 
                 for (var k = 0 - x - ls; k < _this.cw; k += ls) {
@@ -434,7 +480,9 @@ var obj = {
             } else {
 
                 // Static mit Bild
-                _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
+                if (!obj.bm) {
+                    _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
+                }
             }
 
         });
@@ -452,7 +500,7 @@ var obj = {
             return parseInt(Math.random() * (max+1));
         };
 
-        var layercolors = [ 160, 70, 30 ];
+        var layercolors = [ 180, 100, 50 ];
         var starsperlayer = 30;
         var layersize = 1000;
 
