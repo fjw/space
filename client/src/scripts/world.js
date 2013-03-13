@@ -5,6 +5,16 @@ define(["underscore"], function(_) { return function(name) {
         worldfunctions: null,
         statics: [],
 
+        localobjects: [
+            {
+                type: "explosion",
+                x: -1000, y: 0,     //Koordinaten
+                ma: 0,           //Bewegungswinkel
+                s: 0,            //Speed
+                anim: 2          //Animationsdauer in Sec
+            }
+        ],
+
         lastupdate: Date.now(),
 
         _init: function(name) {
@@ -13,7 +23,8 @@ define(["underscore"], function(_) { return function(name) {
         },
 
         updateFromServer: function(worldobjects) {
-            this.objects = worldobjects;
+            this.objects = this.localobjects.concat(worldobjects);
+
             this.lastupdate = Date.now();
         },
 

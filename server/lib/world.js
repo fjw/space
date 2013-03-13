@@ -2,7 +2,7 @@ exports = module.exports = function() {
 
     var obj = {
 
-        statics:[],
+        statics: [],
         objects: [],
         objecttypes: [],
 

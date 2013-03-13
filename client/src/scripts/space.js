@@ -2,10 +2,8 @@ define(["underscore", "jquery", "rafpolyfill", "world", "res"], function(_, $, r
 var obj = {
 
     //--------------------
-    bgcanvas: null,
-    bgctx: null,
-    vgcanvas: null,
-    vgctx: null,
+    layers: [],
+    ctxs: [],
     mapcanvas: null,
     mapctx: null,
 
@@ -30,17 +28,31 @@ var obj = {
 
         var _this = this;
 
-        //Canvas einrichten
-        this.bgcanvas = $("#bg")[0];
-        this.bgctx = this.bgcanvas.getContext("2d");
-        this.vgcanvas = $("#vg")[0];
-        this.vgctx = this.vgcanvas.getContext("2d");
-        this.mapcanvas = $("#map")[0];
-        this.mapctx = this.mapcanvas.getContext("2d");
+        //Canvase einrichten
+        // 0 - Sterne                           - ultradyn
+        // 1 - Hintergrund Statics              - modifizierte welt-translation
+        // 2 - Rückseiten Statics               - welt-translation
+        // 3 - Partikel / Effekte Hintergrund   - welt-translation
+        // 4 - dynamische Objekte               - welt-translation
+        // 5 - aktueller Spieler                - welt-translation
+        // 6 - Vordergrund Statics              - welt-translation
+        // 7 - Partikel / Effekte Vordergrund   - welt-translation
+        // 8 - HUD                              - keine translation
+        for(var i = 0; i <= 8; i++) {
+            this.layers[i] = document.createElement("canvas");
+            this.ctxs[i] = this.layers[i].getContext("2d");
+            this.ctxs[i].translate(0.5, 0.5);
 
-        this.bgctx.translate(0.5, 0.5);
-        this.vgctx.translate(0.5, 0.5);
+            $(this.layers[i]).appendTo("body");
+            $(this.layers[i]).css("z-index", i);
+            $(this.layers[i]).attr("id", "layer"+i);
+        }
+
+        this.mapcanvas = document.createElement("canvas");
+        this.mapctx = this.mapcanvas.getContext("2d");
         this.mapctx.translate(0.5, 0.5);
+        $(this.mapcanvas).appendTo("body");
+        $(this.mapcanvas).attr("id", "map");
 
 
         //inital einen resize triggern
@@ -80,9 +92,9 @@ var obj = {
             _this.world.worldfunctions = wf();
         });
 
-        socket.on("worldupdate", function(worldobjects) {
-            _this.world.updateFromServer(worldobjects);
-            _this.player = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == _this.playername; });
+        socket.on("worldupdate", function(data) {
+            _this.world.updateFromServer(data.objects);
+            _this.player = data.player;
         });
 
         // ------------------------------------------------
@@ -107,7 +119,7 @@ var obj = {
             this.started = true;
         } else {
             //noch keine Antwort vom Server, warte nochmal
-            setTimeout(function() { _this.start; }, 500);
+            setTimeout(function() { _this.start(); }, 500);
         }
     },
 
@@ -117,10 +129,10 @@ var obj = {
         var w = window.innerWidth;
         var h = window.innerHeight;
 
-        this.bgcanvas.width = w;
-        this.bgcanvas.height = h;
-        this.vgcanvas.width = w;
-        this.vgcanvas.height = h;
+        for(var i = 0; i <= 8; i++) {
+            this.layers[i].width = w;
+            this.layers[i].height = h;
+        }
 
         this.mapcanvas.width = 0.2 * w;
         this.mapcanvas.height = 0.2 * h;
@@ -152,9 +164,15 @@ var obj = {
             if(code == 78) { socket.emit("breaktostop", "start"); }
             if(code == 32) { socket.emit("shoot", "start"); }
             if(code == 225) { socket.emit("shoot2", "start"); }
+            if(code == 84) { socket.emit("test", "start"); }
 
         }
 
+        if (code == 48) { window.debug = 0; }
+        if (code == 49) { window.debug = 1; }
+        if (code == 50) { window.debug = 2; }
+        if (code == 51) { window.debug = 3; }
+        if (code == 52) { window.debug = 4; }
 
     },
 
@@ -168,7 +186,7 @@ var obj = {
         if(code == 78) { socket.emit("breaktostop", "stop"); }
         if(code == 32) { socket.emit("shoot", "stop"); }
         if(code == 225) { socket.emit("shoot2", "stop"); }
-
+        if(code == 84) { socket.emit("test", "stop"); }
     },
 
     _flushKeys: function() {
@@ -181,121 +199,40 @@ var obj = {
     _update: function() {
         var _this = this;
 
+        // alle Layers clearen
+        _.each(this.ctxs, function(ctx) {
+            ctx.clearRect(0, 0, _this.cw, _this.ch);
+        });
 
+        // ----- Operationen mit Welt-Koordinaten ----- Layer 2-7
+        var transX = Math.round(_this.mx - _this.player.x);
+        var transY = Math.round(_this.my - _this.player.y);
 
-        //clear
-        this.vgctx.clearRect(0, 0, this.cw, this.ch);
+        for (var i = 2; i <= 7; i++ ) {
+            _this.ctxs[i].save();
+            _this.ctxs[i].translate( transX , transY );
+        }
 
+        this._updateStatics();
+        this._updateObjects();
 
-        // ----- Operationen mit Welt-Koordinaten -----
-        this.vgctx.save();
-
-        if (this.player) {
-            //Koordinatensystem transformieren
-            var xx = Math.round(this.mx - this.player.x);
-            var yy = Math.round(this.my - this.player.y);
-
-            this.vgctx.translate(  xx, yy );
+        // ----- Welt-Koordinaten wiederherstellen----- Layer 2-7
+        for (i = 2; i <= 7; i++ ) {
+            _this.ctxs[i].restore();
         }
 
 
-        _.each(this.world.statics, function(obj) {
 
-            if(obj.type == "ni") {
-
-                // Static ohne Bild mit Pfad
-                _this.vgctx.beginPath();
-
-                _.each(obj.p, function(p, i) {
-                    if( i == 0 ) {
-                        _this.vgctx.moveTo(p.x + obj.x, p.y + obj.y);
-                    } else {
-                        _this.vgctx.lineTo(p.x + obj.x, p.y + obj.y);
-                    }
-                });
-                _this.vgctx.closePath();
-                _this.vgctx.fillStyle = obj.c;
-                _this.vgctx.fill();
-
-            } else {
-
-                // Static mit Bild
-                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, {back: true});
-
-            }
-
-        });
-
-        this.vgctx.fillStyle = "#444";
-        _.each(this.world.objects, function(obj) {
-
-
-            if (obj.type != "player" || obj.name != _this.playername) {
-
-                if (obj.va) {
-
-                    // gewinkeltes Objekt
-                    _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, {angle: obj.va});
-
-                } else if (obj.anim) {
-
-                    // animiertes Objekt
-                    _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, {anim: obj.anim} );
-
-                } else {
-
-                    // sonstiges Objekt zeichnen
-                    _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
-
-                }
-
-
-            }
-
-
-
-
-            // ---- Debug Vektoren
-            if (window.debug >= 2) {
-                //zeichne vektor
-                var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
-                var vy = Math.sin((obj.ma-90) * 0.0174532) * obj.s * 0.5;
-                _this.vgctx.beginPath();
-                _this.vgctx.moveTo(obj.x, obj.y);
-                _this.vgctx.lineTo(obj.x + vx, obj.y + vy);
-                _this.vgctx.strokeStyle = "#f00";
-                _this.vgctx.stroke();
-            }
-            // ----
-
-        });
-
-        //aktuellen Spieler zeichnen
-        this.res.drawSprite(this.vgctx, "player", this.player.x, this.player.y, {angle:this.player.va});
-
-
-        //Vordergrund statics zeichnen //todo: gescheites layersystem muss her
-        _.each(this.world.statics, function(obj) {
-
-            if (obj.type != "ni") {
-
-                // Static mit Bild
-                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
-
-            }
-
-        });
-
-        this.vgctx.restore();
-
+        //todo: gescheiter Enegergy-HUD
         //Energielevel anzeigen
-        this.vgctx.fillStyle = "#ccd";
-        this.vgctx.fillText(Math.floor(this.player.e), 10, 10);
+        this.ctxs[8].fillStyle = "#ccd";
+        this.ctxs[8].fillText(Math.floor(this.player.e), 10, 10);
 
         // -----
 
-        this.updateMinimap();
-        this.updateBackground();
+
+        this._updateMinimap();
+        this._updateStars();
 
         // -----
 
@@ -303,14 +240,104 @@ var obj = {
         this.world.update();
     },
 
-    updateBackground: function() {
+
+    _updateObjects: function() {
+        var _this = this;
+
+        _.each(this.world.objects, function(obj) {
+
+
+            // Ebene wählen
+            // 3 - Partikel / Effekte Hintergrund   - welt-translation
+            // 4 - dynamische Objekte               - welt-translation
+            // 5 - aktueller Spieler                - welt-translation
+            // 7 - Partikel / Effekte Vordergrund   - welt-translation
+            var layer = 4;
+            if (obj.type != "player" || obj.name != _this.playername) { layer = 5; }
+
+
+            var ctx = _this.ctxs[layer];
+
+            // Zeichnen je nach Typ
+            if (typeof(obj.va) != "undefined") {
+
+                // gewinkeltes Objekt
+                _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, {angle: obj.va});
+
+            } else if (typeof(obj.anim) != "undefined") {
+
+                // animiertes Objekt
+                _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, {anim: obj.anim} );
+
+            } else {
+
+                // sonstiges Objekt zeichnen
+                _this.res.drawSprite(ctx, obj.type, obj.x, obj.y);
+
+            }
+
+
+            // ---- Debug Vektoren
+            if (window.debug >= 2) {
+                //zeichne vektor
+                var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
+                var vy = Math.sin((obj.ma-90) * 0.0174532) * obj.s * 0.5;
+                _this.ctxs[7].beginPath();
+                _this.ctxs[7].moveTo(obj.x, obj.y);
+                _this.ctxs[7].lineTo(obj.x + vx, obj.y + vy);
+                _this.ctxs[7].strokeStyle = "#f00";
+                _this.ctxs[7].stroke();
+            }
+            // ----
+
+        });
+
+    },
+
+    _updateStatics: function() {
+        var _this = this;
+
+        _.each(this.world.statics, function(obj) {
+
+            if(obj.type == "ni") {
+
+                var ctx = _this.ctxs[6];
+
+                // Static ohne Bild mit Pfad
+                ctx.beginPath();
+
+                _.each(obj.p, function(p, i) {
+                    if( i == 0 ) {
+                        ctx.moveTo(p.x + obj.x, p.y + obj.y);
+                    } else {
+                        ctx.lineTo(p.x + obj.x, p.y + obj.y);
+                    }
+                });
+                ctx.closePath();
+                ctx.fillStyle = obj.c;
+                ctx.fill();
+
+            } else {
+
+                // Static mit Bild
+                _this.res.drawSprite(_this.ctxs[2], obj.type, obj.x, obj.y, {back: true});
+                _this.res.drawSprite(_this.ctxs[6], obj.type, obj.x, obj.y);
+
+            }
+
+        });
+
+    },
+
+
+    _updateStars: function() {
         var _this = this;
 
         if (this.starlayers) {
 
             var ls = this.starlayers[0].width;
 
-            this.bgctx.clearRect(0, 0, this.cw, this.ch);
+            this.ctxs[0].clearRect(0, 0, this.cw, this.ch);
 
             _.each(this.starlayers, function(layer, i) {
 
@@ -321,7 +348,7 @@ var obj = {
                 for (var k = 0 - x - ls; k < _this.cw; k += ls) {
                     for (var l = 0 - y - ls; l < _this.ch; l += ls) {
 
-                        _this.bgctx.drawImage(layer, Math.round(k), Math.round(l));
+                        _this.ctxs[0].drawImage(layer, Math.round(k), Math.round(l));
 
                     }
 
@@ -331,17 +358,9 @@ var obj = {
 
         }
 
-        _.each(this.world.statics, function(obj) {
-            if (obj.l && obj.l > 0) {
-
-                //todo: Planeten fertig machen, wenn gescheites Layersystem da ist
-                //_this.res.drawSprite(_this.bgctx,  obj.type, obj.x  - mx, obj.y - my, 0, false, false);
-            }
-        });
-
     },
 
-    updateMinimap: function() {
+    _updateMinimap: function() {
 
         // Minimap updaten //todo: Hier kann Perfomance gespart werden z.B. nur jedes 10 Frame rendern
         this.mapctx.clearRect(0, 0, this.mapcanvas.width, this.mapcanvas.height);
@@ -370,7 +389,7 @@ var obj = {
     _mapY: 0,
     _mapbuffer: null,
     _prepareMinimap: function() { //todo: diese Function refakturisieren
-        var _this = this;
+
 
         var zoom = this.zoom;
         var max_x = _.max(this.world.statics, function(item) { return item.x + item.w; });
@@ -392,7 +411,7 @@ var obj = {
         this._mapbuffer.width = w * zoom;
         this._mapbuffer.height = h * zoom;
 
-
+        var _this = this;
         _.each(this.world.statics, function(obj) {
 
             if(obj.type == "ni") {
@@ -407,12 +426,12 @@ var obj = {
                         mctx.lineTo( (p.x + obj.x - mx)*zoom, (p.y + obj.y - my)*zoom);
                     }
                 });
-               mctx.closePath();
-               mctx.fillStyle = obj.c;
-               mctx.fill();
+
+                mctx.closePath();
+                mctx.fillStyle = obj.c;
+                mctx.fill();
 
             } else {
-
 
                 // Static mit Bild
                 _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
@@ -444,28 +463,13 @@ var obj = {
             layer.width = layersize;
             layer.height = layersize;
 
-
-
-            var c = color - 100;
-            var r = 1;
+            var r = 2;
 
             var star = document.createElement("canvas");
             star.width = r*2;
             star.height = r*2;
             var sctx = star.getContext("2d");
 
-            if (color > 0) {
-/*
-                var gr = sctx.createRadialGradient(r, r ,0, r, r, r);
-                gr.addColorStop(0, 'rgba('+c+','+c+','+c+',0.5)');
-                gr.addColorStop(1, 'rgba('+c+','+c+','+c+',0)');
-
-                sctx.fillStyle = gr;
-                //lctx.rect(x - r, y - r, r*2, r*2);
-                sctx.arc(r, r, r, Math.PI*2, false);
-                sctx.fill();
-                */
-            }
 
             // point
             sctx.fillStyle = 'rgba('+color+','+color+','+color+',1)';

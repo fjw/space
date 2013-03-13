@@ -4,7 +4,7 @@ var obj = {
 
     resitems: {
         player: {
-            uri: "/res/fighter1.png", // "/res/ship2.gif",
+            uri: "/res/fighter1.png",
             center: {x:25, y:25},
             //rotations: true,
             spriterotframes: 1, // Zeile in der die Frames sind
@@ -97,6 +97,9 @@ var obj = {
 
         }
 
+        //altes SpriteSliceBild löschen, Speicher! und Komplikationen
+        resitem.img = null;
+
         resitem.angleimgs = imgs;
     },
 
@@ -148,9 +151,9 @@ var obj = {
         ctx.fillRect(Math.round(x - 2), Math.round(y - 2), 5, 5);
     },
 
-    drawSprite: function(ctx, sprite, x, y, cfg) {
+    drawSprite: function(ctx, spritename, x, y, cfg) {
 
-        var sprite = this.resitems[sprite];
+        var sprite = this.resitems[spritename];
 
         if(!sprite) {
             this.drawErrorPlaceholder(ctx,x,y);
@@ -183,7 +186,9 @@ var obj = {
             }
 
             if(!img) {
-                this.drawErrorPlaceholder(ctx,x,y);
+                if (!cfg || !cfg.onlyifavailable) {
+                    this.drawErrorPlaceholder(ctx,x,y);
+                }
             } else {
 
                 //alles klar, zeichne Bild

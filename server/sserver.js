@@ -126,7 +126,7 @@ io.of('/play').authorization(function (handshake, callback) {
 
     // World-Update-Interval einrichten
     var statusinterval = setInterval(function() {
-        socket.volatile.emit("worldupdate", world.objects);
+        socket.volatile.emit("worldupdate", {objects: world.objects, player: player});
     }, 10);
 
     // Player-Events
@@ -175,6 +175,12 @@ io.of('/play').authorization(function (handshake, callback) {
             player.shooting = false;
             player.shooting2 = false;
         }
+    });
+
+
+    socket.on("test", function(msg) {
+        if(msg == "start") { player.exploding = true; }
+        else { player.exploding = false; }
     });
 
 
