@@ -215,7 +215,7 @@ var obj = {
             } else {
 
                 // Static mit Bild
-                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, 0, true);
+                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, {back: true});
 
             }
 
@@ -225,11 +225,30 @@ var obj = {
         _.each(this.world.objects, function(obj) {
 
 
-            if (obj.type != "player" || obj.name != _this.playername) { //aktuellen Spieler nicht zeichnen
+            if (obj.type != "player" || obj.name != _this.playername) {
 
-                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, obj.va);
+                if (obj.va) {
+
+                    // gewinkeltes Objekt
+                    _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, {angle: obj.va});
+
+                } else if (obj.anim) {
+
+                    // animiertes Objekt
+                    _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, {anim: obj.anim} );
+
+                } else {
+
+                    // sonstiges Objekt zeichnen
+                    _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
+
+                }
+
 
             }
+
+
+
 
             // ---- Debug Vektoren
             if (window.debug >= 2) {
@@ -247,7 +266,7 @@ var obj = {
         });
 
         //aktuellen Spieler zeichnen
-        this.res.drawSprite(this.vgctx, "player", this.player.x, this.player.y, this.player.va);
+        this.res.drawSprite(this.vgctx, "player", this.player.x, this.player.y, {angle:this.player.va});
 
 
         //Vordergrund statics zeichnen //todo: gescheites layersystem muss her
@@ -256,7 +275,7 @@ var obj = {
             if (obj.type != "ni") {
 
                 // Static mit Bild
-                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y, 0, false);
+                _this.res.drawSprite(_this.vgctx, obj.type, obj.x, obj.y);
 
             }
 
@@ -307,7 +326,7 @@ var obj = {
 
         }
 
-        _.each(world.statics, function(obj) {
+        _.each(this.world.statics, function(obj) {
             if (obj.l && obj.l > 0) {
 
                 //todo: Planeten fertig machen, wenn gescheites Layersystem da ist
@@ -391,7 +410,7 @@ var obj = {
 
 
                 // Static mit Bild
-                _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), 0, false, zoom);
+                _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
             }
 
         });

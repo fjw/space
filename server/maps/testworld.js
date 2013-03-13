@@ -17,7 +17,13 @@ exports = module.exports = {
 
 
     objects: [
-
+        {
+            type: "explosion",
+            x: 5, y: 10,     //Koordinaten
+            ma: 0,           //Bewegungswinkel
+            s: 0,            //Speed
+            anim: 30 //TODO: HIER STEHENGEBLIEBEN, werden die Partikel richtig erzeugt?
+        }
     ],
 
     statics: [
@@ -83,12 +89,13 @@ exports = module.exports = {
         },
 
         //Planet1
+        /*
         {
             type: "gasplanet1",
             x: -1000, y: -1000,
             l: 1 //Layer 1, Hintergrund
         },
-
+        */
 
         //Waagrechte lange Wände
         {

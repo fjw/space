@@ -29,6 +29,7 @@ require([   "jquery",
 
 
     var drawFrame = function(f) {
+        var ctx = cnv.getContext("2d");
         ctx.clearRect(0, 0, 20, 20);
 
         var blackalpha = 'rgba(0,0,0,0)';
