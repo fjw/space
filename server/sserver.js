@@ -179,8 +179,18 @@ io.of('/play').authorization(function (handshake, callback) {
 
 
     socket.on("test", function(msg) {
-        if(msg == "start") { player.exploding = true; }
-        else { player.exploding = false; }
+        if(msg == "start") {
+
+
+            player.exploding = true;
+            player.expst = Date.now();
+            player.expp = 0;
+
+
+        }
+        else {
+            //player.exploding = false;
+        }
     });
 
 

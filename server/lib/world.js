@@ -189,6 +189,19 @@ exports = module.exports = function() {
                 }
             }
 
+            // Explosion
+            if (obj.exploding) {
+
+                var duration = 4; //sec
+                obj.expp = ((Date.now() - obj.expst) / 1000) / duration;
+
+
+                if (obj.expp >= 1) {
+                    //todo: spieler zerstören
+                    obj.exploding = false;
+                }
+            }
+
         }
 
         // ============================================

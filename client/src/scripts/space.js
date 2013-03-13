@@ -64,7 +64,9 @@ var obj = {
 
         this.world = new WORLD("myworld");
         this.res = new RES(
-            function(per) { console.log(per); },
+            function(per) {
+                //console.log(per);
+            },
             function() {
                 _this.resloaded = true;
             }
@@ -237,8 +239,13 @@ var obj = {
 
         //todo: gescheiter Enegergy-HUD
         //Energielevel anzeigen
-        this.ctxs[8].fillStyle = "#ccd";
-        this.ctxs[8].fillText(Math.floor(this.player.e), 10, 10);
+        this.ctxs[8].fillStyle = "#ccf";
+        this.ctxs[8].fillText(Math.floor(this.player.e), 10, 15);
+
+
+        //Position anzeigen
+        this.ctxs[8].fillStyle = "#fcf";
+        this.ctxs[8].fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
 
         // -----
 
@@ -289,6 +296,7 @@ var obj = {
             }
 
             if( obj.exploding ) {
+
 
 
 
