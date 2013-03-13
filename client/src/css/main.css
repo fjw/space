@@ -37,6 +37,7 @@ canvas {
 
 #login {
     z-index: 30;
+    position: absolute;
 }
 /* -------- */
 

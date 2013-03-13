@@ -86,11 +86,11 @@ io.of('/play').authorization(function (handshake, callback) {
     var password = handshake.query.password;
 
     if (handshake.address.address == "127.0.0.1") {
-        username = "developer"; password = "trackit";
+        username = "developer"; password = "s";
     }
 
 
-    if((username && password && password == "trackit")) {
+    if((username && password && password == "s")) {
         handshake.playername = username;
 
         callback(null, true);
@@ -197,7 +197,7 @@ io.of('/play').authorization(function (handshake, callback) {
 io.of('/admin').authorization(function (handshake, callback) {
     // ------------------------------------------------------- play --- Auth
 
-    if((handshake.query.password && handshake.query.password == "trackit") || handshake.address.address == "127.0.0.1") {
+    if((handshake.query.password && handshake.query.password == "a") || handshake.address.address == "127.0.0.1") {
         callback(null, true);
     } else {
         callback(null, false);
