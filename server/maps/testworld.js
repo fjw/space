@@ -22,7 +22,7 @@ exports = module.exports = {
             x: 5, y: 10,     //Koordinaten
             ma: 0,           //Bewegungswinkel
             s: 0,            //Speed
-            anim: 30 //TODO: HIER STEHENGEBLIEBEN, werden die Partikel richtig erzeugt?
+            anim: 5
         }
     ],
 

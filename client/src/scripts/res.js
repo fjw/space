@@ -27,7 +27,8 @@ var obj = {
         },
 
         explosion: {
-            create: "createParticle_Explosion"
+            create: "createParticle_Explosion",
+            center: {x:15, y:15}
         }
     },
 
@@ -217,19 +218,27 @@ var obj = {
 
     createParticle_Explosion: function(resitem) {
 
+        var size = 30;
+        var frames = 30;
+
+        var r = Math.floor(size/2);
+
         var imgs = [];
-        for(var f = 0; f < 30; f++) {
+        for(var t = 0; t < frames; t++) {
+            var f = t/frames;
 
             var cnv = document.createElement("canvas");
+            cnv.width = size;
+            cnv.height = size;
+
             var ctx = cnv.getContext("2d");
-            ctx.clearRect(0, 0, 20, 20);
 
             var blackalpha = 'rgba(0,0,0,0)';
             var innercolor = 'yellow';
             var outercolor = 'orange';
             var smoke = 'grey';
 
-            var gr = ctx.createRadialGradient(5, 5 ,0, 5, 5, 10);
+            var gr = ctx.createRadialGradient(r, r ,0, r, r, r);
 
             gr.addColorStop(0, blackalpha);
 
@@ -290,9 +299,10 @@ var obj = {
 
 
             ctx.fillStyle = gr;
-            ctx.fillRect(0, 0, cnv.width, cnv.height);
+            ctx.fillRect(0, 0, size, size);
 
             imgs.push(cnv);
+
         }
 
         resitem.animimgs = imgs;

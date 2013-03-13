@@ -97,13 +97,18 @@ var obj = {
     start: function() {
         var _this = this;
 
-        //Loop starten
-        (function animloop(){
-            requestAnimationFrame(animloop);
-            _this._update();
-        })();
+        if (this.initiated) {
+            //Loop starten
+            (function animloop(){
+                requestAnimationFrame(animloop);
+                _this._update();
+            })();
 
-        this.started = true;
+            this.started = true;
+        } else {
+            //noch keine Antwort vom Server, warte nochmal
+            setTimeout(function() { _this.start; }, 500);
+        }
     },
 
 
