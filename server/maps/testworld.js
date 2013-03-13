@@ -17,16 +17,7 @@ exports = module.exports = {
 
 
     objects: [
-        {
-            type: "explosion",
-            x: 5, y: 10,     //Koordinaten
-            ma: 0,           //Bewegungswinkel
-            s: 0,            //Speed
-            anim: 2          //Animationsdauer in Sec
-
-        },
-
-
+      
     ],
 
     statics: [

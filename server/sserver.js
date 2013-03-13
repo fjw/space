@@ -110,10 +110,7 @@ io.of('/play').authorization(function (handshake, callback) {
     var player =  _.find(world.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
     if(!player) {
         //erzeuge neuen Spieler
-        var type = _.find(world.objecttypes, function(obj) { return obj.type == "player"; });
-        player = _.clone(type);
-        player.name = playername;
-        world.objects.push(player);
+        player = world.spawnPlayer(playername);
     }
 
 
@@ -126,7 +123,19 @@ io.of('/play').authorization(function (handshake, callback) {
 
     // World-Update-Interval einrichten
     var statusinterval = setInterval(function() {
-        socket.volatile.emit("worldupdate", {objects: world.objects, player: player});
+
+        //finde player falls er nichtmehr da ist
+        if(player.deleted) {
+            player =  _.find(world.objects, function(obj) { return obj.type == "player" && obj.name == playername && !obj.deleted; });
+        }
+
+        // sende Update
+        socket.volatile.emit("worldupdate",
+            {
+                objects: world.objects,
+                player: player,
+                clock: Date.now()
+            });
     }, 10);
 
     // Player-Events
@@ -183,8 +192,7 @@ io.of('/play').authorization(function (handshake, callback) {
 
 
             player.exploding = true;
-            player.expst = Date.now();
-            player.expp = 0;
+
 
 
         }

@@ -91,13 +91,18 @@ exports = module.exports = function() {
             //alte Bullets & Bombs entfernen
             var bulletlifetime = 6; //sec
             var bomblifetime = 20; //sec
+            var explosionlifetime = 1;
 
             this.objects = _.filter(this.objects, function(item) {
 
-                if(item.type == "bullet") {
+                if(item.deleted) {
+                    return false;
+                } else if(item.type == "bullet") {
                     return item.t + bulletlifetime * 1000 > thistime;
                 } else if(item.type == "bomb") {
                     return item.t + bomblifetime * 1000 > thistime;
+                } else if(item.type == "explosion") {
+                    return item.t + explosionlifetime * 1000 > thistime;
                 } else {
                     return true;
                 }
@@ -192,19 +197,118 @@ exports = module.exports = function() {
             // Explosion
             if (obj.exploding) {
 
-                var duration = 4; //sec
-                obj.expp = ((Date.now() - obj.expst) / 1000) / duration;
+                //Anfangsbedingung
+                if(!obj.expst) {
+                    obj.expst = Date.now(); //Startzeit
+                    obj.expem = 0;          //bereits emitierte Partikel
+                }
+
+                var duration = 1; //sec
+                obj.expp = ((Date.now() - obj.expst) / 1000) / duration; //aktueller Stand 0-1
+
+
+                var particlecount = 25;
+
+                var emitcount = (particlecount * obj.expp - obj.expem); //jetzt zu emitierende Partikel
+
+
+                for( var i = 0; i < emitcount; i++ ) {
+
+                    //emitiere einen partikel
+                    var r = this.getRandomNumber(5, 15);
+
+                    var particle = {
+                        type: "explosion",
+
+                        x: obj.x + this.getRandomNumber(-20, 20),
+                        y: obj.y + this.getRandomNumber(-20, 20),
+                        ma: obj.ma,
+                        s: obj.s * this.getRandomFloat(0.6, 1),
+                        o: obj.name,
+                        cr: r,
+                        t: thistime,
+                        isanim: true,
+                        ad: duration,
+                        scale: (2*r) / 30
+                    };
+
+                    obj.expem++;
+                    this.objects.push(particle);
+                }
 
 
                 if (obj.expp >= 1) {
-                    //todo: spieler zerstören
+
+                    //emitiere finale partikel
+                    for( var i = 0; i < 10; i++ ) {
+
+                        //emitiere einen partikel
+                        var r = this.getRandomNumber(5, 15);
+
+                        var bulletspeed = this.getRandomNumber(200, 400);
+
+                        var pv = this.worldfunctions.angleAbs2vector(obj.ma, obj.s);
+                        var bv = this.worldfunctions.angleAbs2vector(this.getRandomNumber(0, 359), bulletspeed);
+                        var bas = this.worldfunctions.vector2angleAbs(pv.x + bv.x, pv.y + bv.y);
+
+                        var particle = {
+                            type: "explosion",
+
+                            x: obj.x + this.getRandomNumber(-10, 10),
+                            y: obj.y + this.getRandomNumber(-10, 10),
+                            ma: bas.a,
+                            s: bas.s,
+                            o: obj.name,
+                            cr: r,
+                            t: thistime,
+                            isanim: true,
+                            ad: duration,
+                            scale: (2*r) / 30
+                        };
+
+                        obj.expem++;
+                        this.objects.push(particle);
+                    }
+
                     obj.exploding = false;
+                    obj.expst = null;
+                    obj.inactive = true;
+                    obj.breakingtostop = true;
+                    obj.breaking = false;
+                    obj.thrusting = false;
+                    obj.shooting = false;
+                    obj.shooting2 = false;
+
+                    var _this = this;
+                    setTimeout(function() {
+                        //_this.objects = _.reject(_this.objects, function(item) { return item.type == "player" && item.name == obj.name; });
+                        obj.deleted = true;
+                        _this.spawnPlayer(obj.name);
+                    }, 5000);
+
                 }
             }
 
-        }
+        },
+
+        spawnPlayer: function(name) {
+            var type = _.find(this.objecttypes, function(obj) { return obj.type == "player"; });
+            var player = _.clone(type);
+            player.name = name;
+            this.objects.push(player);
+
+            return player;
+        },
 
         // ============================================
+
+        getRandomNumber: function(min, max) {
+            return Math.round(min + (Math.random()*(max-min)));
+        },
+
+        getRandomFloat: function(min, max) {
+            return min + (Math.random()*(max-min));
+        }
 
     };
 

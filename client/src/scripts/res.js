@@ -232,7 +232,7 @@ var obj = {
             } else if ( cfg && typeof(cfg.anim) != "undefined") {
 
                 // Animationframe
-                img = sprite.animimgs[cfg.anim];
+                img = sprite.animimgs[Math.floor(cfg.anim * (sprite.frames-1))];
 
             } else {
 
@@ -256,12 +256,23 @@ var obj = {
                 }
 
                 if(cfg && cfg.zoom) {
+
                     ctx.drawImage( img,
                         Math.round((x - cx)*cfg.zoom),
                         Math.round((y - cy)*cfg.zoom),
-                        Math.round((img.width)*cfg.zoom),
-                        Math.round((img.height)*cfg.zoom)
+                        Math.round(img.width*cfg.zoom),
+                        Math.round(img.height*cfg.zoom)
                     );
+
+                } else if(cfg && cfg.scale) {
+
+                    ctx.drawImage( img,
+                        Math.round(x - cx*cfg.scale),
+                        Math.round(y - cy*cfg.scale),
+                        Math.round(img.width*cfg.scale),
+                        Math.round(img.height*cfg.scale)
+                    );
+
                 } else {
                     ctx.drawImage( img,
                         Math.round(x - cx),
@@ -281,6 +292,9 @@ var obj = {
 
         var size = 30;
         var frames = 30;
+
+        //speichern für die anim
+        resitem.frames = frames;
 
         var r = Math.floor(size/2);
 
@@ -317,8 +331,8 @@ var obj = {
                 b = 0.6 * m;
                 c = m;
 
-                if (a < 0) { a = 0; } if (b < 0) { b = 0; } if (c < 0) { c = 0; } if (d < 0) { d = 0; }
-                if (a > 1) { a = 1; } if (b > 1) { b = 1; } if (c > 1) { c = 1; } if (d > 1) { d = 1; }
+                if (a < 0) { a = 0; } if (b < 0) { b = 0; } if (c < 0) { c = 0; }
+                if (a > 1) { a = 1; } if (b > 1) { b = 1; } if (c > 1) { c = 1; }
 
                 gr.addColorStop(a, innercolor);
                 gr.addColorStop(b, outercolor);

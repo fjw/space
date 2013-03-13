@@ -97,11 +97,15 @@ var obj = {
             };
 
             _this.world.worldfunctions = wf();
+
         });
 
         socket.on("worldupdate", function(data) {
             _this.world.updateFromServer(data.objects);
             _this.player = data.player;
+
+            //clocksync
+            _this._serverClockDiv = data.clock - Date.now();
         });
 
         // ------------------------------------------------
@@ -112,6 +116,10 @@ var obj = {
         // ------------------------------------------------
     },
 
+    _serverClockDiv: 0,
+    getServerTime: function() {
+        return Date.now() + this._serverClockDiv;
+    },
 
     start: function() {
         var _this = this;
@@ -168,14 +176,16 @@ var obj = {
         if (!this._keysdown[code]) {
             this._keysdown[code] = true;
 
-            if(code == 38) { socket.emit("thrust", "start"); }
-            if(code == 40) { socket.emit("break", "start"); }
-            if(code == 39) { socket.emit("tright", "start"); }
-            if(code == 37) { socket.emit("tleft", "start"); }
-            if(code == 78) { socket.emit("breaktostop", "start"); }
-            if(code == 32) { socket.emit("shoot", "start"); }
-            if(code == 225) { socket.emit("shoot2", "start"); }
-            if(code == 84) { socket.emit("test", "start"); }
+            if(!this.player.exploding && !this.player.inactive) {
+                if(code == 38) { socket.emit("thrust", "start"); }
+                if(code == 40) { socket.emit("break", "start"); }
+                if(code == 39) { socket.emit("tright", "start"); }
+                if(code == 37) { socket.emit("tleft", "start"); }
+                if(code == 78) { socket.emit("breaktostop", "start"); }
+                if(code == 32) { socket.emit("shoot", "start"); }
+                if(code == 225) { socket.emit("shoot2", "start"); }
+                if(code == 84) { socket.emit("test", "start"); }
+            }
 
         }
 
@@ -190,14 +200,16 @@ var obj = {
     _onKeyup: function(code) {
         this._keysdown[code] = false;
 
-        if(code == 38) { socket.emit("thrust", "stop"); }
-        if(code == 40) { socket.emit("break", "stop"); }
-        if(code == 39) { socket.emit("tright", "stop"); }
-        if(code == 37) { socket.emit("tleft", "stop"); }
-        if(code == 78) { socket.emit("breaktostop", "stop"); }
-        if(code == 32) { socket.emit("shoot", "stop"); }
-        if(code == 225) { socket.emit("shoot2", "stop"); }
-        if(code == 84) { socket.emit("test", "stop"); }
+        if(!this.player.exploding && !this.player.inactive) {
+            if(code == 38) { socket.emit("thrust", "stop"); }
+            if(code == 40) { socket.emit("break", "stop"); }
+            if(code == 39) { socket.emit("tright", "stop"); }
+            if(code == 37) { socket.emit("tleft", "stop"); }
+            if(code == 78) { socket.emit("breaktostop", "stop"); }
+            if(code == 32) { socket.emit("shoot", "stop"); }
+            if(code == 225) { socket.emit("shoot2", "stop"); }
+            if(code == 84) { socket.emit("test", "stop"); }
+        }
     },
 
     _flushKeys: function() {
@@ -265,43 +277,60 @@ var obj = {
 
         _.each(this.world.objects, function(obj) {
 
+            if (!obj.inactive) {
 
-            // Ebene wählen
-            // 3 - Partikel / Effekte Hintergrund   - welt-translation
-            // 4 - dynamische Objekte               - welt-translation
-            // 5 - aktueller Spieler                - welt-translation
-            // 7 - Partikel / Effekte Vordergrund   - welt-translation
-            var layer = 4;
-            if (obj.type != "player" || obj.name != _this.playername) { layer = 5; }
+                // Ebene wählen
+                // 3 - Partikel / Effekte Hintergrund   - welt-translation
+                // 4 - dynamische Objekte               - welt-translation
+                // 5 - aktueller Spieler                - welt-translation
+                // 7 - Partikel / Effekte Vordergrund   - welt-translation
+                var layer = 4;
+                if (obj.type != "player" || obj.name != _this.playername) { layer = 5; }
+
+                var alpha = 1;
+
+                var ctx = _this.ctxs[layer];
+
+                if( obj.exploding ) {
+                    alpha = 1 - obj.expp;
+                }
 
 
-            var ctx = _this.ctxs[layer];
+                if (alpha != 1) {
+                    ctx.globalAlpha = alpha;
+                }
 
-            // Zeichnen je nach Typ
-            if (typeof(obj.va) != "undefined") {
+                // Zeichnen je nach Typ
+                if (typeof(obj.va) != "undefined") {
 
-                // gewinkeltes Objekt
-                _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, {angle: obj.va});
+                    // gewinkeltes Objekt
+                    _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, {angle: obj.va});
 
-            } else if (typeof(obj.anim) != "undefined") {
+                } else if (obj.isanim)  {
 
-                // animiertes Objekt
-                _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, {anim: obj.anim} );
+                    // animiertes Objekt
+                    var cfg = {
+                        anim: ((_this.getServerTime() - obj.t) / 1000) / obj.ad
+                    };
 
-            } else {
+                    if (obj.scale) {
+                        cfg.scale = obj.scale;
+                    }
 
-                // sonstiges Objekt zeichnen
-                _this.res.drawSprite(ctx, obj.type, obj.x, obj.y);
+                    _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, cfg );
+
+                } else {
+
+                    // sonstiges Objekt zeichnen
+                    _this.res.drawSprite(ctx, obj.type, obj.x, obj.y);
+
+                }
+
+                if (alpha != 1) {
+                    ctx.globalAlpha = 1;
+                }
 
             }
-
-            if( obj.exploding ) {
-
-
-
-
-            }
-
 
             // ---- Debug Vektoren
             if (window.debug >= 2) {
@@ -487,7 +516,7 @@ var obj = {
 
             } else {
 
-                // Static mit Bild
+                // Static mit Bild, nicht im Hintergrund (bm)
                 if (!obj.bm) {
                     _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
                 }

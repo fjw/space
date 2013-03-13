@@ -8,7 +8,8 @@ require.config({
     paths: {
         'jquery':       'lib/jquery',
         'underscore':   'lib/underscore',
-        'socketio':     'lib/socketio'
+        'socketio':     'lib/socketio',
+        'seedrandom':   'lib/seedrandom'
     }
 });
 
@@ -16,8 +17,9 @@ require.config({
 require([   "jquery",
             "underscore",
             "space",
-            "socket"
-], function( $, _, SPACE, SOCKET) {
+            "socket",
+            "numeric"
+], function( $, _, SPACE, SOCKET, NUMERIC) {
 
     window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
 
@@ -32,7 +34,7 @@ require([   "jquery",
 
         window.socket = new SOCKET("/play");
         window.space = new SPACE();
-
+        window.num = new NUMERIC();
 
         if (!!document.createElement("canvas").getContext) {
             // API-Support ist okay
