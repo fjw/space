@@ -112,6 +112,24 @@ var obj = {
 
     _ressourceLoaded: function(item) {
 
+        //bounding-boxes laden
+        if(!item.w) {
+            if (item.img) {
+                item.w = item.img.width;
+                item.h = item.img.height;
+            } else if (item.bimg) {
+                item.w = item.bimg.width;
+                item.h = item.bimg.height;
+            } else if (item.animimgs && item.animimgs[0]) {
+                item.w = item.animimgs[0].width;
+                item.h = item.animimgs[0].height;
+            } else if (item.angleimgs && item.angleimgs[0]) {
+                item.w = item.angleimgs[0].width;
+                item.h = item.angleimgs[0].height;
+            }
+        }
+
+
         item.complete = true;
 
         var completeItems = _.filter(this.resitems, function(resitem) { return resitem.complete; });
@@ -207,7 +225,50 @@ var obj = {
         ctx.fillRect(Math.round(x - 2), Math.round(y - 2), 5, 5);
     },
 
-    drawSprite: function(ctx, spritename, x, y, cfg) {
+    _drawOperations:[],
+    drawSprite: function(layer, spritename, x, y, cfg) {
+
+        this._drawOperations.push({
+            layer: layer,
+            spritename: spritename,
+            x: x,
+            y: y,
+            cfg: cfg
+        });
+
+    },
+
+    drawImage: function(layer, image, x, y) {
+
+        this._drawOperations.push({
+            layer: layer,
+            image: image,
+            x: x,
+            y: y
+        });
+
+    },
+
+    flush: function(ctx, w, h) {
+
+        //var ops = _.sortBy(this._drawOperations, function(item) { return item.layer; });
+/*
+        _.filter(this._drawOperations, function(item) { return item.layer == 0; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 1; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 2; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 3; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 4; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 5; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 6; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 7; });
+        _.filter(this._drawOperations, function(item) { return item.layer == 8; });
+*/
+
+//        ctx.clearRect(0, 0, _this.cw, _this.ch);
+
+    },
+
+    flushSprite: function(ctx, spritename, x, y, cfg) {
 
         var sprite = this.resitems[spritename];
 
@@ -287,6 +348,24 @@ var obj = {
 
 
     },
+
+    flushImage: function(ctx, image, x, y) {
+        ctx.drawImage(image, x, y);
+    },
+
+
+
+    //Canvase einrichten
+    // 0 - Sterne                           - ultradyn
+    // 1 - Hintergrund Statics              - modifizierte welt-translation
+    // 2 - Rückseiten Statics               - welt-translation
+    // 3 - Partikel / Effekte Hintergrund   - welt-translation
+    // 4 - dynamische Objekte               - welt-translation
+    // 5 - aktueller Spieler                - welt-translation
+    // 6 - Vordergrund Statics              - welt-translation
+    // 7 - Partikel / Effekte Vordergrund   - welt-translation
+    // 8 - HUD                              - keine translation
+
 
     createParticle_Explosion: function(resitem) {
 

@@ -136,7 +136,7 @@ io.of('/play').authorization(function (handshake, callback) {
                 player: player,
                 clock: Date.now()
             });
-    }, 10);
+    }, 30);
 
     // Player-Events
     socket.on("thrust", function(msg) {

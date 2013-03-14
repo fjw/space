@@ -17,7 +17,7 @@ exports = module.exports = {
 
 
     objects: [
-      
+
     ],
 
     statics: [

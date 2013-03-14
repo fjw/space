@@ -7,6 +7,10 @@ var obj = {
     mapcanvas: null,
     mapctx: null,
 
+
+    canvas: null,
+    ctx: null,
+
     cw: 0,
     ch: 0,
 
@@ -24,30 +28,22 @@ var obj = {
     initiated: false,
     resloaded: false,
 
+    //---------------------------
+    _fpsInterval: null,
+    _countFrames: 0,
+    fps: 0,
+    //---------------------------
+
     _init: function() {
         //einrichten und Listener starten... geloopt wird erst später
 
         var _this = this;
 
-        //Canvase einrichten
-        // 0 - Sterne                           - ultradyn
-        // 1 - Hintergrund Statics              - modifizierte welt-translation
-        // 2 - Rückseiten Statics               - welt-translation
-        // 3 - Partikel / Effekte Hintergrund   - welt-translation
-        // 4 - dynamische Objekte               - welt-translation
-        // 5 - aktueller Spieler                - welt-translation
-        // 6 - Vordergrund Statics              - welt-translation
-        // 7 - Partikel / Effekte Vordergrund   - welt-translation
-        // 8 - HUD                              - keine translation
-        for(var i = 0; i <= 8; i++) {
-            this.layers[i] = document.createElement("canvas");
-            this.ctxs[i] = this.layers[i].getContext("2d");
-            this.ctxs[i].translate(0.5, 0.5);
+        this.canvas = document.createElement("canvas");
+        this.ctx = this.canvas.getContext("2d");
+        this.ctx.translate(0.5, 0.5);
+        $(this.canvas).appendTo("body");
 
-            $(this.layers[i]).appendTo("body");
-            $(this.layers[i]).css("z-index", i);
-            $(this.layers[i]).attr("id", "layer"+i);
-        }
 
         this.mapcanvas = document.createElement("canvas");
         this.mapctx = this.mapcanvas.getContext("2d");
@@ -100,6 +96,7 @@ var obj = {
 
         });
 
+
         socket.on("worldupdate", function(data) {
             _this.world.updateFromServer(data.objects);
             _this.player = data.player;
@@ -107,6 +104,7 @@ var obj = {
             //clocksync
             _this._serverClockDiv = data.clock - Date.now();
         });
+
 
         // ------------------------------------------------
         window.onresize = function() { _this._onResize(); };
@@ -129,6 +127,8 @@ var obj = {
             //Map zeichnen
             this._prepareMinimap();
 
+
+
             //Loop starten
             (function animloop(){
                 requestAnimationFrame(animloop);
@@ -148,10 +148,8 @@ var obj = {
         var w = window.innerWidth;
         var h = window.innerHeight;
 
-        for(var i = 0; i <= 8; i++) {
-            this.layers[i].width = w;
-            this.layers[i].height = h;
-        }
+        this.canvas.width = w;
+        this.canvas.height = h;
 
         this.mapcanvas.width = 0.2 * w;
         this.mapcanvas.height = 0.2 * h;
@@ -222,12 +220,13 @@ var obj = {
     _update: function() {
         var _this = this;
 
-        // alle Layers clearen
-        _.each(this.ctxs, function(ctx) {
-            ctx.clearRect(0, 0, _this.cw, _this.ch);
-        });
+        // alle Layer clearen
+        this.ctx.clearRect(0, 0, _this.cw, _this.ch);
+
+
 
         // ----- Operationen mit Welt-Koordinaten ----- Layer 2-7
+        /*
         var transX = Math.round(this.mx - this.player.x);
         var transY = Math.round(this.my - this.player.y);
 
@@ -238,34 +237,59 @@ var obj = {
         //modifizierter Trans für Layer 1
         this.ctxs[1].save();
         this.ctxs[1].translate( Math.round(this.mx - (this.player.x * 0.5)) , (this.my - (this.player.y * 0.5)) );
+*/
 
+
+        this._updateStars();
         this._updateStatics();
         this._updateObjects();
 
         // ----- Welt-Koordinaten wiederherstellen----- Layer 1-7
+        /*
         for (i = 1; i <= 7; i++ ) {
             this.ctxs[i].restore();
         }
-
+        */
 
 
         //todo: gescheiter Enegergy-HUD
         //Energielevel anzeigen
-        this.ctxs[8].fillStyle = "#ccf";
-        this.ctxs[8].fillText(Math.floor(this.player.e), 10, 15);
+        //this.ctxs[8].fillStyle = "#ccf";
+        //this.ctxs[8].fillText(Math.floor(this.player.e), 10, 15);
 
 
         //Position anzeigen
-        this.ctxs[8].fillStyle = "#fcf";
-        this.ctxs[8].fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
+        //this.ctxs[8].fillStyle = "#fcf";
+        //this.ctxs[8].fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
+
+        _this._countFrames++;
+
+        //FPS
+        if (!this._fpsInterval) {
+            this._fpsInterval = setInterval(function() {
+                _this.fps = _this._countFrames;
+                _this._countFrames = 0;
+            }, 1000);
+        }
+
+        if (this.fps > 40) {
+            this.ctx.fillStyle = "#0a0";
+            this.ctx.fillText( this.fps, this.cw - 30, 15);
+        } else {
+            this.ctx.fillStyle = "#a00";
+            this.ctx.fillText( this.fps, this.cw - 30, 15);
+        }
 
         // -----
 
 
         this._updateMinimap();
-        this._updateStars();
+
 
         // -----
+
+        this.res.flush(this.ctx, this.cw, this.ch);
+
 
         //clientside-World-Berechnung
         this.world.update();
@@ -289,7 +313,6 @@ var obj = {
 
                 var alpha = 1;
 
-                var ctx = _this.ctxs[layer];
 
                 if( obj.exploding ) {
                     alpha = 1 - obj.expp;
@@ -297,14 +320,14 @@ var obj = {
 
 
                 if (alpha != 1) {
-                    ctx.globalAlpha = alpha;
+                    //ctx.globalAlpha = alpha; //todo: alpha!
                 }
 
                 // Zeichnen je nach Typ
                 if (typeof(obj.va) != "undefined") {
 
                     // gewinkeltes Objekt
-                    _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, {angle: obj.va});
+                    _this.res.drawSprite(layer, obj.type, obj.x, obj.y, {angle: obj.va});
 
                 } else if (obj.isanim)  {
 
@@ -317,22 +340,23 @@ var obj = {
                         cfg.scale = obj.scale;
                     }
 
-                    _this.res.drawSprite(ctx, obj.type, obj.x, obj.y, cfg );
+                    _this.res.drawSprite(layer, obj.type, obj.x, obj.y, cfg );
 
                 } else {
 
                     // sonstiges Objekt zeichnen
-                    _this.res.drawSprite(ctx, obj.type, obj.x, obj.y);
+                    _this.res.drawSprite(layer, obj.type, obj.x, obj.y);
 
                 }
 
                 if (alpha != 1) {
-                    ctx.globalAlpha = 1;
+                    //ctx.globalAlpha = 1; //todo: alpha!
                 }
 
             }
 
             // ---- Debug Vektoren
+            /* //todo:!!
             if (window.debug >= 2) {
                 //zeichne vektor
                 var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
@@ -343,6 +367,7 @@ var obj = {
                 _this.ctxs[7].strokeStyle = "#f00";
                 _this.ctxs[7].stroke();
             }
+            */
             // ----
 
         });
@@ -360,9 +385,12 @@ var obj = {
 
             if(obj.type == "ni") {
 
-                var ctx = _this.ctxs[6];
+
 
                 // Static ohne Bild mit Pfad
+                /* //todo !!
+
+                 var layer = 6;
                 ctx.beginPath();
 
                 _.each(obj.p, function(p, i) {
@@ -375,23 +403,25 @@ var obj = {
                 ctx.closePath();
                 ctx.fillStyle = obj.c;
                 ctx.fill();
+                */
 
             } else {
 
                 if (obj.bm) {
 
                     // Static im Hintergrund
-                    _this.res.drawSprite(_this.ctxs[1], obj.type, obj.x, obj.y);
+                    _this.res.drawSprite(1, obj.type, obj.x, obj.y);
 
                 } else {
 
                     // Static mit Bild
-                    _this.res.drawSprite(_this.ctxs[2], obj.type, obj.x, obj.y, {back: true});
-                    _this.res.drawSprite(_this.ctxs[6], obj.type, obj.x, obj.y);
+                    _this.res.drawSprite(2, obj.type, obj.x, obj.y, {back: true});
+                    _this.res.drawSprite(6, obj.type, obj.x, obj.y);
 
 
                     //Debug Collisionspfade
                     if (window.debug >= 2) {
+                        /* //todo!!
                         var ctx = _this.ctxs[6];
                         ctx.beginPath();
                         _.each(obj.p, function(p, i) {
@@ -404,6 +434,7 @@ var obj = {
                         ctx.closePath();
                         ctx.fillStyle = "#f00";
                         ctx.fill();
+                        */
                     }
                 }
             }
@@ -420,7 +451,8 @@ var obj = {
 
             var ls = this.starlayers[0].width;
 
-            this.ctxs[0].clearRect(0, 0, this.cw, this.ch);
+            //todo!!
+            //this.ctxs[0].clearRect(0, 0, this.cw, this.ch);
 
             _.each(this.starlayers, function(layer, i) {
 
@@ -431,7 +463,7 @@ var obj = {
                 for (var k = 0 - x - ls; k < _this.cw; k += ls) {
                     for (var l = 0 - y - ls; l < _this.ch; l += ls) {
 
-                        _this.ctxs[0].drawImage(layer, Math.round(k), Math.round(l));
+                        _this.res.drawImage(0, layer, Math.round(k), Math.round(l));
 
                     }
 
@@ -445,7 +477,7 @@ var obj = {
 
     _updateMinimap: function() {
 
-        // Minimap updaten //todo: Hier kann Perfomance gespart werden z.B. nur jedes 10 Frame rendern
+        // Minimap updaten
         this.mapctx.clearRect(0, 0, this.mapcanvas.width, this.mapcanvas.height);
 
         var mx = Math.round((this.player.x - this._mapX) * this.zoom);
