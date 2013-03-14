@@ -7,15 +7,15 @@
 require.config({
     paths: {
         'jquery':       'lib/jquery',
-        'underscore':   'lib/underscore',
+        'lodash':       'lib/lodash',
         'socketio':     'lib/socketio'
     }
 });
 
 
 require([   "jquery",
-    "underscore",
-    "res"
+            "lodash",
+            "res"
 ], function( $, _, RES) {
 
     var res = new RES();

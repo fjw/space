@@ -1,4 +1,4 @@
-define(["underscore"], function(_) { return function(updateCallback, allLoadedCallback) {
+define(["lodash", "ftools"], function(_, ft) { return function(updateCallback, allLoadedCallback) {
 var obj = {
 
     updateCallback: updateCallback,
@@ -225,146 +225,203 @@ var obj = {
         ctx.fillRect(Math.round(x - 2), Math.round(y - 2), 5, 5);
     },
 
+
+    /*
+        Layer-Konfiguration //todo: Kommentare anpassen
+    */
+    layercfg: [
+        0, // 0 - Sterne                           - ultradyn
+        2, // 1 - Hintergrund Statics              - modifizierte welt-translation
+        1, // 2 - Rückseiten Statics               - welt-translation
+        1, // 3 - Partikel / Effekte Hintergrund   - welt-translation
+        1, // 4 - dynamische Objekte               - welt-translation
+        1, // 5 - aktueller Spieler                - welt-translation
+        1, // 6 - Vordergrund Statics              - welt-translation
+        1, // 7 - Partikel / Effekte Vordergrund   - welt-translation
+        0, // 8 - HUD                              - keine translation
+    ],
+
+    /*
+        Setzt den Viewport für Zeichenoperationen, x,y ist oben links
+     */
+    _viewportX: 0,
+    _viewportY: 0,
+    _viewportW: 0,
+    _viewportH: 0,
+    _layerViewportX: [],
+    _layerViewportY: [],
+    _layerViewportCtx: null,
+    setViewport: function(ctx, x, y, w, h) {
+        this._layerViewportCtx = ctx;
+        this._viewportX = x;
+        this._viewportY = y;
+        this._viewportW = w;
+        this._viewportH = h;
+
+        var _this = this;
+        ft.each(this.layercfg, function(layerval, i) {
+            _this._layerViewportX[i] = x * layerval;
+            _this._layerViewportY[i] = y * layerval;
+        });
+    },
+
+    /*
+        Stacked eine Zeichen-Operation (ein bekanntes Sprite) für den nächsten Flush
+     */
     _drawOperations:[],
     drawSprite: function(layer, spritename, x, y, cfg) {
 
-        this._drawOperations.push({
-            layer: layer,
-            spritename: spritename,
-            x: x,
-            y: y,
-            cfg: cfg
-        });
+        var resitem = this.resitems[spritename];
+        if(resitem) {
+
+            if (ft.isBoxOverlap(this._layerViewportX[layer], this._layerViewportY[layer], this._viewportW, this._viewportH, x, y, resitem.w, resitem.h)) {
+
+                this._drawOperations.push({
+                    layer: layer,
+                    spritename: spritename,
+                    x: x,
+                    y: y,
+                    cfg: cfg
+                });
+
+            }
+
+        } else {
+            console.error("unknown Sprite: "+spritename);
+        }
 
     },
 
+    /*
+        Stacked eine Zeichen-Operation (ein Image oder Canvas) für den nächsten Flush
+     */
     drawImage: function(layer, image, x, y) {
 
-        this._drawOperations.push({
-            layer: layer,
-            image: image,
-            x: x,
-            y: y
+        if (ft.isBoxOverlap(this._layerViewportX[layer], this._layerViewportY[layer], this._viewportW, this._viewportH, x, y, image.width, image.height)) {
+
+            this._drawOperations.push({
+                layer: layer,
+                image: image,
+                x: x,
+                y: y
+            });
+
+        }
+    },
+
+
+    /*
+        Zeichnet alle gestackten Operationen auf den Bildschirm und leert den Stack
+     */
+    flush: function() {
+
+        // Layer clearen
+        this._layerViewportCtx.clearRect(0, 0, this._viewportW, this._viewportH);
+
+        // Sortiere alle Operationen nach Layer
+        var ops = this._drawOperations.sort(function(a,b) { return a.layer - b.layer; });
+
+        var _this = this; //todo: Performance testen, ob das mit this überhaupt sinnvoll ist
+        ft.each(ops, function(item) {
+
+            if (item.spritename) {
+                // Sprite
+                _this._flushSprite(item.layer, item.spritename, item.x, item.y, item.cfg);
+
+            } else {
+                // Image
+                _this._flushImage(item.layer, item.image, item.x, item.y);
+
+            }
+
         });
 
+        //leere Oprations-Objekt
+        this._drawOperations = [];
     },
 
-    flush: function(ctx, w, h) {
-
-        //var ops = _.sortBy(this._drawOperations, function(item) { return item.layer; });
-/*
-        _.filter(this._drawOperations, function(item) { return item.layer == 0; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 1; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 2; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 3; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 4; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 5; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 6; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 7; });
-        _.filter(this._drawOperations, function(item) { return item.layer == 8; });
-*/
-
-//        ctx.clearRect(0, 0, _this.cw, _this.ch);
-
-    },
-
-    flushSprite: function(ctx, spritename, x, y, cfg) {
+    _flushSprite: function(layer, spritename, x, y, cfg) {
 
         var sprite = this.resitems[spritename];
 
-        if(!sprite) {
-            this.drawErrorPlaceholder(ctx,x,y);
+        // Bildquelle wählen
+        var img;
+        if (cfg && cfg.back && sprite.bimg) {
+
+            // Backimage
+            img = sprite.bimg;
+
+        } else if ( cfg && typeof(cfg.angle) != "undefined") {
+
+            // Winkelbild
+            img = _.min(sprite.angleimgs, function(item) { return Math.abs(cfg.angle - item.d); }).img;
+            //todo: performance
+
+        } else if ( cfg && typeof(cfg.anim) != "undefined") {
+
+            // Animationframe
+            img = sprite.animimgs[Math.floor(cfg.anim * (sprite.frames-1))];
+
         } else {
-            // Sprite vorhanden
 
-            // Bildquelle wählen
-            var img;
-            if (cfg && cfg.back && sprite.bimg) {
-
-                // Backimage
-                img = sprite.bimg;
-
-            } else if ( cfg && typeof(cfg.angle) != "undefined") {
-
-                // Winkelbild
-                img = _.min(sprite.angleimgs, function(item) { return Math.abs(cfg.angle - item.d); }).img;
-                //todo: performance
-
-            } else if ( cfg && typeof(cfg.anim) != "undefined") {
-
-                // Animationframe
-                img = sprite.animimgs[Math.floor(cfg.anim * (sprite.frames-1))];
-
-            } else {
-
-                // normales Bild
-                img = sprite.img;
-
-            }
-
-            if(!img) {
-                if (!cfg || !cfg.onlyifavailable) {
-                    this.drawErrorPlaceholder(ctx,x,y);
-                }
-            } else {
-
-                //alles klar, zeichne Bild
-                var cx = 0;
-                var cy = 0;
-                if (sprite.center) {
-                    cx = sprite.center.x;
-                    cy = sprite.center.y;
-                }
-
-                if(cfg && cfg.zoom) {
-
-                    ctx.drawImage( img,
-                        Math.round((x - cx)*cfg.zoom),
-                        Math.round((y - cy)*cfg.zoom),
-                        Math.round(img.width*cfg.zoom),
-                        Math.round(img.height*cfg.zoom)
-                    );
-
-                } else if(cfg && cfg.scale) {
-
-                    ctx.drawImage( img,
-                        Math.round(x - cx*cfg.scale),
-                        Math.round(y - cy*cfg.scale),
-                        Math.round(img.width*cfg.scale),
-                        Math.round(img.height*cfg.scale)
-                    );
-
-                } else {
-                    ctx.drawImage( img,
-                        Math.round(x - cx),
-                        Math.round(y - cy)
-                    );
-                }
-
-            }
+            // normales Bild
+            img = sprite.img;
 
         }
 
+        var fx = x - this._layerViewportX[layer];
+        var fy = y - this._layerViewportY[layer];
+
+
+        if(typeof(fx) != "number") {
+            console.log(fx);
+        }
+
+        //alles klar, zeichne Bild
+        var cx = 0;
+        var cy = 0;
+        if (sprite.center) {
+            cx = sprite.center.x;
+            cy = sprite.center.y;
+        }
+
+        if(cfg && cfg.zoom) {
+
+            this._layerViewportCtx.drawImage( img,
+                Math.round((fx - cx)*cfg.zoom),
+                Math.round((fy - cy)*cfg.zoom),
+                Math.round(img.width*cfg.zoom),
+                Math.round(img.height*cfg.zoom)
+            );
+
+        } else if(cfg && cfg.scale) {
+
+            this._layerViewportCtx.drawImage( img,
+                Math.round(fx - cx*cfg.scale),
+                Math.round(fy - cy*cfg.scale),
+                Math.round(img.width*cfg.scale),
+                Math.round(img.height*cfg.scale)
+            );
+
+        } else {
+
+            this._layerViewportCtx.drawImage( img,
+                Math.round(fx - cx),
+                Math.round(fy - cy)
+            );
+        }
 
 
     },
 
-    flushImage: function(ctx, image, x, y) {
-        ctx.drawImage(image, x, y);
+    _flushImage: function(layer, image, x, y) {
+
+        var fx = x - this._layerViewportX[layer];
+        var fy = y - this._layerViewportY[layer];
+
+        this._layerViewportCtx.drawImage(image, fx, fy);
+
     },
-
-
-
-    //Canvase einrichten
-    // 0 - Sterne                           - ultradyn
-    // 1 - Hintergrund Statics              - modifizierte welt-translation
-    // 2 - Rückseiten Statics               - welt-translation
-    // 3 - Partikel / Effekte Hintergrund   - welt-translation
-    // 4 - dynamische Objekte               - welt-translation
-    // 5 - aktueller Spieler                - welt-translation
-    // 6 - Vordergrund Statics              - welt-translation
-    // 7 - Partikel / Effekte Vordergrund   - welt-translation
-    // 8 - HUD                              - keine translation
 
 
     createParticle_Explosion: function(resitem) {

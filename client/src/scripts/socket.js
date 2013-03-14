@@ -1,4 +1,4 @@
-define(["socketio", "underscore"], function(sio, _) { return function(namespace) {
+define(["socketio", "lodash"], function(sio, _) { return function(namespace) {
 var obj = {
 
 	sock: null,

@@ -7,14 +7,14 @@
 require.config({
     paths: {
         'jquery':       'lib/jquery',
-        'underscore':   'lib/underscore',
+        'lodash':       'lib/lodash',
         'socketio':     'lib/socketio'
     }
 });
 
 
 require([   "jquery",
-    "underscore",
+    "lodash",
     "adminspace",
     "socket"
 ], function( $, _, SPACE, SOCKET) {

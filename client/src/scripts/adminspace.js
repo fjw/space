@@ -1,4 +1,4 @@
-define(["underscore", "jquery", "rafpolyfill", "world", "res"], function(_, $, rafpolyfill, WORLD, RES) { return function() {
+define(["lodash", "jquery", "rafpolyfill", "world", "res"], function(_, $, rafpolyfill, WORLD, RES) { return function() {
     var obj = {
 
         //--------------------

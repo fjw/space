@@ -1,4 +1,4 @@
-define(["underscore", "jquery", "rafpolyfill", "world", "res"], function(_, $, rafpolyfill, WORLD, RES) { return function() {
+define(["lodash", "jquery", "rafpolyfill", "world", "res", "ftools"], function(_, $, rafpolyfill, WORLD, RES, ft) { return function() {
 var obj = {
 
     //--------------------
@@ -220,9 +220,15 @@ var obj = {
     _update: function() {
         var _this = this;
 
-        // alle Layer clearen
-        this.ctx.clearRect(0, 0, _this.cw, _this.ch);
 
+        this.res.setViewport(this.ctx, this.player.x - this.mx, this.player.y - this.my, this.cw, this.ch)
+
+
+        // alle Layer clearen
+        //this.ctx.clearRect(0, 0, _this.cw, _this.ch);
+
+        var x1 = Math.round(this.mx - this.player.x);
+        var y1 = Math.round(this.my - this.player.y);
 
 
         // ----- Operationen mit Welt-Koordinaten ----- Layer 2-7
@@ -262,9 +268,25 @@ var obj = {
         //this.ctxs[8].fillStyle = "#fcf";
         //this.ctxs[8].fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
 
-        _this._countFrames++;
+
+
+
+
+        // -----
+
+
+
+
+
+        // -----
+
+        this.res.flush();
+
+
+        this._updateMinimap();
 
         //FPS
+        _this._countFrames++;
         if (!this._fpsInterval) {
             this._fpsInterval = setInterval(function() {
                 _this.fps = _this._countFrames;
@@ -279,16 +301,6 @@ var obj = {
             this.ctx.fillStyle = "#a00";
             this.ctx.fillText( this.fps, this.cw - 30, 15);
         }
-
-        // -----
-
-
-        this._updateMinimap();
-
-
-        // -----
-
-        this.res.flush(this.ctx, this.cw, this.ch);
 
 
         //clientside-World-Berechnung
@@ -550,7 +562,9 @@ var obj = {
 
                 // Static mit Bild, nicht im Hintergrund (bm)
                 if (!obj.bm) {
-                    _this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
+
+                    //todo: neues System für Minimap
+                    //_this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
                 }
             }
 

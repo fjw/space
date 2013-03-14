@@ -1,4 +1,4 @@
-define(["underscore"], function(_) { return function(name) {
+define(["lodash"], function(_) { return function(name) {
     var obj = {
 
         objects: [],

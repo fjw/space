@@ -7,20 +7,22 @@
 require.config({
     paths: {
         'jquery':       'lib/jquery',
-        'underscore':   'lib/underscore',
+        'lodash':       'lib/lodash',
         'socketio':     'lib/socketio',
-        'seedrandom':   'lib/seedrandom'
+        'seedrandom':   'lib/seedrandom',
+        'ftools':       'lib/ftools'
     }
 });
 
 
 require([   "jquery",
-            "underscore",
+            "lodash",
             "space",
             "socket",
-            "numeric"
-], function( $, _, SPACE, SOCKET, NUMERIC) {
+            "ftools"
+], function( $, _, SPACE, SOCKET, ft) {
 
+    //noinspection JSUnresolvedVariable
     window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
 
     if (document.location.href == "http://localhost:4004/") {
@@ -34,7 +36,6 @@ require([   "jquery",
 
         window.socket = new SOCKET("/play");
         window.space = new SPACE();
-        window.num = new NUMERIC();
 
         if (!!document.createElement("canvas").getContext) {
             // API-Support ist okay
