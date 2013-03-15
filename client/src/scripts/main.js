@@ -58,7 +58,7 @@ require([   "jquery",
 
             //@todo: DEV ONLY
             if(window.env == "dev") {
-                $("#login button").click();
+                //$("#login button").click();
             }
 
 

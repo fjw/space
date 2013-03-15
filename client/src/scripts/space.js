@@ -106,12 +106,7 @@ var obj = {
         });
 
 
-        // ------------------------------------------------
-        window.onresize = function() { _this._onResize(); };
-        window.onkeydown = function(e) { _this._onKeydown(e.keyCode); };
-        window.onkeyup = function(e) { _this._onKeyup(e.keyCode); };
-        window.onblur = function() { _this._onBlur(); };
-        // ------------------------------------------------
+
     },
 
     _serverClockDiv: 0,
@@ -136,6 +131,15 @@ var obj = {
             })();
 
             this.started = true;
+
+            //Events binden
+            // ------------------------------------------------
+            window.onresize = function() { _this._onResize(); };
+            window.onkeydown = function(e) { _this._onKeydown(e.keyCode); };
+            window.onkeyup = function(e) { _this._onKeyup(e.keyCode); };
+            window.onblur = function() { _this._onBlur(); };
+            // ------------------------------------------------
+
         } else {
             //noch keine Antwort vom Server, oder nicht alle Grafiken geladen, warte nochmal
             setTimeout(function() { _this.start(); }, 500);
