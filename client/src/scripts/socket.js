@@ -20,11 +20,17 @@ var obj = {
         };
 
         var devhost = "http://localhost:4004/";
+        var devhost2 = "http://192.168.178.27:4004/";
 
         if (document.location.href == devhost || document.location.href == devhost + "admin.html") {
             //DEV MODE
             this.hostname = devhost;
         }
+        if (document.location.href == devhost2 || document.location.href == devhost2 + "admin.html") {
+            //DEV MODE2
+            this.hostname = devhost2;
+        }
+
 
         if (window.debug) {
             console.info("create socket to %s, namespace: %s", this.hostname, this.namespace);

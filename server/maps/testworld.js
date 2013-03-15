@@ -75,7 +75,7 @@ exports = module.exports = {
         //Planet1
         {
             type: "gasplanet1",
-            x: -1000, y: -1000,
+            x: 700, y: 300,
             bm: true //Hintergrund Modifier
         },
 
@@ -506,7 +506,7 @@ exports = module.exports = {
             type: "ni", x: 1369, y: -1523,
             p: [ { x: 10, y: 0 }, { x: 20, y: 0 }, { x: 30, y: 10 }, { x: 30, y: 20 }, { x: 20, y: 30 }, { x: 10, y: 30 }, { x: 0, y: 20 }, { x: 0, y: 10 } ],
             c: "#444"
-        },
+        }
 
 
 

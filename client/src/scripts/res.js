@@ -63,10 +63,14 @@ var obj = {
             uri: "/res/asteroid13.png"
         },
 
-
         explosion: {
             create: "createParticle_Explosion",
             center: {x:15, y:15}
+        },
+
+        bullet: {
+            create: "createParticle_Bullet",
+            center: {x:3, y:3}
         }
     },
 
@@ -110,6 +114,9 @@ var obj = {
         });
     },
 
+    /*
+        Callback: eine Ressource wurde geladen
+     */
     _ressourceLoaded: function(item) {
 
         //bounding-boxes laden
@@ -145,6 +152,9 @@ var obj = {
         }
     },
 
+    /*
+        lädt ein Sprite in die Library, mit Rotationsslices
+     */
     _loadRotationSprite: function(resitem) {
 
         var rotationSteps = 35;
@@ -177,6 +187,9 @@ var obj = {
         resitem.angleimgs = imgs;
     },
 
+    /*
+        Rotiert ein einfaches Bild ohne Slices und lädt es in die Library
+     */
     _preloadRotations: function(resitem) {
 
         var rotationSteps = 35;
@@ -210,35 +223,20 @@ var obj = {
         resitem.angleimgs = imgs;
     },
 
-    drawParticle: function(ctx) {
-
-        ctx.beginPath();
-        ctx.arc(100,100,50,Math.PI*2, false);
-        ctx.fill();
-
-
-    },
-
-    drawErrorPlaceholder: function(ctx, x, y) {
-        //kein Bild vorhanden, Platzhalter zeichnen
-        ctx.fillStyle = "#f00";
-        ctx.fillRect(Math.round(x - 2), Math.round(y - 2), 5, 5);
-    },
-
 
     /*
         Layer-Konfiguration //todo: Kommentare anpassen
     */
     layercfg: [
         0, // 0 - Sterne                           - ultradyn
-        2, // 1 - Hintergrund Statics              - modifizierte welt-translation
+        0.5, // 1 - Hintergrund Statics              - modifizierte welt-translation
         1, // 2 - Rückseiten Statics               - welt-translation
         1, // 3 - Partikel / Effekte Hintergrund   - welt-translation
         1, // 4 - dynamische Objekte               - welt-translation
         1, // 5 - aktueller Spieler                - welt-translation
         1, // 6 - Vordergrund Statics              - welt-translation
         1, // 7 - Partikel / Effekte Vordergrund   - welt-translation
-        0, // 8 - HUD                              - keine translation
+        0  // 8 - HUD                              - keine translation
     ],
 
     /*
@@ -309,6 +307,30 @@ var obj = {
         }
     },
 
+    /*
+        Stacked eine Zeichen-Operation (einen Pfad) für den nächsten Flush
+        !! unperformant, nur für dev !!
+     */
+    drawPath: function(layer, p, x, y, color, fill) {
+
+        var w = _.max(p, function(point) { return point.x; }).x;
+        var h = _.max(p, function(point) { return point.y; }).y;
+
+        if (ft.isBoxOverlap(this._layerViewportX[layer], this._layerViewportY[layer], this._viewportW, this._viewportH, x, y, w, h)) {
+
+            this._drawOperations.push({
+                layer: layer,
+                p: p,
+                x: x,
+                y: y,
+                color: color,
+                fill: fill
+            });
+
+        }
+
+    },
+
 
     /*
         Zeichnet alle gestackten Operationen auf den Bildschirm und leert den Stack
@@ -328,6 +350,9 @@ var obj = {
                 // Sprite
                 _this._flushSprite(item.layer, item.spritename, item.x, item.y, item.cfg);
 
+            } else if (item.p) {
+                // Pfad
+                _this._flushPath(item.layer, item.p, item.x, item.y, item.color, item.fill);
             } else {
                 // Image
                 _this._flushImage(item.layer, item.image, item.x, item.y);
@@ -338,6 +363,32 @@ var obj = {
 
         //leere Oprations-Objekt
         this._drawOperations = [];
+    },
+
+    _flushPath: function(layer, p, x, y, color, fill) {
+
+        var ctx = this._layerViewportCtx;
+        var fx = x - this._layerViewportX[layer];
+        var fy = y - this._layerViewportY[layer];
+
+        ctx.beginPath();
+        ft.each(p, function(point, i) {
+            if( i == 0 ) {
+                ctx.moveTo(ft.round(point.x + fx), ft.round(point.y + fy));
+            } else {
+                ctx.lineTo(ft.round(point.x + fx), ft.round(point.y + fy));
+            }
+        });
+        ctx.closePath();
+
+        if (fill) {
+            ctx.fillStyle = color;
+            ctx.fill();
+        } else {
+            ctx.strokeStyle = color;
+            ctx.stroke();
+        }
+
     },
 
     _flushSprite: function(layer, spritename, x, y, cfg) {
@@ -353,9 +404,9 @@ var obj = {
 
         } else if ( cfg && typeof(cfg.angle) != "undefined") {
 
-            // Winkelbild
+            // Winkelbild //todo: performance
             img = _.min(sprite.angleimgs, function(item) { return Math.abs(cfg.angle - item.d); }).img;
-            //todo: performance
+
 
         } else if ( cfg && typeof(cfg.anim) != "undefined") {
 
@@ -369,49 +420,58 @@ var obj = {
 
         }
 
-        var fx = x - this._layerViewportX[layer];
-        var fy = y - this._layerViewportY[layer];
-
-
-        if(typeof(fx) != "number") {
-            console.log(fx);
-        }
-
-        //alles klar, zeichne Bild
-        var cx = 0;
-        var cy = 0;
-        if (sprite.center) {
-            cx = sprite.center.x;
-            cy = sprite.center.y;
-        }
-
-        if(cfg && cfg.zoom) {
-
-            this._layerViewportCtx.drawImage( img,
-                Math.round((fx - cx)*cfg.zoom),
-                Math.round((fy - cy)*cfg.zoom),
-                Math.round(img.width*cfg.zoom),
-                Math.round(img.height*cfg.zoom)
-            );
-
-        } else if(cfg && cfg.scale) {
-
-            this._layerViewportCtx.drawImage( img,
-                Math.round(fx - cx*cfg.scale),
-                Math.round(fy - cy*cfg.scale),
-                Math.round(img.width*cfg.scale),
-                Math.round(img.height*cfg.scale)
-            );
-
+        if(!img) {
+            console.error("sprite problem: "+spritename);
         } else {
 
-            this._layerViewportCtx.drawImage( img,
-                Math.round(fx - cx),
-                Math.round(fy - cy)
-            );
+            var fx = x - this._layerViewportX[layer];
+            var fy = y - this._layerViewportY[layer];
+
+            //alles klar, zeichne Bild
+            var cx = 0;
+            var cy = 0;
+            if (sprite.center) {
+                cx = sprite.center.x;
+                cy = sprite.center.y;
+            }
+
+            if(cfg && cfg.alpha) {
+                this._layerViewportCtx.globalAlpha = cfg.alpha;
+            }
+
+            if(cfg && cfg.zoom) {
+
+                this._layerViewportCtx.drawImage( img,
+                    ft.round((fx - cx)*cfg.zoom),
+                    ft.round((fy - cy)*cfg.zoom),
+                    ft.round(img.width*cfg.zoom),
+                    ft.round(img.height*cfg.zoom)
+                );
+
+            } else if(cfg && cfg.scale) {
+
+                this._layerViewportCtx.drawImage( img,
+                    ft.round(fx - cx*cfg.scale),
+                    ft.round(fy - cy*cfg.scale),
+                    ft.round(img.width*cfg.scale),
+                    ft.round(img.height*cfg.scale)
+                );
+
+            } else {
+
+
+                this._layerViewportCtx.drawImage( img,
+                    ft.round(fx - cx),
+                    ft.round(fy - cy)
+                );
+
+            }
+
+            if(cfg && cfg.alpha) {
+                this._layerViewportCtx.globalAlpha = 1;
+            }
+
         }
-
-
     },
 
     _flushImage: function(layer, image, x, y) {
@@ -419,10 +479,53 @@ var obj = {
         var fx = x - this._layerViewportX[layer];
         var fy = y - this._layerViewportY[layer];
 
-        this._layerViewportCtx.drawImage(image, fx, fy);
+        this._layerViewportCtx.drawImage(image,
+            ft.round(fx),
+            ft.round(fy)
+        );
 
     },
 
+    createParticle_Bullet: function(resitem) {
+
+        var size = 6;
+
+        var r = Math.floor(size/2);
+
+
+        var cnv = document.createElement("canvas");
+        cnv.width = size;
+        cnv.height = size;
+
+        var ctx = cnv.getContext("2d");
+
+        var innercolor = '#fdf';
+        var outercolor = 'rgba(255,50,255,0.5)';
+        var coloralpha = 'rgba(255,50,255,0.5)';
+        var blackalpha = 'rgba(255,0,255,0)';
+
+        var gr = ctx.createRadialGradient(r, r ,0, r, r, 6);
+
+        gr.addColorStop(0, blackalpha);
+
+        var a, b, c, d;
+
+        a = 0;
+        b = 0.6;
+        c = 0.7;
+        d = 1;
+
+        gr.addColorStop(a, innercolor);
+        gr.addColorStop(b, outercolor);
+        gr.addColorStop(c, coloralpha);
+        gr.addColorStop(d, blackalpha);
+
+        ctx.fillStyle = gr;
+        ctx.fillRect(0, 0, size, size);
+
+        resitem.img = cnv;
+
+    },
 
     createParticle_Explosion: function(resitem) {
 
@@ -495,7 +598,7 @@ var obj = {
                 m = (f - p2) / (1 - p2);
 
                 a = m;
-                b = m + 0.2;
+                b = m * 0.8 + 0.2;
                 c = 0.6 + 0.4 * m;
                 d = 1;
 

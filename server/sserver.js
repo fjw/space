@@ -85,7 +85,7 @@ io.of('/play').authorization(function (handshake, callback) {
     var username = handshake.query.user;
     var password = handshake.query.password;
 
-    if (handshake.address.address == "127.0.0.1") {
+    if (handshake.address.address == "127.0.0.1" || handshake.address.address == "192.168.178.20") {
         username = "developer"; password = "s";
     }
 
@@ -136,7 +136,7 @@ io.of('/play').authorization(function (handshake, callback) {
                 player: player,
                 clock: Date.now()
             });
-    }, 30);
+    }, 14);
 
     // Player-Events
     socket.on("thrust", function(msg) {

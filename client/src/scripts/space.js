@@ -224,58 +224,9 @@ var obj = {
         this.res.setViewport(this.ctx, this.player.x - this.mx, this.player.y - this.my, this.cw, this.ch)
 
 
-        // alle Layer clearen
-        //this.ctx.clearRect(0, 0, _this.cw, _this.ch);
-
-        var x1 = Math.round(this.mx - this.player.x);
-        var y1 = Math.round(this.my - this.player.y);
-
-
-        // ----- Operationen mit Welt-Koordinaten ----- Layer 2-7
-        /*
-        var transX = Math.round(this.mx - this.player.x);
-        var transY = Math.round(this.my - this.player.y);
-
-        for (var i = 2; i <= 7; i++ ) {
-            this.ctxs[i].save();
-            this.ctxs[i].translate( transX , transY );
-        }
-        //modifizierter Trans für Layer 1
-        this.ctxs[1].save();
-        this.ctxs[1].translate( Math.round(this.mx - (this.player.x * 0.5)) , (this.my - (this.player.y * 0.5)) );
-*/
-
-
         this._updateStars();
         this._updateStatics();
         this._updateObjects();
-
-        // ----- Welt-Koordinaten wiederherstellen----- Layer 1-7
-        /*
-        for (i = 1; i <= 7; i++ ) {
-            this.ctxs[i].restore();
-        }
-        */
-
-
-        //todo: gescheiter Enegergy-HUD
-        //Energielevel anzeigen
-        //this.ctxs[8].fillStyle = "#ccf";
-        //this.ctxs[8].fillText(Math.floor(this.player.e), 10, 15);
-
-
-        //Position anzeigen
-        //this.ctxs[8].fillStyle = "#fcf";
-        //this.ctxs[8].fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
-
-
-
-
-
-        // -----
-
-
-
 
 
         // -----
@@ -285,16 +236,28 @@ var obj = {
 
         this._updateMinimap();
 
+
+        //todo: gescheiter Enegergy-HUD
+        //Energielevel anzeigen
+        this.ctx.fillStyle = "#ccf";
+        this.ctx.fillText(Math.floor(this.player.e), 10, 15);
+
+
+        //Position anzeigen
+        this.ctx.fillStyle = "#fcf";
+        this.ctx.fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
+
+
         //FPS
         _this._countFrames++;
         if (!this._fpsInterval) {
             this._fpsInterval = setInterval(function() {
-                _this.fps = _this._countFrames;
+                _this.fps = _this._countFrames * 2;
                 _this._countFrames = 0;
-            }, 1000);
+            }, 500);
         }
 
-        if (this.fps > 40) {
+        if (this.fps > 25) {
             this.ctx.fillStyle = "#0a0";
             this.ctx.fillText( this.fps, this.cw - 30, 15);
         } else {
@@ -311,7 +274,7 @@ var obj = {
     _updateObjects: function() {
         var _this = this;
 
-        _.each(this.world.objects, function(obj) {
+        ft.each(this.world.objects, function(obj) {
 
             if (!obj.inactive) {
 
@@ -331,55 +294,39 @@ var obj = {
                 }
 
 
-                if (alpha != 1) {
-                    //ctx.globalAlpha = alpha; //todo: alpha!
-                }
+                var cfg = {};
 
-                // Zeichnen je nach Typ
+                if (alpha != 1) {
+                    cfg.alpha = alpha;
+                }
+                if (obj.scale) {
+                    cfg.scale = obj.scale;
+                }
                 if (typeof(obj.va) != "undefined") {
+                    cfg.angle = obj.va;
 
-                    // gewinkeltes Objekt
-                    _this.res.drawSprite(layer, obj.type, obj.x, obj.y, {angle: obj.va});
-
-                } else if (obj.isanim)  {
-
-                    // animiertes Objekt
-                    var cfg = {
-                        anim: ((_this.getServerTime() - obj.t) / 1000) / obj.ad
-                    };
-
-                    if (obj.scale) {
-                        cfg.scale = obj.scale;
-                    }
-
-                    _this.res.drawSprite(layer, obj.type, obj.x, obj.y, cfg );
-
-                } else {
-
-                    // sonstiges Objekt zeichnen
-                    _this.res.drawSprite(layer, obj.type, obj.x, obj.y);
+                }
+                if (obj.isanim)  {
+                    cfg.anim = ((_this.getServerTime() - obj.t) / 1000) / obj.ad;
 
                 }
 
-                if (alpha != 1) {
-                    //ctx.globalAlpha = 1; //todo: alpha!
-                }
+                // Objekt zeichnen
+                _this.res.drawSprite(layer, obj.type, obj.x, obj.y, cfg);
 
             }
 
             // ---- Debug Vektoren
-            /* //todo:!!
             if (window.debug >= 2) {
                 //zeichne vektor
                 var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
                 var vy = Math.sin((obj.ma-90) * 0.0174532) * obj.s * 0.5;
-                _this.ctxs[7].beginPath();
-                _this.ctxs[7].moveTo(obj.x, obj.y);
-                _this.ctxs[7].lineTo(obj.x + vx, obj.y + vy);
-                _this.ctxs[7].strokeStyle = "#f00";
-                _this.ctxs[7].stroke();
+
+                _this.res.drawPath(7,[
+                    { x: 0 , y: 0  },
+                    { x: vx, y: vy }
+                ], obj.x, obj.y, "#f00", false);
             }
-            */
             // ----
 
         });
@@ -397,25 +344,8 @@ var obj = {
 
             if(obj.type == "ni") {
 
-
-
                 // Static ohne Bild mit Pfad
-                /* //todo !!
-
-                 var layer = 6;
-                ctx.beginPath();
-
-                _.each(obj.p, function(p, i) {
-                    if( i == 0 ) {
-                        ctx.moveTo(p.x + obj.x, p.y + obj.y);
-                    } else {
-                        ctx.lineTo(p.x + obj.x, p.y + obj.y);
-                    }
-                });
-                ctx.closePath();
-                ctx.fillStyle = obj.c;
-                ctx.fill();
-                */
+                _this.res.drawPath(6, obj.p, obj.x, obj.y, obj.c, true);
 
             } else {
 
@@ -433,20 +363,9 @@ var obj = {
 
                     //Debug Collisionspfade
                     if (window.debug >= 2) {
-                        /* //todo!!
-                        var ctx = _this.ctxs[6];
-                        ctx.beginPath();
-                        _.each(obj.p, function(p, i) {
-                            if( i == 0 ) {
-                                ctx.moveTo(p.x + obj.x, p.y + obj.y);
-                            } else {
-                                ctx.lineTo(p.x + obj.x, p.y + obj.y);
-                            }
-                        });
-                        ctx.closePath();
-                        ctx.fillStyle = "#f00";
-                        ctx.fill();
-                        */
+
+                        _this.res.drawPath(7, obj.p, obj.x, obj.y, "#f66", true);
+
                     }
                 }
             }
@@ -459,14 +378,14 @@ var obj = {
     _updateStars: function() {
         var _this = this;
 
+
+
         if (this.starlayers) {
 
             var ls = this.starlayers[0].width;
 
-            //todo!!
-            //this.ctxs[0].clearRect(0, 0, this.cw, this.ch);
 
-            _.each(this.starlayers, function(layer, i) {
+            ft.each(this.starlayers, function(layer, i) {
 
                 var x = (_this.player.x / (i+3)) % ls;
                 var y = (_this.player.y / (i+3)) % ls;
@@ -475,13 +394,15 @@ var obj = {
                 for (var k = 0 - x - ls; k < _this.cw; k += ls) {
                     for (var l = 0 - y - ls; l < _this.ch; l += ls) {
 
-                        _this.res.drawImage(0, layer, Math.round(k), Math.round(l));
+                        _this.res.drawImage(0, layer, k, l);
 
                     }
 
                 }
 
             });
+
+
 
         }
 
@@ -563,7 +484,8 @@ var obj = {
                 // Static mit Bild, nicht im Hintergrund (bm)
                 if (!obj.bm) {
 
-                    //todo: neues System für Minimap
+                    //mctx.drawImage(sprite.img)
+
                     //_this.res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
                 }
             }
@@ -592,7 +514,7 @@ var obj = {
             var layer = document.createElement("canvas");
             var lctx = layer.getContext("2d");
             layer.width = layersize;
-            layer.height = layersize;
+            layer.height = layersize;00
 
             var r = 2;
 
@@ -618,7 +540,6 @@ var obj = {
 
             _this.starlayers.push(layer);
         });
-
 
 
 

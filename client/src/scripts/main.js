@@ -25,7 +25,7 @@ require([   "jquery",
     //noinspection JSUnresolvedVariable
     window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
 
-    if (document.location.href == "http://localhost:4004/") {
+    if (document.location.href == "http://localhost:4004/" || document.location.href == "http://192.168.178.27:4004/") {
         window.env = "dev";
     } else {
         window.env = "production";

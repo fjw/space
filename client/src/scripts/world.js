@@ -6,13 +6,7 @@ define(["lodash"], function(_) { return function(name) {
         statics: [],
 
         localobjects: [
-            {
-                type: "explosion",
-                x: -1000, y: 0,     //Koordinaten
-                ma: 0,           //Bewegungswinkel
-                s: 0,            //Speed
-                anim: 2          //Animationsdauer in Sec
-            }
+
         ],
 
         lastupdate: Date.now(),
