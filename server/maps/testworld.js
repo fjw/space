@@ -20,7 +20,7 @@ exports = module.exports = {
 
         {
             type: "player",
-            x: 200, y: 100,     //Koordinaten
+            x: 600, y: 600,     //Koordinaten
             ma: 0,           //Bewegungswinkel
             s: 0,            //Speed
             va: 135,         //Sichtwinkel
@@ -28,7 +28,6 @@ exports = module.exports = {
             e: 100,
             name: "dummy"
         }
-
     ],
 
     statics: [

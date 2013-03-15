@@ -378,6 +378,10 @@ exports = module.exports = function() {
             var type = _.find(this.objecttypes, function(obj) { return obj.type == "player"; });
             var player = _.clone(type);
             player.name = name;
+
+            player.x = this.getRandomNumber(-200, 200);
+            player.y = this.getRandomNumber(-200, 200);
+
             this.objects.push(player);
 
             return player;
