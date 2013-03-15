@@ -13,7 +13,7 @@ var http    = require('http'),
 //---
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
-_ = require( __dirname + "/lib/underscore.js");
+_ = require( __dirname + "/lib/lodash.js");
 WORLD = require( __dirname + "/lib/world.js");
 //---
 

@@ -232,6 +232,7 @@ exports = module.exports = function() {
         vector2angleAbs: vector2angleAbs,
         angleInBoundaries: angleInBoundaries,
         distancePointFromPath: distancePointFromPath,
-        directionlessAngle: directionlessAngle
+        directionlessAngle: directionlessAngle,
+        vectorAbs: vectorAbs
     };
 };

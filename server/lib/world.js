@@ -84,32 +84,29 @@ exports = module.exports = function() {
                 _this.worldfunctions.updateObj(obj, _this.statics, secselapsed);
 
                 if(obj.type == "player") {
+
                     _this.playerFunctions(obj, secselapsed, thistime);
+                    _this.playerCollisions(obj, secselapsed, thistime);
+
                 }
             });
 
             //alte Bullets & Bombs entfernen
-            var bulletlifetime = 6; //sec
-            var bomblifetime = 20; //sec
-            var explosionlifetime = 1;
-
             this.objects = _.filter(this.objects, function(item) {
 
                 if(item.deleted) {
                     return false;
-                } else if(item.type == "bullet") {
-                    return item.t + bulletlifetime * 1000 > thistime;
-                } else if(item.type == "bomb") {
-                    return item.t + bomblifetime * 1000 > thistime;
-                } else if(item.type == "explosion") {
-                    return item.t + explosionlifetime * 1000 > thistime;
+                } else if( item.ad ) {
+                    return item.t + item.ad * 1000 > thistime;
                 } else {
                     return true;
                 }
+
             });
 
 
         },
+
 
         playerFunctions: function(obj, secselapsed, thistime) {
 
@@ -145,7 +142,8 @@ exports = module.exports = function() {
                         s: bas.s,
                         o: obj.name,
                         cr: cr,
-                        t: thistime
+                        t: thistime,
+                        ad: 6 //Lifetime
                     };
 
                     this.objects.push(bullet);
@@ -158,6 +156,7 @@ exports = module.exports = function() {
             }
 
             // Bomben
+            /*
             if (obj.shooting2) {
 
                 var bulletspeed = 250;
@@ -182,7 +181,8 @@ exports = module.exports = function() {
                         s: bas.s,
                         o: obj.name,
                         cr: cr,
-                        t: thistime
+                        t: thistime,
+                        ad: 20
                     };
 
                     this.objects.push(bullet);
@@ -193,6 +193,7 @@ exports = module.exports = function() {
                     obj.e = obj.e - edrain;
                 }
             }
+            */
 
             // Explosion
             if (obj.exploding) {
@@ -290,6 +291,88 @@ exports = module.exports = function() {
             }
 
         },
+
+
+        playerCollisions: function(obj, secselapsed, thistime) {
+            var _this = this;
+
+            if(!obj.inactive && !obj.exploding) {
+
+                _.each(this.objects, function(proj) {
+
+                    if( (proj.type == "bullet" || proj.type == "bomb" || proj.type == "explosion") &&
+                         proj.o != obj.name &&
+                         _this.worldfunctions.vectorAbs(proj.x - obj.x, proj.y - obj.y) < obj.cr + proj.cr) {
+
+                        // Spieler getroffen!!
+
+                        if (proj.type == "bullet") {
+                            //direkter Treffer mit Bullet
+
+                            //Schaden
+                            var edrain = 30;
+
+                            //emitiere einen partikel
+                            var r = _this.getRandomNumber(5, 6);
+
+
+                            var pv = _this.worldfunctions.angleAbs2vector(obj.ma, obj.s);
+                            var bv = _this.worldfunctions.angleAbs2vector(proj.ma, proj.s);
+                            var bas = _this.worldfunctions.vector2angleAbs(pv.x + bv.x, pv.y + bv.y);
+
+                            var particle = {
+                                type: "bullethit",
+
+                                x: proj.x,
+                                y: proj.y,
+                                ma: bas.a,
+                                s: bas.s,
+                                o: obj.name,
+                                cr: r,
+                                t: thistime,
+                                isanim: true,
+                                ad: 0.5,
+                                scale: (2*r) / 12
+                            };
+
+                            _this.objects.push(particle);
+
+                        }
+
+                        if (proj.type == "bomb") {
+                            //direkter Treffer mit Bombe
+
+                            //Schaden
+                            var edrain = 70;
+
+                        }
+
+                        if (proj.type == "explosion") {
+                            //Kollateralschaden durch Explosion
+
+                            //Schaden
+                            var edrain = 10;
+
+                        }
+
+                        proj.deleted = true;
+
+                        //energie abziehen
+                        obj.e = obj.e - edrain;
+
+                        if(obj.e < 0) {
+                            obj.exploding = true;
+                        }
+
+                    }
+
+
+                });
+
+            }
+
+        },
+
 
         spawnPlayer: function(name) {
             var type = _.find(this.objecttypes, function(obj) { return obj.type == "player"; });

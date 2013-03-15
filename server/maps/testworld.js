@@ -18,6 +18,17 @@ exports = module.exports = {
 
     objects: [
 
+        {
+            type: "player",
+            x: 200, y: 100,     //Koordinaten
+            ma: 0,           //Bewegungswinkel
+            s: 0,            //Speed
+            va: 135,         //Sichtwinkel
+            cr: 18,          //Kollisionsradius
+            e: 100,
+            name: "dummy"
+        }
+
     ],
 
     statics: [
