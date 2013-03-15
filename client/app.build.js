@@ -12,7 +12,7 @@
     ],
 	paths: {
         'jquery':       'lib/jquery',
-        'underscore':   'lib/underscore',
+        'lodash':       'lib/lodash',
         'socketio':     'lib/socketio',
         'seedrandom':   'lib/seedrandom'
     }
