@@ -42,7 +42,7 @@ require([   "jquery",
 
             $("#login button").bind("click", function() {
 
-                window.socket.connect($("#username").attr("value"), $("#password").attr("value"), function() {
+                window.socket.connect($("#username").val(), $("#password").val(), function() {
 
                     $("#login").fadeOut(100, function() {
 
@@ -58,7 +58,7 @@ require([   "jquery",
 
             //@todo: DEV ONLY
             if(window.env == "dev") {
-                //$("#login button").click();
+                $("#login button").click();
             }
 
 
