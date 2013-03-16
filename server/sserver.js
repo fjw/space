@@ -240,5 +240,5 @@ io.of('/admin').authorization(function (handshake, callback) {
 
 setInterval(function() {
     world.update();
-},10);
+},1);
 

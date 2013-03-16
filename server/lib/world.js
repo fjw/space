@@ -71,9 +71,12 @@ exports = module.exports = function() {
 
         },
 
+
+
         // ============================================ SERVER-WORLD-CALCULATIONS ============================================
         update: function() {
             var _this = this;
+
 
             var thistime = Date.now();
             var secselapsed = (thistime - this.lastupdate) / 1000;
@@ -286,6 +289,64 @@ exports = module.exports = function() {
                         obj.deleted = true;
                         _this.spawnPlayer(obj.name);
                     }, 5000);
+
+                }
+
+            }
+
+
+            if(obj.thrusting || obj.breaking) {
+
+                if(!obj.lastthrust || obj.lastthrust + 100 < thistime ) {
+
+
+                    var r = 12;
+
+                    var v = obj.va;
+                    if(obj.breaking) {
+                        v = this.worldfunctions.angleInBoundaries(180 + obj.va);
+                    }
+
+                    var va = this.worldfunctions.angleAbs2vector(obj.va, 20);
+
+                    var vp = this.worldfunctions.angleAbs2vector(obj.va + 90, 4);
+
+                    var particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x + vp.x,
+                        y: obj.y - va.y + vp.y,
+                        ma: obj.va,
+                        s: obj.s - 100,
+                        o: obj.name,
+                        cr: r,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.3,
+                        scale: (2*r) / 30
+                    };
+
+                    this.objects.push(particle);
+
+
+                    var particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x - vp.x,
+                        y: obj.y - va.y - vp.y,
+                        ma: obj.va,
+                        s: obj.s - 100,
+                        o: obj.name,
+                        cr: r,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.3,
+                        scale: (2*r) / 30
+                    };
+
+                    this.objects.push(particle);
+
+                    obj.lastthrust = thistime;
 
                 }
             }

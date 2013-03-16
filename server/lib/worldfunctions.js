@@ -173,24 +173,25 @@ exports = module.exports = function() {
 
                 var v = {x:0,y:0};
 
-                var playervelocity = 5; //pro sek
-                var playerbackvelocity = 3;
-                var playerrotationspeed = 3;
+                var playervelocity = 500; //pro sek
+                var playerbackvelocity = 300;
+                var playerrotationspeed = 300;
                 var playermaxspeed = 300;
 
+
                 if (obj.rturning) {
-                    obj.va = angleInBoundaries(obj.va + playerrotationspeed);
+                    obj.va = angleInBoundaries(obj.va + playerrotationspeed * secselapsed);
                 }
                 if (obj.lturning) {
-                    obj.va = angleInBoundaries(obj.va - playerrotationspeed);
+                    obj.va = angleInBoundaries(obj.va - playerrotationspeed * secselapsed);
                 }
 
                 if (!collided) { //nur wenn gerade nicht kollidiert wurde (tunneling verhindern)
                     if (obj.thrusting) {
-                        v = angleAbs2vector(obj.va, playervelocity);
+                        v = angleAbs2vector(obj.va, playervelocity * secselapsed );
                     }
                     if (obj.breaking) {
-                        v = angleAbs2vector( angleInBoundaries(obj.va-180), playerbackvelocity );
+                        v = angleAbs2vector( angleInBoundaries(obj.va-180), playerbackvelocity * secselapsed );
                     }
 
                     if (obj.thrusting || obj.breaking) {
