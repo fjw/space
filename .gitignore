@@ -1,4 +1,4 @@
 .idea
-server/node_modules
-server/log
+server/world/node_modules
+server/world/log
 client/build
