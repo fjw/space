@@ -12,7 +12,7 @@ exports = module.exports = function(collection, worldname) {
 
             this.dbc = dbc;     //DB-Collection
             this.name = name;   //Name der Welt
-            this.map = require( __dirname + "/maps/"+worldname+".js");  //Map-Einstellungen
+            this.map = require( __dirname + "/../maps/"+worldname+".js");  //Map-Einstellungen
 
         },
 
@@ -23,6 +23,13 @@ exports = module.exports = function(collection, worldname) {
 
             this.dbc.find({}).each(function(err, doc) {
             });
+        },
+
+        /*
+            Löscht alle Objekte aus der Welt
+        */
+        purge: function() {
+
         }
 
 

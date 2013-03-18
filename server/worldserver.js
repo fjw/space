@@ -46,22 +46,6 @@ new mongodb.Db('space', server, {safe: false}).open(function (dberror, db) {
             }
         });
 
-
-/*
-        collection.insert({hello: 'world'}, {safe:true}, function(err, objects) {
-
-            log("warn", err);
-
-            if (err) console.warn(err.message);
-
-            if (err && err.message.indexOf('E11000 ') !== -1) {
-                // this _id was already inserted in the database
-            }
-
-
-        });
-        */
-
     }
 });
 
