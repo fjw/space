@@ -1,40 +1,29 @@
 exports = module.exports = {
 
-    statics: [
-        /*
+
+    /*
+
+         statische Objekte der Welt
+
          {
-         type: "walltest",
-         x:-300, y:-300,       //Koordinaten
-         w: 2000, h: 2000,   //Größe   //todo: w,h aus image holen
-         cp: [   //Kollisionspfade
-         { x1: 30,    y1: 30,    x2: 1970, y2: 30 },
-         { x1: 1970,  y1: 30,    x2: 1970, y2: 1970 },
-         { x1: 1970,  y1: 1970,  x2: 30,    y2: 1970 },
-         { x1: 30,    y1: 1970,  x2: 30,    y2: 30 }
-         ]
-         },*/
+             type: "meinstatic",     // id der ressource ("ni" = static ohne Bild)
+             x:-300, y:-900,         // Koordinaten
+             w: 432, h: 600,         // Größe
+             ps: [                   // Polygone (für Kollision)
+                [{x: 0, y: 0}, {x:0, y: 10}, {x:10, y:10}],
+                [{x: 20, y: 20}, {x:20, y: 40}, {x:40, y:40}]
+             ],
+             bg: false               // Objekt im Background-Layer?
+         }
 
-
-        //Ein paar Hindernisse
-        /*
-        {
-            type: "ni", // Wand ohne Bild
-            x: 100, y: 100,
-            p: [ // Geschlossender Pfad, Kollisionspfad wird automatisch generiert
-                { x: 0, y:0 },
-                { x: 100, y: 0 },
-                { x: 100, y: 100 },
-                { x: 0, y: 100 }
-            ],
-            c: "#f00"
-        },*/
-
+    */
+    statics: [
 
         //Station
         {
             type: "station",
             x:-300, y:-900,       //Koordinaten
-            w: 432, h: 600,   //Größe   //todo: w,h aus image holen
+            w: 432, h: 600,   //Größe
             p: [
                 {x:20, y: 60}, {x:3, y:70}, {x:58, y:165}, {x:23, y:268}, {x:41, y:371}, {x:124, y:457}, {x:112, y:574}, {x:132, y:580}, {x:158, y:372}, {x:241, y:386}, {x:210, y:593}, {x:228, y:594}, {x:256, y:494}, {x:354, y:442}, {x:414, y:330}, {x:404, y:201}, {x:304, y:99}, {x:173, y:92}, {x:95, y:7}, {x:85, y:17}, {x:202, y:167}, {x:121, y:221}
 
@@ -45,7 +34,7 @@ exports = module.exports = {
         {
             type: "station",
             x:20000, y:-20000,       //Koordinaten
-            w: 432, h: 600,   //Größe   //todo: w,h aus image holen
+            w: 432, h: 600,          //Größe
             p: [
                 {x:20, y: 60}, {x:3, y:70}, {x:58, y:165}, {x:23, y:268}, {x:41, y:371}, {x:124, y:457}, {x:112, y:574}, {x:132, y:580}, {x:158, y:372}, {x:241, y:386}, {x:210, y:593}, {x:228, y:594}, {x:256, y:494}, {x:354, y:442}, {x:414, y:330}, {x:404, y:201}, {x:304, y:99}, {x:173, y:92}, {x:95, y:7}, {x:85, y:17}, {x:202, y:167}, {x:121, y:221}
 
@@ -56,7 +45,7 @@ exports = module.exports = {
         {
             type: "gasplanet1",
             x: 700, y: 300,
-            bm: true //Hintergrund Modifier
+            bg: true //Hintergrund Modifier
         },
 
 
