@@ -49,8 +49,11 @@ exports = module.exports = function(collection, worldname) {
         // ------------------------------------------------------------
         // ------------------------------------------------------------
 
+        /*
+            bereitet aus dem Mapfile geladene statics für die Verarbeitung vor
+         */
         _loadStatics: function(map) {
-
+            var countCps = 0;
 
             for (var i = 0, len = map.statics.length; i < len; i++) {
                 var stc = map.statics[i];
@@ -60,8 +63,8 @@ exports = module.exports = function(collection, worldname) {
                 if((!stc.w || !stc.h) && stc.ps) {
                     var max = 0;
                     var may = 0;
-                    stc.pis.each(function(p) {
-                        p.each(function(v) {
+                    stc.ps.forEach(function(p) {
+                        p.forEach(function(v) {
                             if (v.x > max) { max = v.x; }
                             if (v.y > may) { may = v.y; }
                         });
@@ -76,16 +79,52 @@ exports = module.exports = function(collection, worldname) {
                 if(stc.ps) {
                     var cps = [];
 
-                    stc.ps.each(function(p) {
+                    stc.ps.forEach(function(p) {
 
+                        var plen = p.length;
+                        for(var i = 0; i < plen - 1; i++) {
+                            cps.push({
+                                x1: p[i].x,
+                                y1: p[i].y,
+                                x2: p[i+1].x,
+                                y2: p[i+1].y
+                            });
+                        }
+                        cps.push({
+                            x1: p[plen - 1].x,
+                            y1: p[plen - 1].y,
+                            x2: p[0].x,
+                            y2: p[0].y
+                        });
 
                     });
 
+                    if(stc.cps) {
+                        stc.cps = stc.cps.concat(cps);
+                    } else {
+                        stc.cps = cps;
+                    }
 
                 }
 
 
+                if (stc.cps) {
+                    // Winkel der Collisionsvektoren ausrechnen
+                    stc.cps.forEach(function(item) {
+                       item.a = vector.directionlessAngle(vector.vector2angleAbs(item.x2 - item.x1, item.y2 - item.y1).a);
+                    });
+
+                    //Zählen
+                    countCps += stc.cps.length;
+                }
+
+
+
+                //Einfügen
+                this.statics.push(stc);
             }
+
+            log("info", this.statics.length + " statics objects loaded, " + countCps + " collisionpaths");
 
         }
 

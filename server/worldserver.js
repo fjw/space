@@ -1,8 +1,10 @@
 // -----------------------------------
-var mongodb = require('mongodb');
+log = require( __dirname + "/lib/log.js");
+oi = require( __dirname + "/lib/oi.js");
+vector = new require( __dirname + "/lib/vector.js")();
+
+var MONGODB = require('mongodb');
 var colors  = require('colors');
-var log = require( __dirname + "/lib/log.js");
-var oi = require( __dirname + "/lib/oi.js");
 var _ = require( __dirname + "/lib/lodash.js");
 var WORLD = require( __dirname + "/lib/world.js");
 // -----------------------------------
@@ -13,10 +15,10 @@ var worldname = "testarena";
 
 
 
-var server = new mongodb.Server("127.0.0.1", 27017, {}); //perf: native_parser?
+var server = new MONGODB.Server("127.0.0.1", 27017, {}); //perf: native_parser?
 
 
-new mongodb.Db('space', server, {safe: false}).open(function (dberror, db) {
+new MONGODB.Db('space', server, {safe: false}).open(function (dberror, db) {
 
     if (dberror) {
         log("critical", dberror);
@@ -37,11 +39,22 @@ new mongodb.Db('space', server, {safe: false}).open(function (dberror, db) {
                 var world = new WORLD(coll, worldname);
 
                 // ------------------------- Main Loop ----------------------------
-                while(1) {
+
+                setInterval(function() {
+                    world.update();
+                }, 15);
+
+                /* todo: benchmark dieses fullpower-loop:
+                var next = function() {
                     process.nextTick(function () {
                         world.update();
+                        next();
+                        console.log("loop");
                     });
-                }
+                };
+                next();
+                */
+
                 // ----------------------------------------------------------------
 
             }
