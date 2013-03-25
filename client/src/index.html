@@ -13,29 +13,38 @@
 <body>
 
 
-<div id="site">
+    <div id="site">
 
-    <div id="connecting"></div>
-    <div id="login" style="display: none">
+        <div id="joinbox">
+            <div id="connecting">connecting...</div>
+            <div id="login" style="display: none">
 
-        <form id="userloginform">
-            <div>
-                <input type="text" id="username">
-                <input type="password" id="password">
-                <button>GO</button>
+                <form id="guestloginform">
+                    <div>
+                        <h2>G</h2>
+                        <input type="text" id="guestname">
+                        <button>GO</button>
+                    </div>
+                </form>
+
+                <form id="userloginform">
+                    <div>
+                        <h2>U</h2>
+                        <input type="text" id="username">
+                        <input type="password" id="password">
+                        <button>GO</button>
+                    </div>
+                </form>
+
+
+
             </div>
-        </form>
+        </div>
 
-        <form id="guestloginform">
-            <div>
-                <input type="text" id="guestname">
-                <button>GO</button>
-            </div>
-        </form>
 
     </div>
 
-</div>
+    <div id="error" style="display:none"><div class="title">error</div><div class="msg"></div></div>
 
 </body>
 </html>

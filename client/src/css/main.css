@@ -1,9 +1,89 @@
 @import url("reset.css");
 
 
+body {
+    background: #000;
+    position: relative;
+}
+
+
 /* -------- */
 
+#site {
+    width: 930px;
+    background: #ccc;
+    border: 2px solid #fff;
+    border-radius: 2px;
+    min-height: 500px;
 
+    margin: 60px auto;
+    padding: 10px;
+}
 
+#joinbox {
 
+}
+
+#joinbox #userloginform,
+#joinbox #guestloginform {
+    float: left;
+    margin: 10px;
+    border: 1px solid #fff;
+    width: 443px;
+
+    border-radius: 2px;
+}
+
+#joinbox #userloginform div,
+#joinbox #guestloginform div {
+    margin: 10px;
+}
+
+#joinbox #userloginform h2,
+#joinbox #guestloginform h2 {
+    font-size: 30px;
+    color: #fff;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #888;
+    border-radius: 3px;
+}
+
+#error {
+    position: fixed;
+    border: 2px solid #c00;
+    border-radius: 2px;
+
+    top: 0; left: 0;
+
+    margin: 100px 20%;
+    width: 60%;
+
+    opacity: 0.8;
+
+    background: #000;
+
+    text-align: center;
+
+    color: #c00;
+}
+
+#error .title {
+    position: absolute;
+    left: -1px;
+    top: -1px;
+
+    padding: 2px;
+    background: #c00;
+    color: #fff;
+
+    border: 2px solid #c00;
+    border-radius: 2px;
+}
+
+#error .msg {
+    margin: 30px;
+}
 
