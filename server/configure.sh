@@ -3,5 +3,6 @@
 npm install colors
 npm install mongodb
 npm install ws
+npm install node-static
 
 
