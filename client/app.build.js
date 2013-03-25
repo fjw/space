@@ -11,6 +11,7 @@
         'jquery':       'lib/jquery',
         'lodash':       'lib/lodash',
         'seedrandom':   'lib/seedrandom',
-        'ftools':       'lib/ftools'
+        'ftools':       'lib/ftools',
+        'msgpack':      'lib/msgpack'
     }
 })

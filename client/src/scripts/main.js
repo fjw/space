@@ -9,7 +9,8 @@ require.config({
         'jquery':       'lib/jquery',
         'lodash':       'lib/lodash',
         'seedrandom':   'lib/seedrandom',
-        'ftools':       'lib/ftools'
+        'ftools':       'lib/ftools',
+        'msgpack':      'lib/msgpack'
     }
 });
 
@@ -17,9 +18,11 @@ require.config({
 require([
     "jquery",
     "lodash",
-    "ftools"
-], function( $, _, ft) {
+    "ftools",
+    "socket"
+], function( $, _, ft, SOCKET) {
 
+    // ---------
 
     window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
 
@@ -29,8 +32,30 @@ require([
         window.env = "production";
     }
 
+    // ---------
 
     $(document).ready(function() {
+
+
+        var $login = $("#login");
+
+
+        if($login) {
+
+            //auf Seiten mit Login-Maske
+            window.socket = new SOCKET();
+            window.socket.connect(function() {
+
+                $("#connecting").fadeOut(300, function() {
+
+                    $login.fadeIn(300);
+
+                });
+
+
+            });
+
+        }
 
 
     });

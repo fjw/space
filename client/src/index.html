@@ -2,15 +2,40 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+    <meta name="robots" content="noindex, nofollow">
+
     <title></title>
     <link href="css/main.css" rel="stylesheet" type="text/css" />
     <script data-main="scripts/main" src="scripts/lib/require.js"></script>
 </head>
 <body>
-<div id="login">
-    <input type="text" id="username">
-    <input type="password" id="password">
-    <button>GO</button>
+
+
+<div id="site">
+
+    <div id="connecting"></div>
+    <div id="login" style="display: none">
+
+        <form id="userloginform">
+            <div>
+                <input type="text" id="username">
+                <input type="password" id="password">
+                <button>GO</button>
+            </div>
+        </form>
+
+        <form id="guestloginform">
+            <div>
+                <input type="text" id="guestname">
+                <button>GO</button>
+            </div>
+        </form>
+
+    </div>
+
 </div>
+
 </body>
 </html>
