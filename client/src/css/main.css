@@ -1,44 +1,6 @@
 @import url("reset.css");
 
-body {
-    position: fixed;
-    font-family: Tahoma, Geneva, sans-serif;
-    font-size: 13px;
-    color: #fff;
 
-    margin:0; padding: 0;
-    background: #000;
-}
-
-.clear {
-    clear: both;
-}
-
-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-}
-
-#map {
-    bottom: 10px;
-    left: 10px;
-
-    top: inherit;
-
-    border: 1px solid #ccc;
-    border-radius: 2px;
-
-    background: #000;
-    opacity: 0.7;
-
-    z-index: 9;
-}
-
-#login {
-    z-index: 30;
-    position: absolute;
-}
 /* -------- */
 
 

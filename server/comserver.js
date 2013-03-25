@@ -10,8 +10,22 @@ var WORLD = require( __dirname + "/lib/world.js");
 var WEBSOCKET = require('ws');
 // -----------------------------------
 
+var port, env = process.env.NODE_ENV;
+if( env == 'production' ) {
 
-var wss = new WEBSOCKET.Server({port: 4004});
+    // ---- production-config
+    port = 443;
+
+} else {
+
+    // ---- development-config
+    port = 4004;
+    env = "development";
+}
+
+log("info", "[" + env + "] communication-server listening on " + port);
+
+var wss = new WEBSOCKET.Server({port: port});
 
 
 wss.on('connection', function(ws) {

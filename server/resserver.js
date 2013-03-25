@@ -26,7 +26,7 @@ if( env == 'production' ) {
 
 }
 
-log("info", env + " resource-server listening on " + port);
+log("info", "[" + env + "] resource-server listening on " + port);
 
 var fileServer = new STATIC.Server(respath, cfg);
 
