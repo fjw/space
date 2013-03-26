@@ -37,9 +37,42 @@ require([
     $(document).ready(function() {
 
 
+        // Interface ---------------------------------------------------
+        var startInterface = function() {
+
+            var $interface = $("#interface");
+
+            var activetab = $(".tabbutton.active", $interface).attr("data-id");
+
+            $(".tabmain", $interface).hide();
+            $(".tabmain[data-id="+activetab+"]", $interface).show();
+
+            $interface.fadeIn(600);
+
+            $(".tabbutton", $interface).bind("click", function() {
+
+                activetab = $(this).attr("data-id");
+                $(".tabbutton", $interface).removeClass("active");
+                $(this).addClass("active");
+                $(".tabmain", $interface).hide();
+                $(".tabmain[data-id="+activetab+"]", $interface).show();
+
+            });
+
+
+            $(".launch", $interface).bind("click", function() {
+
+                //start game
+                console.log("start");
+
+            });
+
+
+        };
+
+
+        // Login -------------------------------------------------------
         var $login = $("#login");
-
-
         if($login) {
 
             //auf Seiten mit Login-Maske
@@ -52,10 +85,42 @@ require([
 
                 });
 
-
             });
 
+            $("#userloginform").bind("submit", function(){
+
+                var $form = $("#userloginform");
+
+                var username = $("#username", $form).val();
+                var password = $("#password", $form).val();
+
+                window.socket.auth(username, password, function(err) {
+
+                    if (err) {
+                        var $ferr = $(".formerror", $form);
+                        $ferr.html(err);
+                        $ferr.fadeIn(100);
+                    } else {
+
+                        //alles passt, bin eingeloggt, lade spielmarkup
+                        $.ajax("/res/interface.html").done(function(data){
+                            $("body").append(data);
+
+                            //Seite ausfaden, Interface einfaden
+                            $("#site").fadeOut(600, function() {
+                                startInterface();
+                            })
+                        });
+
+
+                    }
+
+                });
+
+                return false;
+            });
         }
+        // -------------------------------------------------------
 
 
     });
