@@ -60,7 +60,7 @@ require([
             });
 
 
-            $(".launch", $interface).bind("click", function() {
+            $(".launchgame", $interface).bind("click", function() {
 
                 //start game
                 console.log("start");
