@@ -6,6 +6,13 @@ body {
     position: relative;
 }
 
+#maincanvas {
+    position: fixed;
+}
+
+#map {
+    display: none;
+}
 
 /* -------- */
 
@@ -86,6 +93,45 @@ input {
 
 #interface .mainarea {
     clear: both;
+}
+
+#interface .launchgame {
+
+    float: right;
+
+    width: 150px;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #fff;
+    border-radius: 2px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+#interface .launchgame.disabled {
+    border: 1px solid #ddd;
+    color: #ddd;
+    cursor: default;
+}
+
+#interface .launchgame.disabled:hover {
+    border: 1px solid #ddd;
+}
+
+#interface .launchgame:hover {
+    border: 1px solid #00f;
+}
+
+#interface .resloaded {
+    width: 150px;
+}
+
+#interface .resloaded .percent {
+    height: 4px;
+    width: 0;
+    background: #444;
+
+    margin-top: 10px;
 }
 
 

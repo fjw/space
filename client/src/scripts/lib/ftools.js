@@ -77,16 +77,18 @@
 
         each: function(collection, callback) {
             //Powerschleife
-            var fn = callback,
-                index = -1,
-                length = collection.length;
+            if (collection) {
+                var fn = callback,
+                    index = -1,
+                    length = collection.length;
 
-            while (++index < length) {
-                if (fn(collection[index], index, collection) === false) {
-                    break;
+                while (++index < length) {
+                    if (fn(collection[index], index, collection) === false) {
+                        break;
+                    }
                 }
+                return collection;
             }
-            return collection;
         },
 
         isBoxOverlap: function(x1, y1, w1, h1, x2, y2, w2, h2) {

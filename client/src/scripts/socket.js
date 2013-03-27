@@ -6,6 +6,8 @@ var obj = {
     hostname: "ws://localhost:4004",
     username: false,
 
+    lastping: 0,
+
     _init: function() {
 
 
@@ -28,7 +30,7 @@ var obj = {
                 var msg = msgpack.decode(message.data);
                 if (msg && msg.i && _this._cbs[msg.i]) {
                     if (window.debug) {
-                        if (msg.i != "worldupdate" || window.debug >= 3) {
+                        if ( (msg.i != "worldupdate" && msg.i != "ping" && msg.i != "pong") || window.debug >= 3) {
                             console.info("received '"+msg.i+"'");
                             console.log(msg.d);
                         }
@@ -41,13 +43,29 @@ var obj = {
 
         //todo: auto reconnect
         this.sock.onclose = function() {
-            console.log("socket closed");
+
+            if(window.errorMsg) {
+                window.errorMsg("connection lost");
+            } else {
+                console.error("connection lost");
+            }
+
             _this.sock = null;
         };
 
-        if(callback) {
-            callback();
-        }
+        this.sock.onopen = function() {
+
+            _this.ping(function(){});
+
+            if(callback) {
+                callback();
+            }
+
+        };
+
+        this.on("ping", function() {
+            _this.emit("pong", {});
+        });
 
     },
 
@@ -70,11 +88,27 @@ var obj = {
 
     },
 
+    ping: function(callback) {
+        var _this = this;
+
+        var sendtime = Date.now();
+
+        this.emit("ping", {});
+
+        this.on("pong", function() {
+            _this.lastping = Date.now() - sendtime;
+
+            callback(_this.lastping);
+        });
+    },
+
     emit: function(msg, data) {
         if(this.sock) {
             if (window.debug) {
-                console.info("sending '"+msg+"'");
-                console.log(data);
+                if ( (msg != "worldupdate" && msg != "ping" && msg != "pong") || window.debug >= 3) {
+                    console.info("sending '"+msg+"'");
+                    console.log(data);
+                }
             }
 
             this.sock.send(msgpack.encode({ i:msg, d:data }));

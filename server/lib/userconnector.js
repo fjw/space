@@ -9,7 +9,13 @@ var CONNECTION = function(ws) {
         logedin: false,
         admin: false,
 
+        username: null,
+
         ws: null,
+
+        onclose: null,
+
+        lastping: 0,
 
         _init: function(ws) {
             var _this = this;
@@ -26,6 +32,14 @@ var CONNECTION = function(ws) {
                 }
             });
 
+            // Close Callback
+            ws.on('close', function(code, message) {
+                if (_this.onclose) {
+                    _this.onclose(code, message);
+                }
+                log("info", "client disconnected");
+            });
+
             this.on("auth", function(data) {
 
 
@@ -34,44 +48,70 @@ var CONNECTION = function(ws) {
                 if(data.u == "frederic" && data.p == "master") {
 
                     // allowed Admin
-                    _this.send("auth", {allowed: 1});
+                    _this.emit("auth", {allowed: 1});
                     _this.member = true;
                     _this.admin = true;
                     _this.logedin = true;
 
+                    _this.username = data.u;
+
                 } else if (data.u == "user" && data.p == "s") {
 
                     // allowed guest
-                    _this.send("auth", {allowed: 1});
+                    _this.emit("auth", {allowed: 1});
                     _this.member = true;
                     _this.logedin = true;
+
+                    _this.username = data.u;
 
                 } else if (data.u == "guest" && data.p == "s") {
 
                     // allowed guest
-                    _this.send("auth", {allowed: 1});
+                    _this.emit("auth", {allowed: 1});
                     _this.logedin = true;
+
+                    _this.username = data.u;
 
                 } else {
 
                     //wrong credentials
-                    _this.send("auth", {error: "wrong credentials", allowed: 0});
+                    _this.emit("auth", {error: "wrong credentials", allowed: 0});
 
                 }
 
 
             });
 
-            log("info", "a client connected");
+            this.on("ping", function() {
+                _this.emit("pong", {});
+            });
+
+            this.ping(function(ping) {
+                log("info", "client connected (ping: "+ping+")");
+            });
         },
 
-        send: function(type, data) {
+        emit: function(type, data) {
             this.ws.send(msgpack.encode({i:type, d:data}), {binary: true});
         },
 
         _cbs: [],
         on: function(type, callback) {
             this._cbs[type] = callback;
+        },
+
+        ping: function(callback) {
+            var _this = this;
+
+            var sendtime = Date.now();
+
+            this.emit("ping", {});
+
+            this.on("pong", function() {
+                _this.lastping = Date.now() - sendtime;
+
+                callback(_this.lastping);
+            });
         }
 
     };

@@ -19,8 +19,10 @@ require([
     "jquery",
     "lodash",
     "ftools",
-    "socket"
-], function( $, _, ft, SOCKET) {
+    "socket",
+    "res",
+    "space"
+], function( $, _, ft, SOCKET, RES, SPACE) {
 
     // ---------
 
@@ -34,11 +36,83 @@ require([
 
     // ---------
 
+    var fadespeed = 100;
+
+    // ---------
+
+
     $(document).ready(function() {
+
+        // Error --------------------------------------------------
+        window.errorMsg = function(msg, title) {
+
+            var $error = $("#error");
+
+            if ($error.length == 0) {
+                $error = $('<div id="error" style="display:none"><div class="title"></div><div class="msg"></div></div>');
+                $('body').append($error);
+            }
+
+
+            if (!title) { title = "error"; }
+
+            $('.title', $error).html(title);
+            $('.msg', $error).html(msg);
+
+            $error.fadeIn(fadespeed);
+
+        };
+
+
+        // Game ---------------------------------------------------
+        var startGame = function() {
+
+            // Interface entfernen
+            $("#interface").remove();
+
+            if(!window.space) {
+                window.space = new SPACE();
+                window.space.start();
+            }
+
+
+        };
 
 
         // Interface ---------------------------------------------------
         var startInterface = function() {
+
+            // Site entfernen
+            $("#site").remove();
+
+            // regelmässig Pingen
+            var pingInterval = window.setInterval(function() {
+
+                window.socket.ping(function(ping) {
+
+                    $("#ping").html(ping);
+
+                });
+
+            }, 5000);
+
+
+            // Ressourcen laden
+            var resloaded = false;
+            if(!window.res) {
+                window.res = new RES(
+                    function(per) {
+                        var $resloaded = $(".resloaded", $interface);
+                        var $percent = $(".percent", $resloaded);
+                        $percent.css("width", $resloaded.width() * per);
+                    },
+                    function() {
+                        resloaded = true;
+                        $(".launchgame", $interface).removeClass("disabled");
+                    }
+                );
+            }
+
 
             var $interface = $("#interface");
 
@@ -47,7 +121,7 @@ require([
             $(".tabmain", $interface).hide();
             $(".tabmain[data-id="+activetab+"]", $interface).show();
 
-            $interface.fadeIn(600);
+            $interface.fadeIn(fadespeed);
 
             $(".tabbutton", $interface).bind("click", function() {
 
@@ -60,11 +134,19 @@ require([
             });
 
 
+            var started = false;
             $(".launchgame", $interface).bind("click", function() {
+                if (resloaded && !started) {
+                    started = true;
+                    $interface.fadeOut(fadespeed, function() {
 
-                //start game
-                console.log("start");
+                        if(pingInterval) {
+                            window.clearInterval(pingInterval);
+                        }
 
+                        startGame();
+                    });
+                }
             });
 
 
@@ -79,9 +161,9 @@ require([
             window.socket = new SOCKET();
             window.socket.connect(function() {
 
-                $("#connecting").fadeOut(300, function() {
+                $("#connecting").fadeOut(fadespeed, function() {
 
-                    $login.fadeIn(300);
+                    $login.fadeIn(fadespeed);
 
                 });
 
@@ -99,7 +181,7 @@ require([
                     if (err) {
                         var $ferr = $(".formerror", $form);
                         $ferr.html(err);
-                        $ferr.fadeIn(100);
+                        $ferr.fadeIn(fadespeed);
                     } else {
 
                         //alles passt, bin eingeloggt, lade spielmarkup
@@ -107,7 +189,7 @@ require([
                             $("body").append(data);
 
                             //Seite ausfaden, Interface einfaden
-                            $("#site").fadeOut(600, function() {
+                            $("#site").fadeOut(fadespeed, function() {
                                 startInterface();
                             })
                         });
