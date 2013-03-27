@@ -1,3 +1,5 @@
+var vector = new require( __dirname + "/lib/vector.js")();
+
 exports = module.exports = function(collection, worldname) {
     var obj = {
 
@@ -36,13 +38,49 @@ exports = module.exports = function(collection, worldname) {
         /*
             Für den Main-Loop, wird vom Worldserver aufgerufen
          */
+        lastupdate: Date.now(),
         update: function() {
+            var _this = this;
 
-            this.dbc.find({}).each(function(err, doc) {
+            var thistime = Date.now();
+            var secselapsed = (thistime - this.lastupdate) / 1000;
+            this.lastupdate = thistime;
+
+
+            this.dbc.find({}).each(function(err, obj) {
+
+                if(obj.cr) {
+                    _this._checkStaticCollisions(obj, secselapsed, thistime);
+                }
+                if(obj.type == "player") {
+                    _this._checkPlayerCollisions(obj, secselapsed, thistime);
+                    _this._updatePlayerActions(obj, secselapsed, thistime);
+                }
+                if(obj.s) {
+                    _this._updatePosition(obj, secselapsed, thistime);
+                }
+
             });
         },
 
+        _checkStaticCollisions: function(obj, secselapsed, thistime) {
 
+
+        },
+
+        _checkPlayerCollisions: function(obj, secselapsed, thistime) {
+
+
+        },
+
+        _updatePlayerActions: function(obj, secselapsed, thistime) {
+
+
+        },
+
+        _updatePosition:  function(obj, secselapsed, thistime) {
+
+        },
 
         // -------------------------------------------------------------
         // -------------------------------------------------------------

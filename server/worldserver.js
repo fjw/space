@@ -1,7 +1,6 @@
 // -----------------------------------
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
-vector = new require( __dirname + "/lib/vector.js")();
 
 var MONGODB = require('mongodb');
 var colors  = require('colors');
