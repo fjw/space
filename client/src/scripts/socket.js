@@ -30,7 +30,7 @@ var obj = {
                 var msg = msgpack.decode(message.data);
                 if (msg && msg.i && _this._cbs[msg.i]) {
                     if (window.debug) {
-                        if ( (msg.i != "worldupdate" && msg.i != "ping" && msg.i != "pong") || window.debug >= 3) {
+                        if ( (msg.i != "wu" && msg.i != "ping" && msg.i != "pong") || window.debug >= 3) {
                             console.info("received '"+msg.i+"'");
                             console.log(msg.d);
                         }
@@ -105,7 +105,7 @@ var obj = {
     emit: function(msg, data) {
         if(this.sock) {
             if (window.debug) {
-                if ( (msg != "worldupdate" && msg != "ping" && msg != "pong") || window.debug >= 3) {
+                if ( (msg != "wu" && msg != "ping" && msg != "pong") || window.debug >= 3) {
                     console.info("sending '"+msg+"'");
                     console.log(data);
                 }

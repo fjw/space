@@ -72,7 +72,7 @@ new USERCONNECTOR(port, function(c) {
 
         // Welt laden
         var world = _.find(worlds, function(w) { return w.name == worldname; });
-        if (world) {
+        if (world && c.logedin) {
 
             // Spieler zuerst holen
             world.getPlayer(c.username, function(player) {
@@ -83,7 +83,7 @@ new USERCONNECTOR(port, function(c) {
                 }
 
                 // Begrüßung senden
-                c.emit("initial", {
+                c.emit("ini", {
                     playername: c.username,
                     statics: world.statics
                 });
@@ -94,7 +94,7 @@ new USERCONNECTOR(port, function(c) {
                 updateinterval = setInterval(function() {
 
                      world.getVisibleObjects(c.username, function(player, objects) {
-                         c.emit("worldupdate", {
+                         c.emit("wu", {
                              objects: objects,
                              player: player,
                              clock: Date.now()
@@ -104,6 +104,12 @@ new USERCONNECTOR(port, function(c) {
                 }, 14);
 
 
+            });
+
+
+            c.on("pa", function(action) {
+                // Playeraction
+                world.setPlayerAction(c.username, action);
             });
         }
 

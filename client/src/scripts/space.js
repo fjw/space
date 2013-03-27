@@ -62,7 +62,7 @@ var obj = {
 
         // ------------------------------------------------
 
-        socket.on("initial", function(data) {
+        socket.on("ini", function(data) {
 
             if (_this.initiated) {
                 //wurde schonmal gestartet, Server restart? => Reload Page
@@ -80,7 +80,7 @@ var obj = {
         });
 
 
-        socket.on("worldupdate", function(data) {
+        socket.on("wu", function(data) {
             _this.world.updateFromServer(data.objects);
             _this.player = data.player;
 
@@ -162,14 +162,21 @@ var obj = {
             this._keysdown[code] = true;
 
             if(this.player && !this.player.exploding && !this.player.inactive) {
-                if(code == 38) { socket.emit("thrust", "start"); }
-                if(code == 40) { socket.emit("break", "start"); }
-                if(code == 39) { socket.emit("tright", "start"); }
-                if(code == 37) { socket.emit("tleft", "start"); }
-                if(code == 78) { socket.emit("breaktostop", "start"); }
-                if(code == 32) { socket.emit("shoot", "start"); }
-                if(code == 225) { socket.emit("shoot2", "start"); }
-                if(code == 84) { socket.emit("test", "start"); }
+
+                var pa = null;
+
+                if(code == 38) { pa = "t"; }
+                if(code == 40) { pa = "b"; }
+                if(code == 39) { pa = "r"; }
+                if(code == 37) { pa = "l"; }
+                if(code == 78) { pa = "s"; }
+                if(code == 32) { pa = "sa"; }
+                if(code == 225)  { pa = "sb"; }
+                //if(code == 84) { socket.emit("test", "start"); }
+
+                if (pa) {
+                    socket.emit("pa", pa + "1");
+                }
             }
 
         }
@@ -186,14 +193,22 @@ var obj = {
         this._keysdown[code] = false;
 
         if(this.player && !this.player.exploding && !this.player.inactive) {
-            if(code == 38) { socket.emit("thrust", "stop"); }
-            if(code == 40) { socket.emit("break", "stop"); }
-            if(code == 39) { socket.emit("tright", "stop"); }
-            if(code == 37) { socket.emit("tleft", "stop"); }
-            if(code == 78) { socket.emit("breaktostop", "stop"); }
-            if(code == 32) { socket.emit("shoot", "stop"); }
-            if(code == 225) { socket.emit("shoot2", "stop"); }
-            if(code == 84) { socket.emit("test", "stop"); }
+
+            var pa = null;
+
+            if(code == 38) { pa = "t"; }
+            if(code == 40) { pa = "b"; }
+            if(code == 39) { pa = "r"; }
+            if(code == 37) { pa = "l"; }
+            if(code == 78) { pa = "s"; }
+            if(code == 32) { pa = "sa"; }
+            if(code == 225)  { pa = "sb"; }
+            //if(code == 84) { socket.emit("test", "stop"); }
+
+            if (pa) {
+                socket.emit("pa", pa + "0");
+            }
+
         }
     },
 
@@ -201,7 +216,7 @@ var obj = {
 
         this._keysdown = [];
 
-        socket.emit("allsystems", "stop");
+        socket.emit("pa", "as"); //allstop!!
     },
 
     _update: function() {

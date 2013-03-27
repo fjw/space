@@ -85,6 +85,86 @@ exports = module.exports = function(collection, worldname) {
             });
         },
 
+        /*
+            ein Spieler führt eine Aktion aus
+
+            hier werden je nach Aktionscode auf das Spielerobjekt werte gesetzt
+            im Client sind die Aktionscodes mit Keycodes verbunden (Tastendruck)
+         */
+        setPlayerAction: function(playername, action) {
+
+            var update = null;
+
+            switch(action) {
+
+                case "t1":
+                    update = {$set: {thrusting: true}};
+                    break;
+                case "t0":
+                    update = {$unset: {thrusting: 1}};
+                    break;
+
+                case "b1":
+                    update = {$set: {breaking: true}};
+                    break;
+                case "b0":
+                    update = {$unset: {breaking: 1}};
+                    break;
+
+                case "r1":
+                    update = {$set: {rturning: true}};
+                    break;
+                case "r0":
+                    update = {$unset: {rturning: 1}};
+                    break;
+
+                case "l1":
+                    update = {$set: {lturning: true}};
+                    break;
+                case "l0":
+                    update = {$unset: {lturning: 1}};
+                    break;
+
+                case "s1":
+                    update = {$set: {stopping: true}};
+                    break;
+                case "s0":
+                    update = {$unset: {stopping: 1}};
+                    break;
+
+                case "sa1":
+                    update = {$set: {shooting: true}};
+                    break;
+                case "sa0":
+                    update = {$unset: {shooting: 1}};
+                    break;
+
+                case "sb1":
+                    update = {$set: {shooting2: true}};
+                    break;
+                case "sb0":
+                    update = {$unset: {shooting2: 1}};
+                    break;
+
+                case "as":
+                    update = {$unset: {thrusting: 1, breaking: 1, rturning: 1, lturning: 1, stopping: 1, shooting: 1, shooting2: 1}};
+                    break;
+
+            }
+
+            if (update) {
+
+                this.dbc.findAndModify(
+                    { "type": "player", name: playername },
+                    [],
+                    update,
+                    {},
+                    function(err, object) {}
+                );
+
+            }
+
+        },
 
         /*
             holt alle Objekte, die ein bestimmter Spieler sehen darf
