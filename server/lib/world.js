@@ -1,4 +1,5 @@
-var vector = new require( __dirname + "/lib/vector.js")();
+var vector = new require( __dirname + "/vector.js")();
+var _ = require( __dirname + "/lodash.js");
 
 exports = module.exports = function(collection, worldname) {
     var obj = {
@@ -11,7 +12,7 @@ exports = module.exports = function(collection, worldname) {
         // ------------
 
         statics: [],
-
+        cfg: {},
 
         // ------------------------------------------------------------
         // ------------------------------------------------------------
@@ -26,6 +27,9 @@ exports = module.exports = function(collection, worldname) {
 
 
             var map = require( __dirname + "/../maps/"+worldname+".js");  //Map-Einstellungen
+
+            this.cfg = _.extend(require( __dirname + "/../maps/globalcfg.js"), map.cfg);
+
 
             this._loadStatics(map);
 
@@ -48,37 +52,199 @@ exports = module.exports = function(collection, worldname) {
 
 
             this.dbc.find({}).each(function(err, obj) {
+                if(err) {
+                    log("error", err);
+                }
+                if(obj && !err) {
 
-                if(obj.cr) {
-                    _this._checkStaticCollisions(obj, secselapsed, thistime);
-                }
-                if(obj.type == "player") {
-                    _this._checkPlayerCollisions(obj, secselapsed, thistime);
-                    _this._updatePlayerActions(obj, secselapsed, thistime);
-                }
-                if(obj.s) {
-                    _this._updatePosition(obj, secselapsed, thistime);
+                    if(obj.cr) {
+                        _this._checkStaticCollisions(obj, secselapsed, thistime);
+                    }
+                    if(obj.type == "player") {
+                        _this._checkPlayerCollisions(obj, secselapsed, thistime);
+                        _this._updatePlayerActions(obj, secselapsed, thistime);
+                    }
+                    if(obj.s) {
+                        _this._updatePosition(obj, secselapsed, thistime);
+                    }
+
+
+                    if (obj.deleted) {
+                        _this.dbc.remove({_id: obj._id});
+                    } else {
+                        _this.dbc.save(obj);
+                    }
+
                 }
 
             });
+
         },
 
         _checkStaticCollisions: function(obj, secselapsed, thistime) {
 
+
+            var collided = false;
+
+
+            for( var i = 0, len = this.statics.length; i < len; i++ ) {
+
+                var stat = this.statics[i];
+
+                // dieser static hat cp? => kann kollidieren?
+                // es kann immer nur mit EINEM static pro Loop kollidiert werden!
+                // Reichweite abchecken durch BoundingBox
+                if( stat.cps && !collided && vector.isBoxOverlap(obj.x - obj.cr, obj.y - obj.cr,
+                                                                obj.cr * 2, obj.cr * 2,
+                                                                stat.x, stat.y,
+                                                                stat.w, stat.h)) {
+
+
+                    // Kollisionen suchen
+                    var clplist = [];
+                    stat.cps.forEach(function(cp) {
+                        var dpp = vector.distancePointFromPath(obj.x, obj.y, cp.x1 + stat.x, cp.y1 + stat.y, cp.x2 + stat.x, cp.y2 + stat.y);
+
+                        if (dpp.d < obj.cr) {
+
+                            clplist.push({
+                                dpp: dpp,
+                                cp: cp
+                            });
+                        }
+                    });
+
+                    if (clplist.length > 0) {
+
+                        var clpa, sx, sy;
+                        if (clplist.length > 1) {
+                            //mehrere Kollisionen, zwischenwinkel ermitteln
+                            var sum = _.reduce(clplist, function(memo, item){ return memo + directionlessAngle(item.cp.a); }, 0);
+                            clpa = sum / clplist.length;
+
+                            var xsum = _.reduce(clplist, function(memo, item){ return memo + item.dpp.sx; }, 0);
+                            sx = xsum / clplist.length;
+
+                            var ysum = _.reduce(clplist, function(memo, item){ return memo + item.dpp.sy; }, 0);
+                            sy = ysum / clplist.length;
+
+                        } else {
+                            clpa = clplist[0].cp.a;
+                            sx = clplist[0].dpp.sx;
+                            sy = clplist[0].dpp.sy;
+                        }
+
+                        // !Kollision!
+
+                        // Einfallswinkel gleich Ausfallswinkel
+                        obj.ma = vector.angleInBoundaries(2 * clpa - obj.ma);
+
+                        // Objekt im rechten Winkel verschieben aus dem Kollisionsradius schieben
+                        var cdx = obj.x - sx;
+                        var cdy = obj.y - sy;
+                        var b = vector.vectorAbs(cdx, cdy);
+                        obj.x = sx + (cdx / b * (obj.cr + 2)); // 2 mehr für die spitzen winkel
+                        obj.y = sy + (cdy / b * (obj.cr + 2));
+
+                        obj.s *= this.cfg.staticbouncefactor;
+                        collided = true;
+
+                    }
+
+                }
+
+
+                if (collided) {
+                    break;
+                }
+
+            }
 
         },
 
         _checkPlayerCollisions: function(obj, secselapsed, thistime) {
 
 
+
+            if(!obj.inactive && !obj.exploding) {
+
+                //finde alle Objekte die kollidieren könnten
+                this.dbc.find({ type: { $in: ["bullet", "bomb", "explosion"] }, o: { $ne: obj.name } }).each(function(err, proj) {
+
+                    if(err) {
+                        log("error", err);
+                    }
+                    if(proj && !err) {
+
+                        if (vector.vectorAbs(proj.x - obj.x, proj.y - obj.y) < obj.cr + proj.cr) {
+
+                            // Spieler getroffen!!
+
+                            //todo: do smth
+
+                        }
+
+                    }
+
+                });
+
+            }
+
         },
 
         _updatePlayerActions: function(obj, secselapsed, thistime) {
+
+            var v = {x:0,y:0};
+
+            if (obj.rturning) {
+                obj.va = vector.angleInBoundaries(obj.va + this.cfg.playerrotationspeed * secselapsed);
+            }
+            if (obj.lturning) {
+                obj.va = vector.angleInBoundaries(obj.va - this.cfg.playerrotationspeed * secselapsed);
+            }
+
+            if (obj.thrusting) {
+                v = vector.angleAbs2vector(obj.va, this.cfg.playeracceleration * secselapsed );
+            }
+            if (obj.breaking) {
+                v = vector.angleAbs2vector( vector.angleInBoundaries(obj.va-180), this.cfg.playerbackacceleration * secselapsed );
+            }
+
+            if (obj.thrusting || obj.breaking) {
+                // Beschleunigungsvektor addieren (falls vorhanden)
+                var m = vector.angleAbs2vector(obj.ma, obj.s);
+
+                m.x += v.x;
+                m.y += v.y;
+
+                // neue Werte im Objekt vermerken
+                var as = vector.vector2angleAbs(m.x, m.y);
+
+                obj.s = as.s;
+                obj.ma = as.a;
+
+                if (obj.s > this.cfg.playermaxspeed) {
+                    obj.s = this.cfg.playermaxspeed;
+                }
+            }
+
+            if (obj.stopping) {
+                obj.s = obj.s - this.cfg.playerstopacceleration * secselapsed;
+                if (obj.s < 5) { obj.s = 0; }
+            }
+
 
 
         },
 
         _updatePosition:  function(obj, secselapsed, thistime) {
+
+            // Vektor aus aktueller Geschwindigkeit bestimmen
+            var m = vector.angleAbs2vector(obj.ma, obj.s);
+
+            // Änderung pro Sekunde
+            obj.x += m.x * secselapsed;
+            obj.y += m.y * secselapsed;
 
         },
 
@@ -114,8 +280,8 @@ exports = module.exports = function(collection, worldname) {
             this.dbc.insert( {
                 type: "player",
                 x: 0, y: 0,      //Koordinaten
-                ma: 0,           //Bewegungswinkel
-                s: 0,            //Speed
+                ma: 45,           //Bewegungswinkel
+                s: 100,            //Speed
                 va: 135.9234567890123,         //Sichtwinkel
                 cr: 18,          //Kollisionsradius
                 e: 100,          //Energie

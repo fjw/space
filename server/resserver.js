@@ -2,7 +2,6 @@
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
 var colors  = require('colors');
-var _ = require( __dirname + "/lib/lodash.js");
 var STATIC = require('node-static');
 // -----------------------------------
 
@@ -34,5 +33,6 @@ require('http').createServer(function (request, response) {
     request.addListener('end', function () {
         fileServer.serve(request, response);
     });
+    request.resume();
 }).listen(port);
 

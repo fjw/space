@@ -13,6 +13,9 @@ exports = module.exports = function(type, txt) {
 		case "info":
 			console.log(a.blue + txt);
 			break;
+        case "benchmark":
+            console.log(a.green + txt);
+            break;
 		case "warn":
 			console.log(a.yellow + txt);
 			break;

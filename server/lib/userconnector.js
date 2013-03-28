@@ -103,12 +103,12 @@ var CONNECTION = function(ws) {
         ping: function(callback) {
             var _this = this;
 
-            var sendtime = Date.now();
+            var sendtime = process.hrtime();
 
             this.emit("ping", {});
 
             this.on("pong", function() {
-                _this.lastping = Date.now() - sendtime;
+                _this.lastping = process.hrtime(sendtime)[0] * 1000;
 
                 callback(_this.lastping);
             });
