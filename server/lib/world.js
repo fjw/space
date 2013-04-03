@@ -1,7 +1,9 @@
 var vector = new require( __dirname + "/vector.js")();
 var _ = require( __dirname + "/lodash.js");
+var msgpack = require('msgpack-js');
 
-exports = module.exports = function(collection, worldname) {
+
+exports = module.exports = function(rc, worldname) {
     var obj = {
 
         // ------------
@@ -20,9 +22,9 @@ exports = module.exports = function(collection, worldname) {
         /*
             Konstruktor & Einstellungen
          */
-        _init: function(collection, worldname) {
+        _init: function(rc, worldname) {
 
-            this.dbc = collection;     //DB-Collection
+            this.dbc = rc;     //DB-Collection
             this.name = worldname;   //Name der Welt
 
 
@@ -46,38 +48,74 @@ exports = module.exports = function(collection, worldname) {
         update: function() {
             var _this = this;
 
-            var thistime = Date.now();
-            var secselapsed = (thistime - this.lastupdate) / 1000;
-            this.lastupdate = thistime;
+
+            if (this.dbc && this.dbc.connected) {
+
+                var thistime = Date.now();
+                var secselapsed = (thistime - this.lastupdate) / 1000;
+                this.lastupdate = thistime;
+
+                var key = this.name;
 
 
-            this.dbc.find({}).each(function(err, obj) {
-                if(err) {
-                    log("error", err);
-                }
-                if(obj && !err) {
+                //eine umdrehung machen
+                this.dbc.llen(key, function(err, len) {
 
-                    if(obj.cr) {
-                        _this._checkStaticCollisions(obj, secselapsed, thistime);
+
+                    for (var i = 0; i < len; i++) {
+
+                        _this.dbc.lpop(key, function(err, mobj) {
+
+                            if (mobj) {
+
+                                oi(mobj);
+                                console.log(msgpack.decode(mobj));
+
+                                var resobj = _this._updateObj(msgpack.decode(mobj), secselapsed, thistime);
+
+                                if (resobj) {
+                                    _this.dbc.rpush(key, msgpack.encode(resobj));
+                                }
+                            }
+
+                        });
+
+
                     }
-                    if(obj.type == "player") {
-                        _this._checkPlayerCollisions(obj, secselapsed, thistime);
-                        _this._updatePlayerActions(obj, secselapsed, thistime);
-                    }
-                    if(obj.s) {
-                        _this._updatePosition(obj, secselapsed, thistime);
-                    }
 
 
-                    if (obj.deleted) {
-                        _this.dbc.remove({_id: obj._id});
-                    } else {
-                        _this.dbc.save(obj);
-                    }
+                });
 
-                }
 
-            });
+            }
+
+
+        },
+
+        _updateObj: function(obj, secselapsed, thistime) {
+
+            if(obj.cr) {
+                _this._checkStaticCollisions(obj, secselapsed, thistime);
+            }
+
+            /*
+            if(obj.type == "player") {
+                _this._checkPlayerCollisions(obj, secselapsed, thistime);
+                _this._updatePlayerActions(obj, secselapsed, thistime);
+            }
+            */
+
+            if(obj.s) {
+                _this._updatePosition(obj, secselapsed, thistime);
+            }
+
+
+
+            if (obj.deleted) {
+                return null;
+            } else {
+                return obj;
+            }
 
         },
 
@@ -165,7 +203,7 @@ exports = module.exports = function(collection, worldname) {
         _checkPlayerCollisions: function(obj, secselapsed, thistime) {
 
 
-
+/*
             if(!obj.inactive && !obj.exploding) {
 
                 //finde alle Objekte die kollidieren könnten
@@ -189,6 +227,7 @@ exports = module.exports = function(collection, worldname) {
                 });
 
             }
+            */
 
         },
 
@@ -255,7 +294,7 @@ exports = module.exports = function(collection, worldname) {
             Löscht alle Objekte aus der Welt
         */
         purge: function() {
-            this.dbc.remove();
+           log("error", "todo");
         },
 
 
@@ -263,9 +302,74 @@ exports = module.exports = function(collection, worldname) {
             Sucht einen Spieler
         */
         getPlayer: function(playername, callback) {
-            this.dbc.findOne( { "type": "player", name: playername }, function(err, player) {
-                callback(player);
+
+            this.queryObject(this.name, function(item) {
+                return (item.type == "player" && item.name == playername);
+            }, callback);
+
+        },
+
+
+        queryObject: function(key, peritemcallback, callback) {
+            var _this = this;
+
+            this.dbc.llen(key, function(err, len) {
+
+
+                if (len > 0) {
+
+                    var called = false;
+                    var fired = 0;
+
+                    var checkAll = function() {
+
+                        fired++;
+
+                        if (fired >= len && !called) {
+                            //kein Ergebnis gefunden
+                            callback(null);
+                            called = true;
+                        }
+                    };
+
+
+                    for(var i=0; i < len; i++) {
+
+                        _this.dbc.lindex(key, i, function(err, bitem) {
+
+                            if(bitem) {
+
+                                var item = msgpack.decode(bitem);
+                                if (peritemcallback(item)) {
+
+                                    if(!called) {
+                                        called = true;
+                                        callback(item);
+                                    }
+
+                                }
+
+                            }
+
+                            checkAll();
+                        });
+
+                    }
+
+                } else {
+
+                    //empty list
+                    callback(null);
+
+                }
+
             });
+        },
+
+        insertObject: function(obj) {
+
+            this.dbc.lpush(this.name, msgpack.encode(obj));
+
         },
 
 
@@ -275,9 +379,11 @@ exports = module.exports = function(collection, worldname) {
         spawnPlayer: function(playername) {
 
             // evtl. alten Spieler löschen
-            this.dbc.remove( { "type": "player", name: playername } );
+            //this.dbc.remove( { "type": "player", name: playername } );
+            //todo: checkIT
 
-            this.dbc.insert( {
+
+            this.insertObject( {
                 type: "player",
                 x: 0, y: 0,      //Koordinaten
                 ma: 45,           //Bewegungswinkel
@@ -288,6 +394,7 @@ exports = module.exports = function(collection, worldname) {
                 name: playername
             });
         },
+
 
         /*
             ein Spieler führt eine Aktion aus
@@ -376,25 +483,42 @@ exports = module.exports = function(collection, worldname) {
         getVisibleObjects: function(playername, callback) {
             var _this = this;
 
-            var objects = [];
+            var items = [];
             var player = null;
 
-            //todo: vorerst alle Objekte !!
-            this.dbc.find({}).toArray(function(err, docs) {
+            //todo: vorerst alle objekte ausgeben
+            this.dbc.llen(this.name, function(err, len) {
 
-                docs.forEach(function(doc) {
+                if (len > 0) {
 
-                    if (doc && doc.type == "player" && doc.name == playername) {
-                        player = _this.stripObjForSending(doc);
+                    for(var i=0; i < len; i++) {
+
+                        _this.dbc.lindex(_this.name, i, function(err, bitem) {
+
+                            console.log(bitem);
+
+                            var item = msgpack.decode(bitem);
+
+                            if (item.type == "player" && item.name == playername) {
+                                player = _this.stripObjForSending(item);
+                            }
+
+                            items.push(_this.stripObjForSending(item));
+
+                            if (items.length == len) {
+                                callback(player, items);
+                            }
+
+                        });
+
                     }
 
-                    if (doc) {
-                        objects.push(_this.stripObjForSending(doc));
-                    }
+                } else {
 
-                });
+                    //empty list
+                    callback(null, []);
 
-                callback(player, objects);
+                }
 
             });
 
@@ -492,7 +616,7 @@ exports = module.exports = function(collection, worldname) {
                 this.statics.push(stc);
             }
 
-            log("info", this.statics.length + " statics objects loaded, " + countCps + " collisionpaths");
+            log("info", this.statics.length + " static objects loaded, " + countCps + " collisionpaths");
 
         }
 
@@ -500,6 +624,6 @@ exports = module.exports = function(collection, worldname) {
     };
 
     //mach den _init und gib das objekt aus
-    obj._init(collection, worldname);
+    obj._init(rc, worldname);
     return obj;
 };

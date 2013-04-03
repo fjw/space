@@ -2,17 +2,57 @@
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
 
-var MONGODB = require('mongodb');
+var redis = require('redis');
+var rc = redis.createClient();
+
 var colors  = require('colors');
 var _ = require( __dirname + "/lib/lodash.js");
 var WORLD = require( __dirname + "/lib/world.js");
 // -----------------------------------
 
 var worldname = "testarena";
-var benchmark = true;
+var benchmark = false;
 
 // -----------------------------------
 
+
+rc.on("error", function (err) {
+   log("error", "redis: " + err);
+});
+
+// -----------------------------------
+
+// Welt erzeugen
+var world = new WORLD(rc, worldname);
+
+// ------------------------- Main Loop ----------------------------
+
+var updatecount = 0;
+setInterval(function() {
+    world.update();
+    if (benchmark) { updatecount++; }
+}, 15);
+
+if (benchmark) {
+    setupBenchmark(coll);
+}
+
+
+// todo: benchmark dieses fullpower-loop:
+// todo: checke andere alternative mit setImmediate
+/*
+    var next = function() {
+        process.nextTick(function () {
+            world.update();
+            next();
+        });
+    };
+    next();
+*/
+
+
+
+/*
 
 
 var updatecount = 0;
@@ -62,6 +102,8 @@ new MONGODB.Db('space', server, {safe: false}).open(function (dberror, db) {
                 };
                 next();
                 */
+
+/*
 
                 // ----------------------------------------------------------------
 
@@ -119,3 +161,4 @@ function addRandomPlayer(coll) {
 
 }
 
+*/
