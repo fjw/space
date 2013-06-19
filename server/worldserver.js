@@ -27,6 +27,15 @@ var world = new WORLD(rc, worldname, {flush: true});
 
 // ------------------------- Main Loop ----------------------------
 
+
+//lokaltest
+var foo = require(__dirname + "/lib/gamelogic.js");
+
+console.log(foo.update("trala"));
+
+
+
+/* //dies ist der richtige loop wieder einkommentieren nach lokaltest
 var updatecount = 0;
 setInterval(function() {
     world.update();
@@ -36,6 +45,8 @@ setInterval(function() {
 if (benchmark) {
     setupBenchmark(coll);
 }
+*/
+
 
 
 // todo: benchmark dieses fullpower-loop:

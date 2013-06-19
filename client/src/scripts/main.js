@@ -10,7 +10,8 @@ require.config({
         'lodash':       'lib/lodash',
         'seedrandom':   'lib/seedrandom',
         'ftools':       'lib/ftools',
-        'msgpack':      'lib/msgpack'
+        'msgpack':      'lib/msgpack',
+        'gamelogic':    'lib/gamelogic'
     }
 });
 
@@ -21,11 +22,16 @@ require([
     "ftools",
     "socket",
     "res",
-    "space"
-], function( $, _, ft, SOCKET, RES, SPACE) {
+    "space",
+    "gamelogic"
+], function( $, _, ft, SOCKET, RES, SPACE, gamelogic) {
+
+
+    console.log(gamelogic);
 
     // ---------
 
+/*
     window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
 
     if (document.location.href == "http://localhost:4004/" || document.location.href == "http://192.168.178.27:4004/") {
@@ -206,6 +212,6 @@ require([
 
 
     });
-
+*/
 
 });
