@@ -20,7 +20,7 @@ if( env == 'production' ) {
 
     // ---- development-config
     respath = __dirname + '/../client/src';
-    port = 8080;
+    port = 8090;
     env = "development";
 
 }

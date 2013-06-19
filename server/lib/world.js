@@ -1,6 +1,5 @@
 var vector = new require( __dirname + "/vector.js")();
 var _ = require( __dirname + "/lodash.js");
-var msgpack = require('msgpack-js');
 
 
 exports = module.exports = function(rc, worldname) {
@@ -58,55 +57,69 @@ exports = module.exports = function(rc, worldname) {
                 var key = this.name;
 
 
-                //eine umdrehung machen
-                this.dbc.llen(key, function(err, len) {
+                //get Actionstack
 
 
-                    for (var i = 0; i < len; i++) {
+                this.dbc.get(this.name + "_actionStack", function(err, astack) {
 
-                        _this.dbc.lpop(key, function(err, mobj) {
+                    console.log(astack);
 
-                            if (mobj) {
-
-                                oi(mobj);
-                                console.log(msgpack.decode(mobj));
-
-                                var resobj = _this._updateObj(msgpack.decode(mobj), secselapsed, thistime);
-
-                                if (resobj) {
-                                    _this.dbc.rpush(key, msgpack.encode(resobj));
-                                }
-                            }
-
-                        });
-
-
+                    if (astack) {
+                        astack = _this._decodeObject(astack);
+                    } else {
+                        astack = {};
                     }
 
 
-                });
 
+                    //eine umdrehung machen
+                    _this.dbc.llen(key, function(err, len) {
+
+
+                        for (var i = 0; i < len; i++) {
+
+                            _this.dbc.lpop(key, function(err, mobj) {
+
+                                if (mobj) {
+
+                                    var resobj = _this._updateObj(_this._decodeObject(mobj), secselapsed, thistime, astack);
+
+                                    if (resobj) {
+                                        _this.dbc.rpush(key, _this._encodeObject(resobj));
+                                    }
+                                }
+
+                            });
+
+
+                        }
+
+
+                    });
+
+
+                });
 
             }
 
 
         },
 
-        _updateObj: function(obj, secselapsed, thistime) {
+        _updateObj: function(obj, secselapsed, thistime, astack) {
 
             if(obj.cr) {
-                _this._checkStaticCollisions(obj, secselapsed, thistime);
+                this._checkStaticCollisions(obj, secselapsed, thistime);
             }
 
-            /*
+
             if(obj.type == "player") {
-                _this._checkPlayerCollisions(obj, secselapsed, thistime);
-                _this._updatePlayerActions(obj, secselapsed, thistime);
+                //this._checkPlayerCollisions(obj, secselapsed, thistime);
+                this._updatePlayerActions(obj, secselapsed, thistime, astack);
             }
-            */
+
 
             if(obj.s) {
-                _this._updatePosition(obj, secselapsed, thistime);
+                this._updatePosition(obj, secselapsed, thistime);
             }
 
 
@@ -231,7 +244,27 @@ exports = module.exports = function(rc, worldname) {
 
         },
 
-        _updatePlayerActions: function(obj, secselapsed, thistime) {
+        _updatePlayerActions: function(obj, secselapsed, thistime, astack) {
+
+
+            var actions = astack[obj.name];
+
+            if (actions) {
+
+                console.log(actions);
+
+                _.each(actions, function(value, key) {
+
+                    if(value) {
+                        obj[key] = true;
+                    } else {
+                        delete(obj[key]);
+                    }
+
+                });
+
+            }
+
 
             var v = {x:0,y:0};
 
@@ -339,7 +372,8 @@ exports = module.exports = function(rc, worldname) {
 
                             if(bitem) {
 
-                                var item = msgpack.decode(bitem);
+                                var item = _this._decodeObject(bitem);
+
                                 if (peritemcallback(item)) {
 
                                     if(!called) {
@@ -368,7 +402,7 @@ exports = module.exports = function(rc, worldname) {
 
         insertObject: function(obj) {
 
-            this.dbc.lpush(this.name, msgpack.encode(obj));
+            this.dbc.lpush(this.name, this._encodeObject(obj));
 
         },
 
@@ -401,79 +435,97 @@ exports = module.exports = function(rc, worldname) {
 
             hier werden je nach Aktionscode auf das Spielerobjekt werte gesetzt
             im Client sind die Aktionscodes mit Keycodes verbunden (Tastendruck)
-         */
+        */
         setPlayerAction: function(playername, action) {
+            var _this = this;
 
-            var update = null;
+            this.dbc.get(this.name + "_actionStack", function(err, astack) {
 
-            switch(action) {
 
-                case "t1":
-                    update = {$set: {thrusting: true}};
-                    break;
-                case "t0":
-                    update = {$unset: {thrusting: 1}};
-                    break;
+                if (astack) {
+                    astack = _this._decodeObject(astack);
+                } else {
+                    astack = {};
+                }
 
-                case "b1":
-                    update = {$set: {breaking: true}};
-                    break;
-                case "b0":
-                    update = {$unset: {breaking: 1}};
-                    break;
+                var ao = astack[playername];
 
-                case "r1":
-                    update = {$set: {rturning: true}};
-                    break;
-                case "r0":
-                    update = {$unset: {rturning: 1}};
-                    break;
+                if(!ao) {
+                    ao = {};
+                }
 
-                case "l1":
-                    update = {$set: {lturning: true}};
-                    break;
-                case "l0":
-                    update = {$unset: {lturning: 1}};
-                    break;
 
-                case "s1":
-                    update = {$set: {stopping: true}};
-                    break;
-                case "s0":
-                    update = {$unset: {stopping: 1}};
-                    break;
+                switch(action) {
 
-                case "sa1":
-                    update = {$set: {shooting: true}};
-                    break;
-                case "sa0":
-                    update = {$unset: {shooting: 1}};
-                    break;
+                    case "t1":
+                        ao.thrusting = true;
+                        break;
+                    case "t0":
+                        ao.thrusting = false;
+                        break;
+                    case "b1":
+                        ao.breaking = true;
+                        break;
+                    case "b0":
+                        ao.breaking = false;
+                        break;
 
-                case "sb1":
-                    update = {$set: {shooting2: true}};
-                    break;
-                case "sb0":
-                    update = {$unset: {shooting2: 1}};
-                    break;
+                    case "r1":
+                        ao.rturning = true;
+                        break;
+                    case "r0":
+                        ao.rturning = false;
+                        break;
+                    case "l1":
+                        ao.lturning = true;
+                        break;
+                    case "l0":
+                        ao.lturning = false;
+                        break;
 
-                case "as":
-                    update = {$unset: {thrusting: 1, breaking: 1, rturning: 1, lturning: 1, stopping: 1, shooting: 1, shooting2: 1}};
-                    break;
+                    case "s1":
+                        ao.stopping = true;
+                        break;
+                    case "s0":
+                        ao.stopping = false;
+                        break;
 
-            }
+                    case "sa1":
+                        ao.shooting = true;
+                        break;
+                    case "sa0":
+                        ao.shooting = false;
+                        break;
 
-            if (update) {
+                    case "sb1":
+                        ao.shooting2 = true;
+                        break;
+                    case "sb0":
+                        ao.shooting2 = false;
+                        break;
 
-                this.dbc.findAndModify(
-                    { "type": "player", name: playername },
-                    [],
-                    update,
-                    {},
-                    function(err, object) {}
-                );
+                    case "as":
+                        ao.thrusting = false;
+                        ao.breaking = false;
+                        ao.rturning = false;
+                        ao.lturning = false;
+                        ao.stopping = false;
+                        ao.shooting = false;
+                        ao.shooting2 = false;
+                        break;
 
-            }
+
+                }
+
+                if ( ao ) {
+                    astack[playername] = ao;
+
+                    console.log(astack);
+
+                    _this.dbc.set(_this.name + "_actionStack", _this._encodeObject(astack));
+                }
+
+            });
 
         },
 
@@ -495,18 +547,24 @@ exports = module.exports = function(rc, worldname) {
 
                         _this.dbc.lindex(_this.name, i, function(err, bitem) {
 
-                            console.log(bitem);
+                            if (bitem) {
 
-                            var item = msgpack.decode(bitem);
+                                var item = _this._decodeObject(bitem);
 
-                            if (item.type == "player" && item.name == playername) {
-                                player = _this.stripObjForSending(item);
-                            }
+                                if (item) {
 
-                            items.push(_this.stripObjForSending(item));
+                                    if (item.type == "player" && item.name == playername) {
+                                        player = _this.stripObjForSending(item);
+                                    }
 
-                            if (items.length == len) {
-                                callback(player, items);
+                                    items.push(_this.stripObjForSending(item));
+
+                                    if (items.length == len) {
+                                        callback(player, items);
+                                    }
+
+                                }
+
                             }
 
                         });
@@ -538,8 +596,19 @@ exports = module.exports = function(rc, worldname) {
             return obj;
         },
 
+        _encodeObject: function(obj) {
+            return JSON.stringify(obj);
+            //return msgpack.encode(obj);
+        },
+
+        _decodeObject: function(obj) {
+            return JSON.parse(obj);
+            //return msgpack.decode(obj);
+        },
+
         // ------------------------------------------------------------
         // ------------------------------------------------------------
+
 
         /*
             bereitet aus dem Mapfile geladene statics für die Verarbeitung vor
