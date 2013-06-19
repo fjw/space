@@ -69,7 +69,6 @@ exports = module.exports = function(rc, worldname, options) {
 
                     if (astack) {
                         astack = _this._decodeObject(astack);
-                        console.log(astack);
                     } else {
                         astack = {};
                     }
@@ -256,8 +255,6 @@ exports = module.exports = function(rc, worldname, options) {
             var actions = astack[obj.name];
 
             if (actions) {
-
-                console.log(actions);
 
                 _.each(actions, function(value, key) {
 
