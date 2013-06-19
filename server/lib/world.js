@@ -2,7 +2,7 @@ var vector = new require( __dirname + "/vector.js")();
 var _ = require( __dirname + "/lodash.js");
 
 
-exports = module.exports = function(rc, worldname) {
+exports = module.exports = function(rc, worldname, options) {
     var obj = {
 
         // ------------
@@ -21,10 +21,16 @@ exports = module.exports = function(rc, worldname) {
         /*
             Konstruktor & Einstellungen
          */
-        _init: function(rc, worldname) {
+        _init: function(rc, worldname, options) {
 
             this.dbc = rc;     //DB-Collection
             this.name = worldname;   //Name der Welt
+
+            if(options) {
+                if(options.flush) {
+                    this.dbc.flushall();
+                }
+            }
 
 
             var map = require( __dirname + "/../maps/"+worldname+".js");  //Map-Einstellungen
@@ -58,14 +64,12 @@ exports = module.exports = function(rc, worldname) {
 
 
                 //get Actionstack
-
-
                 this.dbc.get(this.name + "_actionStack", function(err, astack) {
 
-                    console.log(astack);
 
                     if (astack) {
                         astack = _this._decodeObject(astack);
+                        console.log(astack);
                     } else {
                         astack = {};
                     }
@@ -98,6 +102,8 @@ exports = module.exports = function(rc, worldname) {
                     });
 
 
+                    //actionstack leeren
+                    _this.dbc.del(_this.name + "_actionStack");
                 });
 
             }
@@ -433,7 +439,8 @@ exports = module.exports = function(rc, worldname) {
         /*
             ein Spieler führt eine Aktion aus
 
-            hier werden je nach Aktionscode auf das Spielerobjekt werte gesetzt
+            hier werden je nach Aktionscode auf den Aktionstack Werte gesetzt
+            world.update liest den Stack und wendet sie dann auf die spieler an
             im Client sind die Aktionscodes mit Keycodes verbunden (Tastendruck)
         */
         setPlayerAction: function(playername, action) {
@@ -519,8 +526,6 @@ exports = module.exports = function(rc, worldname) {
 
                 if ( ao ) {
                     astack[playername] = ao;
-
-                    console.log(astack);
 
                     _this.dbc.set(_this.name + "_actionStack", _this._encodeObject(astack));
                 }
@@ -693,6 +698,6 @@ exports = module.exports = function(rc, worldname) {
     };
 
     //mach den _init und gib das objekt aus
-    obj._init(rc, worldname);
+    obj._init(rc, worldname, options);
     return obj;
 };

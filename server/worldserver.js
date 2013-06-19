@@ -23,7 +23,7 @@ rc.on("error", function (err) {
 // -----------------------------------
 
 // Welt erzeugen
-var world = new WORLD(rc, worldname);
+var world = new WORLD(rc, worldname, {flush: true});
 
 // ------------------------- Main Loop ----------------------------
 
