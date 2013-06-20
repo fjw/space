@@ -29,9 +29,12 @@ var world = new WORLD(rc, worldname, {flush: true});
 
 
 //lokaltest
-var foo = require(__dirname + "/lib/gamelogic.js");
+var gamelogic = require(__dirname + "/lib/gamelogic.js");
 
-console.log(foo.update("trala"));
+console.log(gamelogic);
+
+
+
 
 
 
