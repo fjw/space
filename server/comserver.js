@@ -75,7 +75,9 @@ new USERCONNECTOR(port, function(c) {
                 });
 
 
-                // WeltUpdate-Interval einrichten
+                /* im Moment kein Weltupdate wegen locale gamelogic
+
+                // Updateinterval Welt an Spieler
                 if(updateinterval) { clearInterval(updateinterval);}
                 updateinterval = setInterval(function() {
 
@@ -87,7 +89,20 @@ new USERCONNECTOR(port, function(c) {
                          });
                      });
 
-                }, 14);
+                }, 1000);
+
+                */
+
+                //update einmalig senden, später muss das wieder raus und stattdessen der loop sein
+                setTimeout(function() {
+                    world.getVisibleObjects(c.username, function(player, objects) {
+                        c.emit("wu", {
+                            objects: objects,
+                            player: player,
+                            clock: Date.now()
+                        });
+                    });
+                }, 1000);
 
 
             });

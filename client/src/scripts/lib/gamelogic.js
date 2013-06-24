@@ -6,10 +6,12 @@
 
 
     var exports = {};
-    //--------------------------------
 
-
-    var vector = exports.vector = function() {
+    /* ---------------------------------------------------------------------------------------------- */
+    /*
+        Vektorfunktionen
+     */
+    var vector = exports.vector = new function() {
 
         // Vektorumwandlung -  Winkel, Betrag -> Koordinaten
         this.angleAbs2vector = function(a, s) {
@@ -101,11 +103,96 @@
         return this;
     };
 
+    /* ---------------------------------------------------------------------------------------------- */
+
+
+    /*
+        Wendet Userbasierte Änderungen auf ein PlayerObjekt an.
+
+        Änderungen des Status kommen aus dem Actionstack.
+        Danach werden Änderungen angewandt.
+     */
+    var updatePlayerActions = function(cfg, obj, secselapsed, astack) {
+
+        var actions = astack[obj.name];
+
+        if (actions) {
+
+            for(var key in actions) {
+                var value = actions[key];
+
+                if(value) {
+                    obj[key] = true;
+                } else {
+                    delete(obj[key]);
+                }
+            }
+
+        }
+
+
+        var v = {x:0,y:0};
+
+        if (obj.rturning) {
+            obj.va = vector.angleInBoundaries(obj.va + cfg.playerrotationspeed * secselapsed);
+        }
+        if (obj.lturning) {
+            obj.va = vector.angleInBoundaries(obj.va - cfg.playerrotationspeed * secselapsed);
+        }
+
+        if (obj.thrusting) {
+            v = vector.angleAbs2vector(obj.va, cfg.playeracceleration * secselapsed );
+        }
+        if (obj.breaking) {
+            v = vector.angleAbs2vector( vector.angleInBoundaries(obj.va-180), cfg.playerbackacceleration * secselapsed );
+        }
+
+        if (obj.thrusting || obj.breaking) {
+            // Beschleunigungsvektor addieren (falls vorhanden)
+            var m = vector.angleAbs2vector(obj.ma, obj.s);
+
+            m.x += v.x;
+            m.y += v.y;
+
+            // neue Werte im Objekt vermerken
+            var as = vector.vector2angleAbs(m.x, m.y);
+
+            obj.s = as.s;
+            obj.ma = as.a;
+
+            if (obj.s > cfg.playermaxspeed) {
+                obj.s = cfg.playermaxspeed;
+            }
+        }
+
+        if (obj.stopping) {
+            obj.s = obj.s - cfg.playerstopacceleration * secselapsed;
+            if (obj.s < 5) { obj.s = 0; }
+        }
+
+    };
+
+
+    /*
+        Bewegt ein Objekt in der Welt weiter
+     */
+    var updatePosition = function(cfg, obj, secselapsed) {
+
+        // Vektor aus aktueller Geschwindigkeit bestimmen
+        var m = vector.angleAbs2vector(obj.ma, obj.s);
+
+        // Änderung pro Sekunde
+        obj.x += m.x * secselapsed;
+        obj.y += m.y * secselapsed;
+
+    };
+
+    /* ---------------------------------------------------------------------------------------------- */
 
     /*
         Aktualisiert ein Objekt in der Welt und wendet phys. Änderungen an
      */
-    exports.updateObj = function(obj, secselapsed, astack) {
+    exports.updateObj = function(cfg, obj, secselapsed, astack) {
 
 
         if(obj.cr) {
@@ -115,12 +202,12 @@
 
         if(obj.type == "player") {
             //this._checkPlayerCollisions(obj, secselapsed, thistime);
-            //this._updatePlayerActions(obj, secselapsed, thistime, astack);
+            updatePlayerActions(cfg, obj, secselapsed, astack);
         }
 
 
         if(obj.s) {
-            //this._updatePosition(obj, secselapsed, thistime);
+            updatePosition(cfg, obj, secselapsed);
         }
 
 
@@ -133,7 +220,7 @@
 
     };
 
-    
+
 
 
     return exports;

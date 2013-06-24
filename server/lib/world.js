@@ -1,5 +1,6 @@
 var vector = new require( __dirname + "/vector.js")();
 var _ = require( __dirname + "/lodash.js");
+var gl = require( __dirname + "/gamelogic.js");
 
 
 exports = module.exports = function(rc, worldname, options) {
@@ -112,6 +113,10 @@ exports = module.exports = function(rc, worldname, options) {
 
         _updateObj: function(obj, secselapsed, thistime, astack) {
 
+
+            /*
+                    *** alte Berechnungen ausserhalb von gamlogic
+
             if(obj.cr) {
                 this._checkStaticCollisions(obj, secselapsed, thistime);
             }
@@ -134,6 +139,12 @@ exports = module.exports = function(rc, worldname, options) {
             } else {
                 return obj;
             }
+
+            */
+
+
+            return gl.updateObj(this.cfg, obj, secselapsed, astack);
+
 
         },
 
@@ -312,16 +323,6 @@ exports = module.exports = function(rc, worldname, options) {
 
         },
 
-        _updatePosition:  function(obj, secselapsed, thistime) {
-
-            // Vektor aus aktueller Geschwindigkeit bestimmen
-            var m = vector.angleAbs2vector(obj.ma, obj.s);
-
-            // Änderung pro Sekunde
-            obj.x += m.x * secselapsed;
-            obj.y += m.y * secselapsed;
-
-        },
 
         // -------------------------------------------------------------
         // -------------------------------------------------------------

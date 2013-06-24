@@ -28,17 +28,11 @@ var world = new WORLD(rc, worldname, {flush: true});
 // ------------------------- Main Loop ----------------------------
 
 
-//lokaltest
-var gamelogic = require(__dirname + "/lib/gamelogic.js");
-
-console.log(gamelogic);
 
 
 
 
 
-
-/* //dies ist der richtige loop wieder einkommentieren nach lokaltest
 var updatecount = 0;
 setInterval(function() {
     world.update();
@@ -48,7 +42,9 @@ setInterval(function() {
 if (benchmark) {
     setupBenchmark(coll);
 }
-*/
+
+
+
 
 
 

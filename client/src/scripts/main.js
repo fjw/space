@@ -22,16 +22,10 @@ require([
     "ftools",
     "socket",
     "res",
-    "space",
-    "gamelogic"
-], function( $, _, ft, SOCKET, RES, SPACE, gamelogic) {
+    "space"
+], function( $, _, ft, SOCKET, RES, SPACE) {
 
 
-    console.log(gamelogic);
-
-    // ---------
-
-/*
     window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
 
     if (document.location.href == "http://localhost:4004/" || document.location.href == "http://192.168.178.27:4004/") {
@@ -212,6 +206,6 @@ require([
 
 
     });
-*/
+
 
 });
