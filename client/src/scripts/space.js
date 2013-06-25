@@ -77,6 +77,9 @@ var obj = {
             //register statics
             _this.world.statics = data.statics;
 
+            //register worldconfig
+            _this.world.cfg = data.cfg;
+
         });
 
 
@@ -84,13 +87,31 @@ var obj = {
             _this.world.updateFromServer(data.objects);
             _this.player = data.player;
 
-            //clocksync
-            _this._serverClockDiv = data.clock - Date.now();
+
         });
 
 
+        socket.on("po", function(datenow) {
+            var thistime = Date.now();
+
+            //momentaner Lag
+            _this.latency = thistime - _this._lastping;
+
+            //clocksync
+            _this._serverClockDiv = datenow - thistime;
+        });
+
+        //regelmässig Pingen
+        window.setInterval(function() {
+            var thistime = Date.now();
+            _this._lastping = thistime;
+            socket.emit("pi", thistime);
+        }, 1000);
 
     },
+
+    _lastping: 0,
+    latency: 0,
 
     _serverClockDiv: 0,
     getServerTime: function() {
@@ -176,6 +197,8 @@ var obj = {
 
                 if (pa) {
                     socket.emit("pa", pa + "1");
+
+                    this.world.setPlayerAction(this.playername, pa + "1");
                 }
             }
 
@@ -207,6 +230,8 @@ var obj = {
 
             if (pa) {
                 socket.emit("pa", pa + "0");
+
+                this.world.setPlayerAction(this.playername, pa + "0");
             }
 
         }
@@ -225,7 +250,7 @@ var obj = {
         if (this.player) { // Spiel läuft nur bei definiertem Spieler
 
             //Welt updaten!
-            //this.player = this.world.update(this.playername);
+            this.player = this.world.update(this.playername, this.latency);
 
 
             res.setViewport(this.ctx, this.player.x - this.mx, this.player.y - this.my, this.cw, this.ch)
@@ -272,6 +297,10 @@ var obj = {
             this.ctx.fillStyle = "#a00";
             this.ctx.fillText( this.fps, this.cw - 30, 15);
         }
+
+        //Latency anzeigen
+        this.ctx.fillStyle = "#66f";
+        this.ctx.fillText( this.latency, this.cw - 30, 30);
 
 
     },

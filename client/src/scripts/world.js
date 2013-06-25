@@ -34,20 +34,46 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
         },
 
+        /*
+             Ein neues Update kam vom Server
+         */
         updateFromServer: function(worldobjects) {
+            //TEST DIFFERENZ
+            var w_player = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == "user"; });
+            var c_player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == "user"; });
+
+            if(w_player && c_player) {
+
+                for(var key in w_player) {
+
+
+                    if(key != "x" && key != "y" && w_player[key] && c_player[key] && w_player[key] != c_player[key]) {
+
+                        console.log("w." + key + "=" + w_player[key]);
+                        console.log("c." + key + "=" + c_player[key]);
+
+                    }
+
+                }
+            }
+
             this.objects = this.localobjects.concat(worldobjects);
 
             this.lastupdate = Date.now();
+
         },
 
-        update: function(playername) {
-            /*
-                Clientseitiges Updaten der Physik und der Welt
+        /*
+             Clientseitiges Updaten der Physik und der Welt
 
-                der aktuelle Spieler wird übergeben und zurückgegeben
-             */
+             der aktuelle Spieler wird übergeben und zurückgegeben
+         */
+        update: function(playername, latency) {
+            var _this = this;
 
-            var thistime = Date.now();
+            if(!latency) { latency = 0; }
+
+            var thistime = Date.now(); // + latency;
             var secselapsed = (thistime - this.lastupdate) / 1000;
             this.lastupdate = thistime;
 
@@ -56,7 +82,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
             _.each(this.objects, function(obj) {
 
-                gl.updateObj(this.cfg, obj, secselapsed, this.actionstack);
+                gl.updateObj(_this.cfg, obj, secselapsed, _this.actionstack);
 
                 //ist es der aktuelle spieler
                 if(obj.type == "player" && obj.name == playername) {

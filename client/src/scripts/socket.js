@@ -30,7 +30,7 @@ var obj = {
                 var msg = msgpack.decode(message.data);
                 if (msg && msg.i && _this._cbs[msg.i]) {
                     if (window.debug) {
-                        if ( (msg.i != "wu" && msg.i != "ping" && msg.i != "pong") || window.debug >= 3) {
+                        if ( (msg.i != "wu" && msg.i != "pi" && msg.i != "po") || window.debug >= 3) {
                             console.info("received '"+msg.i+"'");
                             console.log(msg.d);
                         }
@@ -55,17 +55,11 @@ var obj = {
 
         this.sock.onopen = function() {
 
-            _this.ping(function(){});
-
             if(callback) {
                 callback();
             }
 
         };
-
-        this.on("ping", function() {
-            _this.emit("pong", {});
-        });
 
     },
 
@@ -88,24 +82,11 @@ var obj = {
 
     },
 
-    ping: function(callback) {
-        var _this = this;
-
-        var sendtime = Date.now();
-
-        this.emit("ping", {});
-
-        this.on("pong", function() {
-            _this.lastping = Date.now() - sendtime;
-
-            callback(_this.lastping);
-        });
-    },
 
     emit: function(msg, data) {
         if(this.sock) {
             if (window.debug) {
-                if ( (msg != "wu" && msg != "ping" && msg != "pong") || window.debug >= 3) {
+                if ( (msg != "wu" && msg != "pi" && msg != "po") || window.debug >= 3) {
                     console.info("sending '"+msg+"'");
                     console.log(data);
                 }

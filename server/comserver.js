@@ -71,11 +71,9 @@ new USERCONNECTOR(port, function(c) {
                 // Begrüßung senden
                 c.emit("ini", {
                     playername: c.username,
-                    statics: world.statics
+                    statics: world.statics,
+                    cfg: world.cfg
                 });
-
-
-                /* im Moment kein Weltupdate wegen locale gamelogic
 
                 // Updateinterval Welt an Spieler
                 if(updateinterval) { clearInterval(updateinterval);}
@@ -84,25 +82,11 @@ new USERCONNECTOR(port, function(c) {
                      world.getVisibleObjects(c.username, function(player, objects) {
                          c.emit("wu", {
                              objects: objects,
-                             player: player,
-                             clock: Date.now()
+                             player: player
                          });
                      });
 
-                }, 1000);
-
-                */
-
-                //update einmalig senden, später muss das wieder raus und stattdessen der loop sein
-                setTimeout(function() {
-                    world.getVisibleObjects(c.username, function(player, objects) {
-                        c.emit("wu", {
-                            objects: objects,
-                            player: player,
-                            clock: Date.now()
-                        });
-                    });
-                }, 1000);
+                }, 45);
 
 
             });
@@ -111,6 +95,11 @@ new USERCONNECTOR(port, function(c) {
             c.on("pa", function(action) {
                 // Playeraction
                 world.setPlayerAction(c.username, action);
+            });
+
+            c.on("pi", function(datenow) {
+                //Ping, sende Pong
+                c.emit("po", Date.now());
             });
         }
 

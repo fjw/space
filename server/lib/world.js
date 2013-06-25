@@ -533,11 +533,13 @@ exports = module.exports = function(rc, worldname, options) {
             delete obj._id;
 
             //todo: perfomance check! bringt evtl garnicht so viel
+            /*
             for (var prop in obj) {
                 if (typeof obj[prop] == "number") {
                     obj[prop] = (obj[prop]+0.5)|0; // schnelles runden
                 }
             }
+            */
 
             return obj;
         },
