@@ -224,6 +224,10 @@ var obj = {
 
         if (this.player) { // Spiel läuft nur bei definiertem Spieler
 
+            //Welt updaten!
+            //this.player = this.world.update(this.playername);
+
+
             res.setViewport(this.ctx, this.player.x - this.mx, this.player.y - this.my, this.cw, this.ch)
 
 

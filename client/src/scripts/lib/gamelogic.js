@@ -105,6 +105,75 @@
 
     /* ---------------------------------------------------------------------------------------------- */
 
+    exports.actionCode2actionStackObject = function(action, ao) {
+
+        switch(action) {
+
+            case "t1":
+                ao.thrusting = true;
+                break;
+            case "t0":
+                ao.thrusting = false;
+                break;
+            case "b1":
+                ao.breaking = true;
+                break;
+            case "b0":
+                ao.breaking = false;
+                break;
+
+            case "r1":
+                ao.rturning = true;
+                break;
+            case "r0":
+                ao.rturning = false;
+                break;
+            case "l1":
+                ao.lturning = true;
+                break;
+            case "l0":
+                ao.lturning = false;
+                break;
+
+            case "s1":
+                ao.stopping = true;
+                break;
+            case "s0":
+                ao.stopping = false;
+                break;
+
+            case "sa1":
+                ao.shooting = true;
+                break;
+            case "sa0":
+                ao.shooting = false;
+                break;
+
+            case "sb1":
+                ao.shooting2 = true;
+                break;
+            case "sb0":
+                ao.shooting2 = false;
+                break;
+
+            case "as":
+                ao.thrusting = false;
+                ao.breaking = false;
+                ao.rturning = false;
+                ao.lturning = false;
+                ao.stopping = false;
+                ao.shooting = false;
+                ao.shooting2 = false;
+                break;
+
+        }
+
+        return ao;
+
+    };
+
+    /* ---------------------------------------------------------------------------------------------- */
+
 
     /*
         Wendet Userbasierte Änderungen auf ein PlayerObjekt an.
