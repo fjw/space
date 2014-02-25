@@ -86,8 +86,6 @@ var obj = {
         socket.on("wu", function(data) {
             _this.world.updateFromServer(data.objects);
             _this.player = data.player;
-
-
         });
 
 

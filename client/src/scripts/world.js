@@ -39,13 +39,14 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
          */
         updateFromServer: function(worldobjects) {
             //TEST DIFFERENZ
+
+            /*
             var w_player = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == "user"; });
             var c_player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == "user"; });
 
             if(w_player && c_player) {
 
                 for(var key in w_player) {
-
 
                     if(key != "x" && key != "y" && w_player[key] && c_player[key] && w_player[key] != c_player[key]) {
 
@@ -55,7 +56,10 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
                     }
 
                 }
+
             }
+            */
+
 
             this.objects = this.localobjects.concat(worldobjects);
 

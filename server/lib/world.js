@@ -28,8 +28,15 @@ exports = module.exports = function(rc, worldname, options) {
             this.name = worldname;   //Name der Welt
 
             if(options) {
-                if(options.flush) {
+
+                if(options.flush) { // Wenn gesetzt (von worldserver) wird die Welt neu aufgesetzt
+
+                    // alles aus Collection löschen
                     this.dbc.flushall();
+
+                    // Weltzeit initial setzen
+                    
+
                 }
             }
 
