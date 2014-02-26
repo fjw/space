@@ -1,3 +1,5 @@
+require('newrelic');
+
 // -----------------------------------
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");

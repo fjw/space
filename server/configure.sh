@@ -6,3 +6,4 @@ npm install ws
 npm install node-static
 npm install msgpack-js
 
+npm install newrelic
