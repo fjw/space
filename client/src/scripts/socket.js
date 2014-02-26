@@ -10,6 +10,9 @@ var obj = {
 
     _init: function() {
 
+        if(window.env && window.env == "production") {
+            this.hostname = "ws://109.239.49.151:443";
+        }
 
     },
 
