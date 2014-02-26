@@ -2,6 +2,14 @@ var vector = new require( __dirname + "/vector.js")();
 var _ = require( __dirname + "/lodash.js");
 var gl = require( __dirname + "/gamelogic.js");
 
+var starttime = 0;
+var getTime = function() { //muss private sein, da sonst unsynchron, Weltzeit muss von extern aus der Collection geholt werden
+
+    var t = process.hrtime();
+    var tt = ((t[0] * 1e9 + t[1]) / 1e6) - starttime;
+    return ((tt * 1e4)|0)/1e4;
+};
+
 
 exports = module.exports = function(rc, worldname, options) {
     var obj = {
@@ -15,6 +23,17 @@ exports = module.exports = function(rc, worldname, options) {
 
         statics: [],
         cfg: {},
+
+        starttime: 0,
+
+        getTime: function(callback) {
+
+            //Hole Weltzeit für externe Aufrufe aus der Collection
+            this.dbc.get(this.name + "_time", function(err, worldtime) {
+                callback(worldtime);
+            });
+
+        },
 
         // ------------------------------------------------------------
         // ------------------------------------------------------------
@@ -35,7 +54,7 @@ exports = module.exports = function(rc, worldname, options) {
                     this.dbc.flushall();
 
                     // Weltzeit initial setzen
-                    
+                    starttime = getTime();
 
                 }
             }
@@ -61,16 +80,32 @@ exports = module.exports = function(rc, worldname, options) {
         update: function() {
             var _this = this;
 
-
             if (this.dbc && this.dbc.connected) {
 
-                var thistime = Date.now();
-                var secselapsed = (thistime - this.lastupdate) / 1000;
-                this.lastupdate = thistime;
+                var key = this.name; //weltname als keypräfix
 
-                var key = this.name;
+                //Hole den letzten Zeitstatus der Welt aus der DB
+                this.dbc.get(key + "_time", function(err, lasttime) {
 
 
+                    //aktuelle Zeit
+                    var thistime = getTime();
+
+                    var mselapsed = thistime - lasttime;
+
+
+                    console.log(thistime);
+
+                    //aktuelle Zeit setzen
+                    _this.dbc.set(key + "_time", thistime);
+
+                });
+
+
+
+
+
+/*
                 //get Actionstack
                 this.dbc.get(this.name + "_actionStack", function(err, astack) {
 
@@ -112,6 +147,7 @@ exports = module.exports = function(rc, worldname, options) {
                     //actionstack leeren
                     _this.dbc.del(_this.name + "_actionStack");
                 });
+ */
 
             }
 
