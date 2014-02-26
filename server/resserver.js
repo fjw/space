@@ -1,4 +1,6 @@
-require('newrelic');
+var env = process.env.NODE_ENV;
+
+if( env == 'production' ) { require('newrelic'); }
 
 // -----------------------------------
 log = require( __dirname + "/lib/log.js");
@@ -8,7 +10,7 @@ var STATIC = require('node-static');
 // -----------------------------------
 
 
-var respath, port, env = process.env.NODE_ENV, cfg = {};
+var respath, port, cfg = {};
 if( env == 'production' ) {
 
     // ---- production-config
