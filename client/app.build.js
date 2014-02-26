@@ -12,6 +12,7 @@
         'lodash':       'lib/lodash',
         'seedrandom':   'lib/seedrandom',
         'ftools':       'lib/ftools',
-        'msgpack':      'lib/msgpack'
+        'msgpack':      'lib/msgpack',
+        'gamelogic':    'lib/gamelogic'
     }
 })
