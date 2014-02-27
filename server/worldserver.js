@@ -41,7 +41,7 @@ var updatecount = 0;
 setInterval(function() {
     world.update();
     if (benchmark) { updatecount++; }
-}, 15);
+}, 15); //so klein wie möglich, definiert die kleinste Zeiteinheit
 
 if (benchmark) {
     setupBenchmark(coll);

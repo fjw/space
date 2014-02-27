@@ -93,7 +93,7 @@ new USERCONNECTOR(port, function(c) {
                     //Wichtiges Dokument für Network-Com in MP: http://www.gabrielgambetta.com/fpm_live.html
 
 
-                }, 45);
+                }, 100);
 
 
             });
@@ -106,7 +106,10 @@ new USERCONNECTOR(port, function(c) {
 
             c.on("pi", function(datenow) {
                 //Ping, sende Pong
-                c.emit("po", Date.now());
+
+                world.getTime(function(worldtime){
+                    c.emit("po", worldtime);
+                });
             });
         }
 

@@ -1,4 +1,19 @@
 define(["lodash", "jquery", "rafpolyfill", "world", "ftools"], function(_, $, rafpolyfill, WORLD, ft) { return function() {
+
+// Zeitfunktion
+var supportsPerformanceNow = false;
+if(performance && performance.now && typeof(performance.now) == "function") {
+    supportsPerformanceNow = true;
+}
+var getTime = function() {
+    if(supportsPerformanceNow) {
+        return performance.now();
+    } else {
+        return Date.now();
+    }
+}
+
+
 var obj = {
 
     //--------------------
@@ -90,7 +105,7 @@ var obj = {
 
 
         socket.on("po", function(datenow) {
-            var thistime = Date.now();
+            var thistime = getTime();
 
             //momentaner Lag
             _this.latency = thistime - _this._lastping;
@@ -101,7 +116,7 @@ var obj = {
 
         //regelmässig Pingen
         window.setInterval(function() {
-            var thistime = Date.now();
+            var thistime = getTime();
             _this._lastping = thistime;
             socket.emit("pi", thistime);
         }, 1000);
@@ -113,7 +128,7 @@ var obj = {
 
     _serverClockDiv: 0,
     getServerTime: function() {
-        return Date.now() + this._serverClockDiv;
+        return getTime() + this._serverClockDiv;
     },
 
     start: function() {
@@ -194,7 +209,7 @@ var obj = {
                 //if(code == 84) { socket.emit("test", "start"); }
 
                 if (pa) {
-                    socket.emit("pa", pa + "1");
+                    socket.emit("pa", {a: pa + "1", t: getTime()});
 
                     this.world.setPlayerAction(this.playername, pa + "1");
                 }
@@ -227,7 +242,7 @@ var obj = {
             //if(code == 84) { socket.emit("test", "stop"); }
 
             if (pa) {
-                socket.emit("pa", pa + "0");
+                socket.emit("pa", {a: pa + "0", t: getTime()});
 
                 this.world.setPlayerAction(this.playername, pa + "0");
             }

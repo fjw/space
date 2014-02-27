@@ -3,7 +3,7 @@ var _ = require( __dirname + "/lodash.js");
 var gl = require( __dirname + "/gamelogic.js");
 
 var starttime = 0;
-var getTime = function() { //muss private sein, da sonst unsynchron, Weltzeit muss von extern aus der Collection geholt werden
+var getTime = function() { //muss private sein, da sonst unsynchron, Weltzeit muss von extern aus der Collection geholt werden, darf nur von Worldserver aufgerufen werden
 
     var t = process.hrtime();
     var tt = ((t[0] * 1e9 + t[1]) / 1e6) - starttime;
@@ -90,10 +90,8 @@ exports = module.exports = function(rc, worldname, options) {
                 // hole den letzten Zeitstatus der Welt aus der Collection
                 dbc.get(worldname + "_time", function(err, lasttime) {
 
-
                     // aktuelle Zeit
                     var thistime = getTime();
-
                     var mselapsed = thistime - lasttime;
 
 
@@ -502,7 +500,7 @@ exports = module.exports = function(rc, worldname, options) {
                     ao = {};
                 }
 
-                ao = gl.actionCode2actionStackObject(action, ao);
+                ao = gl.actionCode2actionStackObject(action.a, ao); //todo: HEIER GEHTS WEITER
 
 
 
