@@ -90,6 +90,8 @@ new USERCONNECTOR(port, function(c) {
                          });
                      });
 
+                    //Wichtiges Dokument für Network-Com in MP: http://www.gabrielgambetta.com/fpm_live.html
+
 
                 }, 45);
 

@@ -38,6 +38,8 @@ exports = module.exports = function(rc, worldname, options) {
         // ------------------------------------------------------------
         // ------------------------------------------------------------
 
+
+
         /*
             Konstruktor & Einstellungen
          */
@@ -76,86 +78,84 @@ exports = module.exports = function(rc, worldname, options) {
         /*
             Für den Main-Loop, wird vom Worldserver aufgerufen
          */
-        lastupdate: Date.now(),
         update: function() {
             var _this = this;
 
-            if (this.dbc && this.dbc.connected) {
+            var dbc = this.dbc;
 
-                var key = this.name; //weltname als keypräfix
+            if (dbc && dbc.connected) {
 
-                //Hole den letzten Zeitstatus der Welt aus der DB
-                this.dbc.get(key + "_time", function(err, lasttime) {
+                var worldname = this.name; // Weltname als keypräfix
+
+                // hole den letzten Zeitstatus der Welt aus der Collection
+                dbc.get(worldname + "_time", function(err, lasttime) {
 
 
-                    //aktuelle Zeit
+                    // aktuelle Zeit
                     var thistime = getTime();
 
                     var mselapsed = thistime - lasttime;
 
 
-                    console.log(thistime);
+                    // Spieler Aktionen holen
+                    dbc.get(worldname + "_actionstack", function(err, astack) {
 
-                    //aktuelle Zeit setzen
-                    _this.dbc.set(key + "_time", thistime);
-
-                });
-
-
-
-
-
-/*
-                //get Actionstack
-                this.dbc.get(this.name + "_actionStack", function(err, astack) {
-
-
-                    if (astack) {
-                        astack = _this._decodeObject(astack);
-                    } else {
-                        astack = {};
-                    }
-
-
-
-                    //eine umdrehung machen
-                    _this.dbc.llen(key, function(err, len) {
-
-
-                        for (var i = 0; i < len; i++) {
-
-                            _this.dbc.lpop(key, function(err, mobj) {
-
-                                if (mobj) {
-
-                                    var resobj = _this._updateObj(_this._decodeObject(mobj), secselapsed, thistime, astack);
-
-                                    if (resobj) {
-                                        _this.dbc.rpush(key, _this._encodeObject(resobj));
-                                    }
-                                }
-
-                            });
-
-
+                        if (astack) {
+                            astack = _this._decodeObject(astack);
+                        } else {
+                            astack = {};
                         }
 
 
+                        // durch alle Welt-Objekte rotieren
+                        dbc.llen(worldname + "_objects", function(err, len) {
+
+
+                            for (var i = 0; i < len; i++) {
+
+                                dbc.lpop(worldname + "_objects", function(err, mobj) {
+
+                                    if (mobj) {
+
+                                        // Weltobjekt verarbeiten ...
+                                        var resobj = _this._updateObj(_this._decodeObject(mobj), mselapsed, thistime, astack);
+
+                                        // ... und falls noch vorhanden wieder an den Stack anhängen
+                                        if (resobj) {
+                                            dbc.rpush(worldname + "_objects", _this._encodeObject(resobj));
+                                        }
+                                    }
+
+                                });
+
+
+                            }
+
+                            //-- Update fertig -- Endbedingungen setzen
+
+                            //actionstack leeren
+                            dbc.del(worldname + "_actionstack");
+
+
+                            //aktuelle Zeit setzen
+                            dbc.set(worldname + "_time", thistime);
+
+                            //--
+
+
+                        });
+
                     });
 
-
-                    //actionstack leeren
-                    _this.dbc.del(_this.name + "_actionStack");
                 });
- */
 
             }
 
-
         },
 
-        _updateObj: function(obj, secselapsed, thistime, astack) {
+        _updateObj: function(obj, mselapsed, thistime, astack) {
 
+            var secselapsed = mselapsed / 1000; //todo: umstellen auf millisecs
 
             /*
                     *** alte Berechnungen ausserhalb von gamlogic
@@ -393,7 +393,7 @@ exports = module.exports = function(rc, worldname, options) {
         queryObject: function(key, peritemcallback, callback) {
             var _this = this;
 
-            this.dbc.llen(key, function(err, len) {
+            this.dbc.llen(key + "_objects", function(err, len) {
 
 
                 if (len > 0) {
@@ -415,7 +415,7 @@ exports = module.exports = function(rc, worldname, options) {
 
                     for(var i=0; i < len; i++) {
 
-                        _this.dbc.lindex(key, i, function(err, bitem) {
+                        _this.dbc.lindex(key + "_objects", i, function(err, bitem) {
 
                             if(bitem) {
 
@@ -449,7 +449,7 @@ exports = module.exports = function(rc, worldname, options) {
 
         insertObject: function(obj) {
 
-            this.dbc.lpush(this.name, this._encodeObject(obj));
+            this.dbc.lpush(this.name + "_objects", this._encodeObject(obj));
 
         },
 
@@ -487,7 +487,7 @@ exports = module.exports = function(rc, worldname, options) {
         setPlayerAction: function(playername, action) {
             var _this = this;
 
-            this.dbc.get(this.name + "_actionStack", function(err, astack) {
+            this.dbc.get(this.name + "_actionstack", function(err, astack) {
 
 
                 if (astack) {
@@ -509,7 +509,7 @@ exports = module.exports = function(rc, worldname, options) {
                 if ( ao ) {
                     astack[playername] = ao;
 
-                    _this.dbc.set(_this.name + "_actionStack", _this._encodeObject(astack));
+                    _this.dbc.set(_this.name + "_actionstack", _this._encodeObject(astack));
                 }
 
             });
@@ -528,13 +528,13 @@ exports = module.exports = function(rc, worldname, options) {
             var player = null;
 
             //todo: vorerst alle objekte ausgeben
-            this.dbc.llen(this.name, function(err, len) {
+            this.dbc.llen(this.name + "_objects", function(err, len) {
 
                 if (len > 0) {
 
                     for(var i=0; i < len; i++) {
 
-                        _this.dbc.lindex(_this.name, i, function(err, bitem) {
+                        _this.dbc.lindex(_this.name + "_objects", i, function(err, bitem) {
 
                             if (bitem) {
 

@@ -261,7 +261,7 @@
     /*
         Aktualisiert ein Objekt in der Welt und wendet phys. Änderungen an
      */
-    exports.updateObj = function(cfg, obj, secselapsed, astack) {
+    exports.updateObj = function(cfg, obj, secselapsed, astack) { //todo: umstellen auf millisecs
 
 
         if(obj.cr) {
