@@ -114,12 +114,17 @@ var obj = {
             _this._serverClockDiv = datenow - thistime;
         });
 
-        //regelmässig Pingen
-        window.setInterval(function() {
+        var ping = function() {
             var thistime = getTime();
             _this._lastping = thistime;
             socket.emit("pi", thistime);
-        }, 1000);
+        };
+
+        //regelmässig Pingen
+        window.setInterval(function() {
+           ping();
+        }, 10000);
+        ping();
 
     },
 

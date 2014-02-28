@@ -20,6 +20,8 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
         },
 
         setPlayerAction: function(playername, action) {
+
+            /*
             var ao = this.actionstack[playername];
 
             if(!ao) {
@@ -31,6 +33,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
             if(ao) {
                 this.actionstack[playername] = ao;
             }
+            */
 
         },
 

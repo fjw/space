@@ -94,6 +94,9 @@ exports = module.exports = function(rc, worldname, options) {
                     var thistime = getTime();
                     var mselapsed = thistime - lasttime;
 
+                    //aktuelle Zeit setzen
+                    dbc.set(worldname + "_time", thistime);
+
 
                     // Spieler Aktionen holen
                     dbc.get(worldname + "_actionstack", function(err, astack) {
@@ -135,8 +138,7 @@ exports = module.exports = function(rc, worldname, options) {
                             dbc.del(worldname + "_actionstack");
 
 
-                            //aktuelle Zeit setzen
-                            dbc.set(worldname + "_time", thistime);
+
 
                             //--
 
