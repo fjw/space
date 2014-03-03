@@ -5,6 +5,7 @@ if( env == 'production' ) { require('newrelic'); }
 // -----------------------------------
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
+servercfg = require( __dirname + "/lib/servercfg.js");
 
 var redis = require('redis');
 var rc = redis.createClient();
@@ -12,11 +13,6 @@ var rc = redis.createClient();
 var colors  = require('colors');
 var _ = require( __dirname + "/lib/lodash.js");
 var WORLD = require( __dirname + "/lib/world.js");
-// -----------------------------------
-
-var worldname = "testarena";
-var benchmark = false;
-
 // -----------------------------------
 
 
@@ -27,25 +23,13 @@ rc.on("error", function (err) {
 // -----------------------------------
 
 // Welt erzeugen
-var world = new WORLD(rc, worldname, {flush: true});
+var world = new WORLD("testarena");
 
 // ------------------------- Main Loop ----------------------------
 
-
-
-
-
-
-
-var updatecount = 0;
 setInterval(function() {
     world.update();
-    if (benchmark) { updatecount++; }
-}, 15); //so klein wie möglich, definiert die kleinste Zeiteinheit
-
-if (benchmark) {
-    setupBenchmark(coll);
-}
+}, servercfg.updateinterval.worldloop);
 
 
 
