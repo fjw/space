@@ -1,4 +1,3 @@
-var vector = new require( __dirname + "/vector.js")();
 var _ = require( __dirname + "/lodash.js");
 var gl = require( __dirname + "/gamelogic.js");
 
@@ -12,16 +11,6 @@ var getTime = function() { // holt die aktuelle Zeit der Welt in ms, auf 4 Nachk
     var t = process.hrtime();
     var tt = ((t[0] * 1e9 + t[1]) / 1e6) - starttime;
     return ((tt * 1e4)|0)/1e4;
-};
-
-var encodeObject = function(obj) {
-    return JSON.stringify(obj);
-    //return msgpack.encode(obj);
-};
-
-var decodeObject = function(obj) {
-    return JSON.parse(obj);
-    //return msgpack.decode(obj);
 };
 
 // ----------------------------------------------
@@ -41,8 +30,7 @@ exports = module.exports = function(worldname) {
         statics: [],
         cfg: {},
 
-        // ------------------------------------------------------------
-        // ------------------------------------------------------------
+        // -----------
 
         /*
             Konstruktor & Einstellungen
@@ -60,8 +48,7 @@ exports = module.exports = function(worldname) {
             this._loadStatics(map);
         },
 
-        // -------------------------------------------------------------
-        // -------------------------------------------------------------
+        // ----------
 
         /*
             Main-Loop, update die Welt
@@ -69,17 +56,24 @@ exports = module.exports = function(worldname) {
         update: function() {
             var _this = this;
 
+            this.send(this.statics);
         },
 
         /*
-            Dumpt den Status der aktuellen Welt in die Datenbank
+            Sendet den Status der aktuellen Welt, wird von aussen vergeben
          */
-        dump: function() {
+        send: function(data) {},
+
+        /*
+            Status der aktuellen Welt wurde empfangen
+         */
+        receive: function(data) {
+
 
         },
 
-        // -------------------------------------------------------------
-        // -------------------------------------------------------------
+
+        // ---------
 
 
         /*

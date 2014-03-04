@@ -7,19 +7,13 @@ log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
 vector = new require( __dirname + "/lib/vector.js")();
 
-var redis = require('redis');
-var rc = redis.createClient();
-
+var zmq = require('zmq');
+var servercfg = require( __dirname + "/lib/servercfg.js");
 var colors  = require('colors');
 var _ = require( __dirname + "/lib/lodash.js");
 var WORLD = require( __dirname + "/lib/world.js");
 var USERCONNECTOR = require( __dirname + "/lib/userconnector.js");
 // -----------------------------------
-
-rc.on("error", function (err) {
-    log("error", "redis: " + err);
-});
-
 // -----------------------------------
 
 var port;
@@ -46,12 +40,35 @@ var worlds = [];
 worldnames.forEach(function(wn) {
 
     log("info", "loading World '" + wn + "'");
+
+    // Verbindung einrichten
+    var subscriber = zmq.socket('sub');
+    subscriber.subscribe("");
+
+    process.on('SIGINT', function() {
+        subscriber.close();
+    });
+
+    subscriber.on('message', function(data) {
+        console.log(data.toString());
+    });
+
     // Welt erzeugen
-    worlds.push(new WORLD(rc, wn));
+    var world = {
+        name: wn,
+        subscriber: subscriber,
+        world: new WORLD(wn)
+    };
+
+    // anhängen
+    worlds.push(world);
+
+    // verbinden
+    subscriber.connect("ipc://ipc/"+wn+".ipc");
 
 });
 
-
+/*
 // --------------------------------- manage connections -----------------------
 
 new USERCONNECTOR(port, function(c) {
@@ -127,3 +144,5 @@ new USERCONNECTOR(port, function(c) {
     };
 
 });
+
+*/
