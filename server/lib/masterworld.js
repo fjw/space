@@ -1,5 +1,6 @@
 var _ = require( __dirname + "/lodash.js");
 var gl = require( __dirname + "/gamelogic.js");
+var zmq = require('zmq');
 
 
 // ----------------------------------------------
@@ -13,10 +14,22 @@ var getTime = function() { // holt die aktuelle Zeit der Welt in ms, auf 4 Nachk
     return ((tt * 1e4)|0)/1e4;
 };
 
+var encode = function(objs) {
+    return JSON.stringify(objs); //todo: msgpack?
+};
+
+var decode = function(ser) {
+    return JSON.parse(ser);
+};
+
+// Verbindung einrichten
+var responder = zmq.socket('rep');
+var req = new (require('events').EventEmitter);
+
+
 // ----------------------------------------------
 // ----------------------------- public Objekt
 // ----------------------------------------------
-
 
 exports = module.exports = function(worldname) {
     var obj = {
@@ -28,6 +41,7 @@ exports = module.exports = function(worldname) {
         // ------------
 
         statics: [],
+        objects: [],
         cfg: {},
 
         // -----------
@@ -40,12 +54,33 @@ exports = module.exports = function(worldname) {
             this.name = worldname;   //Name der Welt
 
             // Einstellungen holen! Map-Einstellungen überschreiben globale //todo: stimmt dieser Kommentar? Bestimmt! Trotzdem nochmal prüfen
-            //noinspection JSUnresolvedVariable
             var map = require( __dirname + "/../maps/"+worldname+".js");  // Map-Einstellungen
             this.cfg = _.extend(require( __dirname + "/../maps/globalcfg.js"), map.cfg); // globale einstellungen
 
-
             this._loadStatics(map);
+
+            // Responder verbinden
+            responder.bind("ipc://ipc/"+worldname+".ipc", function(err) {
+                if (err) throw err;
+
+                responder.on('message', function(data) {
+
+                    var d = decode(data);
+
+                    var respond = function(msg) {
+                        responder.send(encode({id: d.id, d: msg}));
+                    };
+
+                    req.emit(d.m, d.d, respond);
+                });
+            });
+
+            // Responder Events
+            req.on("foo", function(data, respond) {
+                console.log(data);
+                respond("baa");
+            });
+
         },
 
         // ----------
@@ -56,16 +91,16 @@ exports = module.exports = function(worldname) {
         update: function() {
             var _this = this;
 
-            this.send(this.statics);
+
         },
 
         /*
-            Sendet den Status der aktuellen Welt, wird von aussen vergeben
+            Sendet den Status der aktuellen Welt, nur für worldserver
          */
         send: function(data) {},
 
         /*
-            Status der aktuellen Welt wurde empfangen
+            Status der aktuellen Welt wurde empfangen, nur für comserver
          */
         receive: function(data) {
 

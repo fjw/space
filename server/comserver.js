@@ -7,11 +7,11 @@ log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
 vector = new require( __dirname + "/lib/vector.js")();
 
-var zmq = require('zmq');
+
 var servercfg = require( __dirname + "/lib/servercfg.js");
 var colors  = require('colors');
 var _ = require( __dirname + "/lib/lodash.js");
-var WORLD = require( __dirname + "/lib/world.js");
+var WORLD = require( __dirname + "/lib/slaveworld.js");
 var USERCONNECTOR = require( __dirname + "/lib/userconnector.js");
 // -----------------------------------
 // -----------------------------------
@@ -41,30 +41,14 @@ worldnames.forEach(function(wn) {
 
     log("info", "loading World '" + wn + "'");
 
-    // Verbindung einrichten
-    var subscriber = zmq.socket('sub');
-    subscriber.subscribe("");
-
-    process.on('SIGINT', function() {
-        subscriber.close();
-    });
-
-    subscriber.on('message', function(data) {
-        console.log(data.toString());
-    });
-
     // Welt erzeugen
     var world = {
         name: wn,
-        subscriber: subscriber,
         world: new WORLD(wn)
     };
 
     // anhängen
     worlds.push(world);
-
-    // verbinden
-    subscriber.connect("ipc://ipc/"+wn+".ipc");
 
 });
 
