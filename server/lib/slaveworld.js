@@ -16,10 +16,6 @@ var decode = function(ser) {
 
 // Requester vorbereiten
 var requester = zmq.socket('req');
-process.on('SIGINT', function() {
-    requester.close();
-});
-
 
 var rqu = []; //queue
 var rid = 0;  //ids
@@ -27,7 +23,7 @@ var request = function(msg, data, callback) {
     rid++;
 
     var to = setTimeout(function() {
-        log("warn", "request "+rid+" timed out");
+        log("warn", "request "+rid+" ("+msg+") timed out");
         rqu = _.filter(rqu, function(item) { return item.id != rid; });
     }, 2000);
 
@@ -59,6 +55,25 @@ requester.on('message', function(data) {
     }
 });
 
+// subscriber vorbereiten
+var subscriber = zmq.socket('sub');
+
+var bc = new (require('events').EventEmitter);
+
+subscriber.subscribe("");
+
+subscriber.on('message', function(data) {
+    var d = decode(data);
+    bc.emit(d.m, d.d);
+});
+
+// Sockets schliessen
+process.on('SIGINT', function() {
+    requester.close();
+    subscriber.close();
+    process.exit();
+});
+
 // ----------------------------------------------
 // ----------------------------- public Objekt
 // ----------------------------------------------
@@ -74,12 +89,14 @@ exports = module.exports = function(worldname) {
 
         statics: [],
         objects: [],
+        lastsync: 0,
+
         cfg: {},
 
         // -----------
 
         /*
-         Konstruktor & Einstellungen
+            Konstruktor & Einstellungen
          */
         _init: function(worldname) {
 
@@ -88,32 +105,30 @@ exports = module.exports = function(worldname) {
             //requester verbinden
             requester.connect("ipc://ipc/"+worldname+".ipc");
 
-
             request("foo", "foodata", function(data) {
                 console.log(data);
             });
+
+            //subscriber verbinden
+            subscriber.connect("ipc://ipc/"+worldname+"2.ipc");
+
+            bc.on("hui", function(data) {
+                console.log(data);
+            });
+
         },
 
         // ----------
 
         /*
-         Main-Loop, update die Welt
-         */
-        update: function() {
-            var _this = this;
+            Holt den aktuellen Stand von der masterwelt
+        */
+        sync: function() {
 
-        },
-
-        /*
-         Sendet den Status der aktuellen Welt, nur für worldserver
-         */
-        send: function(data) {},
-
-        /*
-         Status der aktuellen Welt wurde empfangen, nur für comserver
-         */
-        receive: function(data) {
-
+            request("sync", null, function(data) {
+                this.objects = data.objects;
+                this.lastsync = data.time;
+            });
 
         }
         // ---------

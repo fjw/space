@@ -14,6 +14,10 @@ var getTime = function() { // holt die aktuelle Zeit der Welt in ms, auf 4 Nachk
     return ((tt * 1e4)|0)/1e4;
 };
 
+var lasttime = 0;
+
+// ---
+
 var encode = function(objs) {
     return JSON.stringify(objs); //todo: msgpack?
 };
@@ -22,9 +26,23 @@ var decode = function(ser) {
     return JSON.parse(ser);
 };
 
+// ---
+
 // Verbindung einrichten
 var responder = zmq.socket('rep');
 var req = new (require('events').EventEmitter);
+var publisher = zmq.socket('pub');
+
+var broadcast = function(msg, data) {
+    publisher.send({m:msg, d:data});
+};
+
+// Sockets schliessen
+process.on('SIGINT', function() {
+    responder.close();
+    publisher.close();
+    process.exit();
+});
 
 
 // ----------------------------------------------
@@ -59,6 +77,12 @@ exports = module.exports = function(worldname) {
 
             this._loadStatics(map);
 
+            // Weltzeit initial setzen
+            starttime = getTime();
+
+            // Pubisher verbinden
+            publisher.bindSync("ipc://ipc/"+worldname+"2.ipc");
+
             // Responder verbinden
             responder.bind("ipc://ipc/"+worldname+".ipc", function(err) {
                 if (err) throw err;
@@ -76,11 +100,12 @@ exports = module.exports = function(worldname) {
             });
 
             // Responder Events
-            req.on("foo", function(data, respond) {
-                console.log(data);
-                respond("baa");
+            req.on("sync", function(data, respond) {
+                respond({ objects: this.objects, time: getTime() });
             });
 
+
+            broadcast("hui", "buu");
         },
 
         // ----------
@@ -91,25 +116,22 @@ exports = module.exports = function(worldname) {
         update: function() {
             var _this = this;
 
+            // aktuelle Zeit
+            var thistime = getTime();
+            var mselapsed = thistime - lasttime;
+            lasttime = thistime;
+
+            var astack; //todo: saubermachen
+
+            _.each(this.objects, function(obj) {
+
+                gl.updateObj(this.cfg, obj, mselapsed / 1000, astack); //todo: saubermachen
+
+            });
 
         },
-
-        /*
-            Sendet den Status der aktuellen Welt, nur für worldserver
-         */
-        send: function(data) {},
-
-        /*
-            Status der aktuellen Welt wurde empfangen, nur für comserver
-         */
-        receive: function(data) {
-
-
-        },
-
 
         // ---------
-
 
         /*
             bereitet aus dem Mapfile geladene statics für die Verarbeitung vor

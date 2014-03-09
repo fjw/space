@@ -42,17 +42,13 @@ worldnames.forEach(function(wn) {
     log("info", "loading World '" + wn + "'");
 
     // Welt erzeugen
-    var world = {
-        name: wn,
-        world: new WORLD(wn)
-    };
+    var world = new WORLD(wn);
 
     // anhängen
     worlds.push(world);
-
 });
 
-/*
+
 // --------------------------------- manage connections -----------------------
 
 new USERCONNECTOR(port, function(c) {
@@ -63,7 +59,14 @@ new USERCONNECTOR(port, function(c) {
 
         // Welt laden
         var world = _.find(worlds, function(w) { return w.name == worldname; });
+
         if (world && c.logedin) {
+            // Spieler ist eingeloggt, Welt ist valide
+
+            // Spieler holen
+            var player = world.getPlayer(c.username);
+
+            /*
 
             // Spieler zuerst holen
             world.getPlayer(c.username, function(player) {
@@ -112,6 +115,8 @@ new USERCONNECTOR(port, function(c) {
                     c.emit("po", worldtime);
                 });
             });
+            */
+
         }
 
     });
@@ -128,5 +133,3 @@ new USERCONNECTOR(port, function(c) {
     };
 
 });
-
-*/
