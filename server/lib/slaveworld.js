@@ -36,6 +36,23 @@ var request = function(msg, data, callback) {
     requester.send(encode({id:rid, m:msg, d:data}));
 };
 
+var requestReliable = function(msg, data, callback) {
+
+    var retryinterval;
+    var tryrequest = function() {
+
+        request(msg, data, function(answer) {
+
+        });
+
+    };
+
+    tryrequest();
+
+
+
+};
+
 requester.on('message', function(data) {
     var d = decode(data);
     if (typeof(d.id) != "undefined" &&
@@ -105,16 +122,25 @@ exports = module.exports = function(worldname) {
             //requester verbinden
             requester.connect("ipc://ipc/"+worldname+".ipc");
 
-            request("foo", "foodata", function(data) {
-                console.log(data);
-            });
-
             //subscriber verbinden
             subscriber.connect("ipc://ipc/"+worldname+"2.ipc");
+
+
+            /*
+             request("foo", "foodata", function(data) {
+             console.log(data);
+             });
 
             bc.on("hui", function(data) {
                 console.log(data);
             });
+            */ //todo: nur ein beispiel
+
+        },
+
+        _getWorldConfig: function() {
+
+
 
         },
 

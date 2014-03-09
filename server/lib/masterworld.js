@@ -33,7 +33,7 @@ var responder = zmq.socket('rep');
 var req = new (require('events').EventEmitter);
 var publisher = zmq.socket('pub');
 
-var broadcast = function(msg, data) {
+var publish = function(msg, data) {
     publisher.send({m:msg, d:data});
 };
 
@@ -105,7 +105,7 @@ exports = module.exports = function(worldname) {
             });
 
 
-            broadcast("hui", "buu");
+            //publish("hui", "buu");  //todo: nur ein beispiel
         },
 
         // ----------
