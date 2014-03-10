@@ -34,7 +34,7 @@ var req = new (require('events').EventEmitter);
 var publisher = zmq.socket('pub');
 
 var publish = function(msg, data) {
-    publisher.send({m:msg, d:data});
+    publisher.send(encode({m:msg, d:data}));
 };
 
 // Sockets schliessen
@@ -68,6 +68,7 @@ exports = module.exports = function(worldname) {
             Konstruktor & Einstellungen
          */
         _init: function(worldname) {
+            var _this = this;
 
             this.name = worldname;   //Name der Welt
 
@@ -100,12 +101,25 @@ exports = module.exports = function(worldname) {
             });
 
             // Responder Events
-            req.on("sync", function(data, respond) {
-                respond({ objects: this.objects, time: getTime() });
+            req.on("getobjects", function(data, respond) {
+                respond({ objects: _this.objects, time: getTime() });
             });
 
+            req.on("getstaticdata", function(data, respond) {
+                respond({ statics: _this.statics, cfg: _this.cfg, mastertime: getTime()});
+            });
 
-            //publish("hui", "buu");  //todo: nur ein beispiel
+            req.on("spawnplayer", function(data, respond) {
+                respond({ player: this.spawnPlayer(data.name) });
+            });
+
+            // Masterzeit initial und regelmässig synchen
+            publish("timesync", {mastertime: getTime()});
+            setInterval(function(){
+                publish("timesync", {mastertime: getTime()});
+            }, 10000);
+
+
         },
 
         // ----------
@@ -129,6 +143,24 @@ exports = module.exports = function(worldname) {
 
             });
 
+        },
+
+        spawnPlayer: function(playername) {
+
+            var player = {
+                type: "player",
+                x: 0, y: 0,      //Koordinaten
+                ma: 45,           //Bewegungswinkel
+                s: 100,            //Speed
+                va: 135.9234567890123,         //Sichtwinkel
+                cr: 18,          //Kollisionsradius
+                e: 100,          //Energie
+                name: playername
+            };
+
+            this.objects.push(player);
+
+            return player;
         },
 
         // ---------

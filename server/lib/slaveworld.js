@@ -6,6 +6,13 @@ var zmq = require('zmq');
 // ---------------------------- private Funktionen
 // ----------------------------------------------
 
+var servertimediff = 0;
+var getTime = function() { // holt die aktuelle Zeit der Welt in ms, auf 4 Nachkommastellen genau
+    var t = process.hrtime();
+    var tt = ((t[0] * 1e9 + t[1]) / 1e6) - servertimediff;
+    return ((tt * 1e4)|0)/1e4;
+};
+
 var encode = function(objs) {
     return JSON.stringify(objs); //todo: msgpack?
 };
@@ -15,6 +22,11 @@ var decode = function(ser) {
 };
 
 // Requester vorbereiten
+
+var timeouttime = 2000;
+var retrytime = 4000;
+var maxRetrys = 10;
+
 var requester = zmq.socket('req');
 
 var rqu = []; //queue
@@ -25,7 +37,7 @@ var request = function(msg, data, callback) {
     var to = setTimeout(function() {
         log("warn", "request "+rid+" ("+msg+") timed out");
         rqu = _.filter(rqu, function(item) { return item.id != rid; });
-    }, 2000);
+    }, timeouttime);
 
     rqu.push({
         id: rid,
@@ -38,20 +50,30 @@ var request = function(msg, data, callback) {
 
 var requestReliable = function(msg, data, callback) {
 
-    var retryinterval;
+    var retryTimeOut;
+    var retryCount = 0;
     var tryrequest = function() {
 
+        retryCount++;
+
+        clearTimeout(retryTimeOut);
+        retryTimeOut = setTimeout(function(){
+
+            log("warn", "retrying request...");
+            tryrequest();
+
+        }, retrytime);
+
         request(msg, data, function(answer) {
-
+            clearTimeout(retryTimeOut);
+            callback(answer);
         });
-
     };
 
     tryrequest();
-
-
-
 };
+
+
 
 requester.on('message', function(data) {
     var d = decode(data);
@@ -126,20 +148,20 @@ exports = module.exports = function(worldname) {
             subscriber.connect("ipc://ipc/"+worldname+"2.ipc");
 
 
-            /*
-             request("foo", "foodata", function(data) {
-             console.log(data);
-             });
-
-            bc.on("hui", function(data) {
-                console.log(data);
+            // Hole initial die Daten
+            requestReliable("getstaticdata", null, function(data) {
+                this.cfg = data.cfg;
+                this.statics = data.statics;
+                servertimediff = 0;
+                servertimediff = getTime() - data.mastertime; // hier auch ein timesync
+                log("info", "got "+this.statics.length+" statics from world");
             });
-            */ //todo: nur ein beispiel
 
-        },
-
-        _getWorldConfig: function() {
-
+            // Timesync
+            bc.on("timesync", function(data) {
+                servertimediff = 0;
+                servertimediff = getTime() - data.mastertime;
+            });
 
 
         },
@@ -149,16 +171,43 @@ exports = module.exports = function(worldname) {
         /*
             Holt den aktuellen Stand von der masterwelt
         */
-        sync: function() {
+        sync: function(callback) {
 
-            request("sync", null, function(data) {
+            request("getobjects", null, function(data) {
                 this.objects = data.objects;
                 this.lastsync = data.time;
+
+                callback();
             });
 
-        }
+        },
         // ---------
-    }
+
+        getPlayer: function(playername, callback) {
+            var _this = this;
+
+            this.sync(function() {
+                callback(_.find(_this.objects, function(item){ return (item.type == "player" && item.name == playername); }));
+            });
+        },
+
+        spawnPlayer: function(playername, callback) {
+
+            request("spawnplayer", { name:playername }, function(data) {
+                callback(data.player);
+            });
+
+        },
+
+        getVisibleObjects: function(playername, callback) {
+            var _this = this;
+
+            this.sync(function() {
+                callback(_this.objects, _.find(_this.objects, function(item){ return (item.type == "player" && item.name == playername); }));
+            });
+        }
+
+    };
 
     //mach den _init und gib das objekt aus
     obj._init(worldname);

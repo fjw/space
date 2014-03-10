@@ -64,16 +64,13 @@ new USERCONNECTOR(port, function(c) {
             // Spieler ist eingeloggt, Welt ist valide
 
             // Spieler holen
-            var player = world.getPlayer(c.username);
-
-            /*
-
-            // Spieler zuerst holen
             world.getPlayer(c.username, function(player) {
 
                 // Spieler spawnen
                 if (!player) {
-                    world.spawnPlayer(c.username);
+                    world.spawnPlayer(c.username, function(datap) {
+                        player = datap;
+                    });
                 }
 
                 // Begrüßung senden
@@ -82,6 +79,7 @@ new USERCONNECTOR(port, function(c) {
                     statics: world.statics,
                     cfg: world.cfg
                 });
+
 
                 // Updateinterval Welt an Spieler
                 if(updateinterval) { clearInterval(updateinterval);}
@@ -96,8 +94,7 @@ new USERCONNECTOR(port, function(c) {
 
                     //Wichtiges Dokument für Network-Com in MP: http://www.gabrielgambetta.com/fpm_live.html
 
-
-                }, 100);
+                }, servercfg.updateinterval.comloop);
 
 
             });
@@ -105,7 +102,7 @@ new USERCONNECTOR(port, function(c) {
 
             c.on("pa", function(action) {
                 // Playeraction
-                world.setPlayerAction(c.username, action);
+                //world.setPlayerAction(c.username, action);
             });
 
             c.on("pi", function(datenow) {
@@ -115,7 +112,7 @@ new USERCONNECTOR(port, function(c) {
                     c.emit("po", worldtime);
                 });
             });
-            */
+
 
         }
 
