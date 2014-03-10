@@ -110,7 +110,7 @@ exports = module.exports = function(worldname) {
             });
 
             req.on("spawnplayer", function(data, respond) {
-                respond({ player: this.spawnPlayer(data.name) });
+                respond({ player: _this.spawnPlayer(data.name) });
             });
 
             // Masterzeit initial und regelmässig synchen

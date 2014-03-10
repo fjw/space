@@ -271,7 +271,7 @@
 
         if(obj.type == "player") {
             //this._checkPlayerCollisions(obj, secselapsed, thistime);
-            updatePlayerActions(cfg, obj, secselapsed, astack);
+            //updatePlayerActions(cfg, obj, secselapsed, astack);
         }
 
 

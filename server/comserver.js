@@ -85,7 +85,8 @@ new USERCONNECTOR(port, function(c) {
                 if(updateinterval) { clearInterval(updateinterval);}
                 updateinterval = setInterval(function() {
 
-                     world.getVisibleObjects(c.username, function(player, objects) {
+                     world.getVisibleObjects(c.username, function(objects, player) {
+
                          c.emit("wu", {
                              objects: objects,
                              player: player
@@ -107,10 +108,7 @@ new USERCONNECTOR(port, function(c) {
 
             c.on("pi", function(datenow) {
                 //Ping, sende Pong
-
-                world.getTime(function(worldtime){
-                    c.emit("po", worldtime);
-                });
+                c.emit("po", world.getTime());
             });
 
 

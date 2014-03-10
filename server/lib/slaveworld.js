@@ -138,6 +138,7 @@ exports = module.exports = function(worldname) {
             Konstruktor & Einstellungen
          */
         _init: function(worldname) {
+            var _this = this;
 
             this.name = worldname;   //Name der Welt
 
@@ -150,11 +151,11 @@ exports = module.exports = function(worldname) {
 
             // Hole initial die Daten
             requestReliable("getstaticdata", null, function(data) {
-                this.cfg = data.cfg;
-                this.statics = data.statics;
+                _this.cfg = data.cfg;
+                _this.statics = data.statics;
                 servertimediff = 0;
                 servertimediff = getTime() - data.mastertime; // hier auch ein timesync
-                log("info", "got "+this.statics.length+" statics from world");
+                log("info", "got "+_this.statics.length+" statics from world");
             });
 
             // Timesync
@@ -172,10 +173,11 @@ exports = module.exports = function(worldname) {
             Holt den aktuellen Stand von der masterwelt
         */
         sync: function(callback) {
+            var _this = this;
 
             request("getobjects", null, function(data) {
-                this.objects = data.objects;
-                this.lastsync = data.time;
+                _this.objects = data.objects;
+                _this.lastsync = data.time;
 
                 callback();
             });
@@ -205,6 +207,11 @@ exports = module.exports = function(worldname) {
             this.sync(function() {
                 callback(_this.objects, _.find(_this.objects, function(item){ return (item.type == "player" && item.name == playername); }));
             });
+        },
+
+        getTime: function() {
+
+            return getTime();
         }
 
     };
