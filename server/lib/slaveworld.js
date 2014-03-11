@@ -85,7 +85,9 @@ requester.on('message', function(data) {
         if(r) {
             clearTimeout(r.t);
             rqu = _.filter(rqu, function(item) { return item.id != d.id; });
-            r.cb(d.d);
+            if(typeof(r.cb) == "function") {
+                r.cb(d.d);
+            }
         } else {
             log("warn", "unknown response received");
         }
@@ -212,6 +214,12 @@ exports = module.exports = function(worldname) {
         getTime: function() {
 
             return getTime();
+        },
+
+        setPlayerAction: function(playername, action, num) {
+
+            request("setplayeraction", { name: playername, action: action, num: num });
+
         }
 
     };

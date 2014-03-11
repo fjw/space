@@ -105,7 +105,7 @@
 
     /* ---------------------------------------------------------------------------------------------- */
 
-    exports.actionCode2actionStackObject = function(action, ao) {
+    var setactioncode = function(action, ao) {
 
         switch(action) {
 
@@ -179,27 +179,30 @@
         Wendet Userbasierte Änderungen auf ein PlayerObjekt an.
 
         Änderungen des Status kommen aus dem Actionstack.
-        Danach werden Änderungen angewandt.
      */
-    var updatePlayerActions = function(cfg, obj, secselapsed, astack) {
+    var setPlayerActions = function(obj, astack) {
 
-        var actions = astack[obj.name];
+        //neue Action
+        var playeractionstack = astack[obj.name];
 
-        if (actions) {
+        if (playeractionstack) {
 
-            for(var key in actions) {
-                var value = actions[key];
+            for( var i = 0; i < playeractionstack.length; i++ ) {
 
-                if(value) {
-                    obj[key] = true;
-                } else {
-                    delete(obj[key]);
-                }
+                setactioncode(playeractionstack[i].action, obj);
+                obj.lastaction = playeractionstack[i].num;
             }
 
         }
 
+    };
 
+    /*
+        Wendet Änderungen auf einen Player an
+    */
+    var updatePlayerObject = function(cfg, obj, secselapsed) {
+
+        //Actions anwenden
         var v = {x:0,y:0};
 
         if (obj.rturning) {
@@ -271,7 +274,8 @@
 
         if(obj.type == "player") {
             //this._checkPlayerCollisions(obj, secselapsed, thistime);
-            //updatePlayerActions(cfg, obj, secselapsed, astack);
+            setPlayerActions(obj,astack);
+            updatePlayerObject(cfg, obj, secselapsed);
         }
 
 

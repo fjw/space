@@ -60,6 +60,7 @@ exports = module.exports = function(worldname) {
 
         statics: [],
         objects: [],
+        astack: {},
         cfg: {},
 
         // -----------
@@ -113,6 +114,11 @@ exports = module.exports = function(worldname) {
                 respond({ player: _this.spawnPlayer(data.name) });
             });
 
+            req.on("setplayeraction", function(data, respond) {
+                _this.setPlayerAction(data.name, data.action, data.num);
+                respond(null);
+            });
+
             // Masterzeit initial und regelmässig synchen
             publish("timesync", {mastertime: getTime()});
             setInterval(function(){
@@ -135,14 +141,14 @@ exports = module.exports = function(worldname) {
             var mselapsed = thistime - lasttime;
             lasttime = thistime;
 
-            var astack; //todo: saubermachen
-
             _.each(this.objects, function(obj) {
 
-                gl.updateObj(this.cfg, obj, mselapsed / 1000, astack); //todo: saubermachen
+                gl.updateObj(_this.cfg, obj, mselapsed / 1000, _this.astack); //todo: saubermachen (ms)
 
             });
 
+            //Actionstack leeren
+            this.astack = {};
         },
 
         spawnPlayer: function(playername) {
@@ -161,6 +167,19 @@ exports = module.exports = function(worldname) {
             this.objects.push(player);
 
             return player;
+        },
+
+        setPlayerAction: function(playername, action, num) {
+
+            var playeractionstack = this.astack[playername];
+
+            if(!playeractionstack) {
+                playeractionstack = [];
+            }
+
+            playeractionstack.push({ action: action, num: num });
+
+            this.astack[playername] = playeractionstack;
         },
 
         // ---------

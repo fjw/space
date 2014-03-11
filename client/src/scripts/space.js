@@ -37,6 +37,7 @@ var obj = {
 
     playername: null,
     player: null,
+    playeractionnum: 0,
 
     started: false,
     initiated: false,
@@ -99,8 +100,7 @@ var obj = {
 
 
         socket.on("wu", function(data) {
-            _this.world.updateFromServer(data.objects);
-            _this.player = data.player;
+            _this.player = _this.world.updateFromServer(data.objects, _this.player, _this.playername);
         });
 
 
@@ -214,9 +214,10 @@ var obj = {
                 //if(code == 84) { socket.emit("test", "start"); }
 
                 if (pa) {
-                    socket.emit("pa", {a: pa + "1", t: getTime()});
+                    this.playeractionnum++;
+                    socket.emit("pa", {a: pa + "1", n: this.playeractionnum});
 
-                    this.world.setPlayerAction(this.playername, pa + "1");
+                    this.world.setPlayerAction(this.playername, pa + "1", this.playeractionnum);
                 }
             }
 
@@ -247,9 +248,10 @@ var obj = {
             //if(code == 84) { socket.emit("test", "stop"); }
 
             if (pa) {
-                socket.emit("pa", {a: pa + "0", t: getTime()});
+                this.playeractionnum++;
+                socket.emit("pa", {a: pa + "0", n: this.playeractionnum});
 
-                this.world.setPlayerAction(this.playername, pa + "0");
+                this.world.setPlayerAction(this.playername, pa + "0", this.playeractionnum);
             }
 
         }
@@ -259,7 +261,8 @@ var obj = {
 
         this._keysdown = [];
 
-        socket.emit("pa", "as"); //allstop!!
+        this.playeractionnum++;
+        socket.emit("pa", {a:"as", n: this.playeractionnum}); //allstop!!
     },
 
     _update: function() {

@@ -1,4 +1,18 @@
 define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
+
+    // Zeitfunktion
+    var supportsPerformanceNow = false;
+    if(performance && performance.now && typeof(performance.now) == "function") {
+        supportsPerformanceNow = true;
+    }
+    var getTime = function() {
+        if(supportsPerformanceNow) {
+            return performance.now();
+        } else {
+            return Date.now();
+        }
+    }
+
     var obj = {
 
         objects: [],
@@ -8,66 +22,68 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
         ],
 
-        lastupdate: Date.now(),
+        lastupdate: getTime(),
 
         cfg: {},
 
-        actionstack: {},
+        astack: {},
 
         _init: function(name) {
             //name = Worldname
 
         },
 
-        setPlayerAction: function(playername, action) {
+        setPlayerAction: function(playername, action, num) {
 
-            /*
-            var ao = this.actionstack[playername];
+            var playeractionstack = this.astack[playername];
 
-            if(!ao) {
-                ao = {};
+            if(!playeractionstack) {
+                playeractionstack = [];
             }
 
-            ao = gl.actionCode2actionStackObject(action, ao);
+            playeractionstack.push({ action: action, num: num });
 
-            if(ao) {
-                this.actionstack[playername] = ao;
-            }
-            */
+            this.astack[playername] = playeractionstack;
 
         },
 
         /*
              Ein neues Update kam vom Server
          */
-        updateFromServer: function(worldobjects) {
-            //TEST DIFFERENZ
+        updateFromServer: function(worldobjects, oldplayer, playername) {
 
-            /*
-            var w_player = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == "user"; });
-            var c_player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == "user"; });
+            var newplayer = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == playername; });
 
-            if(w_player && c_player) {
+            if(oldplayer) {
+                // Änderungen am Spieler nur, wenn noch nicht lokal durchgeführt
 
-                for(var key in w_player) {
+                if(newplayer.lastaction < oldplayer.lastaction) {
 
-                    if(key != "x" && key != "y" && w_player[key] && c_player[key] && w_player[key] != c_player[key]) {
 
-                        console.log("w." + key + "=" + w_player[key]);
-                        console.log("c." + key + "=" + c_player[key]);
+                    newplayer = oldplayer;
+                    /*
+                    var keys = ["thrusting",
+                                "breaking",
+                                "rturning",
+                                "lturning",
+                                "stopping",
+                                "shooting",
+                                "shooting2"];
 
-                    }
-
+                    _.each(keys, function(key) {
+                        if(newplayer[key] != oldplayer[key]) {
+                            newplayer[key] = oldplayer[key];
+                        }
+                    });
+                    */
                 }
-
             }
-            */
-
 
             this.objects = this.localobjects.concat(worldobjects);
 
-            this.lastupdate = Date.now();
+            this.lastupdate = getTime();
 
+            return newplayer;
         },
 
         /*
@@ -78,9 +94,9 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
         update: function(playername, latency) {
             var _this = this;
 
-            if(!latency) { latency = 0; }
+            if(!latency) { latency = 0; } //todo: saubermachen
 
-            var thistime = Date.now(); // + latency;
+            var thistime = getTime(); // + latency; //todo: saubermachen
             var secselapsed = (thistime - this.lastupdate) / 1000;
             this.lastupdate = thistime;
 
@@ -89,7 +105,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
             _.each(this.objects, function(obj) {
 
-                gl.updateObj(_this.cfg, obj, secselapsed, _this.actionstack);
+                gl.updateObj(_this.cfg, obj, secselapsed, _this.astack); //todo: saubermachen
 
                 //ist es der aktuelle spieler
                 if(obj.type == "player" && obj.name == playername) {
@@ -99,7 +115,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
             });
 
             //actionstack leeren
-            this.actionstack = {};
+            this.astack = {};
 
             return act;
 
