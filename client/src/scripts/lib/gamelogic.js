@@ -276,7 +276,7 @@
         if(obj.type == "player") {
             //this._checkPlayerCollisions(obj, secselapsed, thistime);
             if(astack) {
-                setPlayerActions(obj,astack);
+                //setPlayerActions(obj,astack);
             }
             updatePlayerObject(cfg, obj, secselapsed);
         }

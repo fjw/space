@@ -115,7 +115,8 @@ exports = module.exports = function(worldname) {
             });
 
             req.on("setplayeraction", function(data, respond) {
-                _this.setPlayerAction(data.name, data.action, respond);
+                var player = _this.setPlayerAction(data.name, data.action);
+                respond({player: player});
             });
 
             // Masterzeit initial und regelmässig synchen
@@ -147,13 +148,14 @@ exports = module.exports = function(worldname) {
             });
 
             //Actionstack Responses ausführen und dann leeren
+            /*
             for(var playername in this.astack) {
                 var player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
 
                 _.each(this.astack[playername], function(ao) {
                     ao.respond({player:player});
                 });
-            }
+            }*/
             this.astack = {};
         },
 
@@ -175,8 +177,8 @@ exports = module.exports = function(worldname) {
             return player;
         },
 
-        setPlayerAction: function(playername, action, respond) {
-
+        setPlayerAction: function(playername, action) {
+/*
             var playeractionstack = this.astack[playername];
 
             if(!playeractionstack) {
@@ -186,6 +188,81 @@ exports = module.exports = function(worldname) {
             playeractionstack.push({ action: action, respond: respond });
 
             this.astack[playername] = playeractionstack;
+  */
+
+            var player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
+
+
+            var setactioncode = function(action, ao) {
+
+                switch(action) {
+
+                    case "t1":
+                        ao.thrusting = true;
+                        break;
+                    case "t0":
+                        ao.thrusting = false;
+                        break;
+                    case "b1":
+                        ao.breaking = true;
+                        break;
+                    case "b0":
+                        ao.breaking = false;
+                        break;
+
+                    case "r1":
+                        ao.rturning = true;
+                        break;
+                    case "r0":
+                        ao.rturning = false;
+                        break;
+                    case "l1":
+                        ao.lturning = true;
+                        break;
+                    case "l0":
+                        ao.lturning = false;
+                        break;
+
+                    case "s1":
+                        ao.stopping = true;
+                        break;
+                    case "s0":
+                        ao.stopping = false;
+                        break;
+
+                    case "sa1":
+                        ao.shooting = true;
+                        break;
+                    case "sa0":
+                        ao.shooting = false;
+                        break;
+
+                    case "sb1":
+                        ao.shooting2 = true;
+                        break;
+                    case "sb0":
+                        ao.shooting2 = false;
+                        break;
+
+                    case "as":
+                        ao.thrusting = false;
+                        ao.breaking = false;
+                        ao.rturning = false;
+                        ao.lturning = false;
+                        ao.stopping = false;
+                        ao.shooting = false;
+                        ao.shooting2 = false;
+                        break;
+
+                }
+
+                return ao;
+
+            };
+
+            setactioncode(action, player);
+            return player;
+
         },
 
         // ---------
