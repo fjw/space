@@ -54,6 +54,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
             var newplayer = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == playername; });
 
+            /*
             if(oldplayer) {
 
                 // Änderungen am Spieler nur, wenn noch nicht lokal durchgeführt
@@ -89,6 +90,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
                 }
             }
+            */
 
             this.objects = this.localobjects.concat(worldobjects);
 

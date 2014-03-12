@@ -115,7 +115,7 @@ exports = module.exports = function(worldname) {
             });
 
             req.on("setplayeraction", function(data, respond) {
-                _this.setPlayerAction(data.name, data.action, data.num);
+                _this.setPlayerAction(data.name, data.action, data.actiontime);
                 respond(null);
             });
 
@@ -169,7 +169,7 @@ exports = module.exports = function(worldname) {
             return player;
         },
 
-        setPlayerAction: function(playername, action, num) {
+        setPlayerAction: function(playername, action, actiontime) {
 
             var playeractionstack = this.astack[playername];
 
@@ -177,7 +177,12 @@ exports = module.exports = function(worldname) {
                 playeractionstack = [];
             }
 
-            playeractionstack.push({ action: action, num: num });
+            var timediff = getTime() - actiontime;
+
+            if(timediff < 0) { timediff = 0; }
+            if(timediff > 1000) { timediff = 1000; }
+
+            playeractionstack.push({ action: action, timediff: timediff });
 
             this.astack[playername] = playeractionstack;
         },

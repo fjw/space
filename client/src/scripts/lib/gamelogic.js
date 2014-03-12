@@ -185,15 +185,29 @@
         //neue Action
         var playeractionstack = astack[obj.name];
 
+        var timediff = 0;
         if (playeractionstack) {
 
             for( var i = 0; i < playeractionstack.length; i++ ) {
 
                 setactioncode(playeractionstack[i].action, obj);
-                obj.lastaction = playeractionstack[i].num;
+                if(playeractionstack[i].timediff) {
+                    timediff += playeractionstack[i].timediff;
+                }
+
             }
 
+            return timediff / playeractionstack.length; //Durchschnitt (kommt wahrschnl. kaum vor, da immer nur eine Action in der Kürze der Zeit)
+
         }
+
+        return 0;
+    };
+
+    var testfunc = function(cfg, obj, secselapsed, astack) { //todo: saubermachen
+
+        var timediff = setPlayerActions(obj, astack);
+        updatePlayerObject(cfg, obj, secselapsed + timediff/1000);
 
     };
 
@@ -274,8 +288,9 @@
 
         if(obj.type == "player") {
             //this._checkPlayerCollisions(obj, secselapsed, thistime);
-            setPlayerActions(obj,astack);
-            updatePlayerObject(cfg, obj, secselapsed);
+            //setPlayerActions(obj,astack);
+            //updatePlayerObject(cfg, obj, secselapsed);
+            testfunc(cfg, obj, secselapsed, astack);
         }
 
 

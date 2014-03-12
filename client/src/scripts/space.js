@@ -215,7 +215,7 @@ var obj = {
 
                 if (pa) {
                     this.playeractionnum++;
-                    socket.emit("pa", {a: pa + "1", n: this.playeractionnum});
+                    socket.emit("pa", {a: pa + "1", n: this.playeractionnum, t: this.getServerTime()});
 
                     this.world.setPlayerAction(this.playername, pa + "1", this.playeractionnum);
                 }
@@ -249,7 +249,7 @@ var obj = {
 
             if (pa) {
                 this.playeractionnum++;
-                socket.emit("pa", {a: pa + "0", n: this.playeractionnum});
+                socket.emit("pa", {a: pa + "0", n: this.playeractionnum, t: this.getServerTime()});
 
                 this.world.setPlayerAction(this.playername, pa + "0", this.playeractionnum);
             }
@@ -262,7 +262,7 @@ var obj = {
         this._keysdown = [];
 
         this.playeractionnum++;
-        socket.emit("pa", {a:"as", n: this.playeractionnum}); //allstop!!
+        socket.emit("pa", {a:"as", n: this.playeractionnum, t: this.getServerTime()}); //allstop!!
     },
 
     _update: function() {

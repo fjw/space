@@ -216,9 +216,9 @@ exports = module.exports = function(worldname) {
             return getTime();
         },
 
-        setPlayerAction: function(playername, action, num) {
+        setPlayerAction: function(playername, action, actiontime) {
 
-            request("setplayeraction", { name: playername, action: action, num: num });
+            request("setplayeraction", { name: playername, action: action, actiontime: actiontime });
 
         }
 
