@@ -1,4 +1,7 @@
 define(["lodash", "ftools"], function(_, ft) { return function(updateCallback, allLoadedCallback) {
+
+
+
 var obj = {
 
     updateCallback: updateCallback,
@@ -387,9 +390,9 @@ var obj = {
         ctx.beginPath();
         ft.each(p, function(point, i) {
             if( i == 0 ) {
-                ctx.moveTo(ft.round(point.x + fx), ft.round(point.y + fy));
+                ctx.moveTo(point.x + fx, point.y + fy);
             } else {
-                ctx.lineTo(ft.round(point.x + fx), ft.round(point.y + fy));
+                ctx.lineTo(point.x + fx, point.y + fy);
             }
         });
         ctx.closePath();
@@ -463,28 +466,25 @@ var obj = {
             if(cfg && cfg.zoom) {
 
                 this._layerViewportCtx.drawImage( img,
-                    ft.round((fx - cx)*cfg.zoom),
-                    ft.round((fy - cy)*cfg.zoom),
-                    ft.round(img.width*cfg.zoom),
-                    ft.round(img.height*cfg.zoom)
+                    (fx - cx)*cfg.zoom,
+                    (fy - cy)*cfg.zoom,
+                    img.width*cfg.zoom,
+                    img.height*cfg.zoom
                 );
 
             } else if(cfg && cfg.scale) {
 
                 this._layerViewportCtx.drawImage( img,
-                    ft.round(fx - cx*cfg.scale),
-                    ft.round(fy - cy*cfg.scale),
-                    ft.round(img.width*cfg.scale),
-                    ft.round(img.height*cfg.scale)
+                    fx - cx*cfg.scale,
+                    fy - cy*cfg.scale,
+                    img.width*cfg.scale,
+                    img.height*cfg.scale
                 );
 
             } else {
 
 
-                this._layerViewportCtx.drawImage( img,
-                    ft.round(fx - cx),
-                    ft.round(fy - cy)
-                );
+                this._layerViewportCtx.drawImage( img, fx - cx, fy - cy);
 
             }
 
@@ -500,10 +500,7 @@ var obj = {
         var fx = x - this._layerViewportX[layer];
         var fy = y - this._layerViewportY[layer];
 
-        this._layerViewportCtx.drawImage(image,
-            ft.round(fx),
-            ft.round(fy)
-        );
+        this._layerViewportCtx.drawImage(image, fx, fy);
 
     },
 

@@ -55,13 +55,12 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
             var newplayer = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == playername; });
 
             if(oldplayer) {
-                // Änderungen am Spieler nur, wenn noch nicht lokal durchgeführt
 
+                // Änderungen am Spieler nur, wenn noch nicht lokal durchgeführt
                 if(newplayer.lastaction < oldplayer.lastaction) {
 
 
-                    newplayer = oldplayer;
-                    /*
+                    //Werte nicht annehmen
                     var keys = ["thrusting",
                                 "breaking",
                                 "rturning",
@@ -75,7 +74,19 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
                             newplayer[key] = oldplayer[key];
                         }
                     });
-                    */
+
+                    //Werte interpolieren
+                    var keys = ["va",
+                                "ma",
+                                "s",
+                                "x", "y"];
+
+                    _.each(keys, function(key) {
+                        if(newplayer[key] != oldplayer[key]) {
+                            newplayer[key] = (oldplayer[key] + newplayer[key]) / 2;
+                        }
+                    });
+
                 }
             }
 

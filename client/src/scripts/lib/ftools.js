@@ -73,8 +73,8 @@
         round: function(num) {
             //fast Round-implementation
 
-            return num;
-            //return Math.round(num);
+            //return num;
+            return Math.round(num);
             //return (num+0.5)|0;
         },
 

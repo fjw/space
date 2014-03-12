@@ -157,7 +157,7 @@ exports = module.exports = function(worldname) {
                 type: "player",
                 x: 0, y: 0,      //Koordinaten
                 ma: 45,           //Bewegungswinkel
-                s: 100,            //Speed
+                s: 0,//100            //Speed
                 va: 135.9234567890123,         //Sichtwinkel
                 cr: 18,          //Kollisionsradius
                 e: 100,          //Energie

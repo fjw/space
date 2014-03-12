@@ -26,11 +26,11 @@ var obj = {
     canvas: null,
     ctx: null,
 
-    cw: 0,
-    ch: 0,
+    cw: 0, // Canvas-Breite
+    ch: 0, // Canvas-Höhe
 
-    mx: 0,
-    my: 0,
+    mx: 0, // Canvas-Mitte-X
+    my: 0, // Canvas-Mitte-Y
     //--------------------
 
     world: null,
@@ -108,7 +108,7 @@ var obj = {
             var thistime = getTime();
 
             //momentaner Lag
-            _this.latency = thistime - _this._lastping;
+            _this.latency = ft.round(thistime - _this._lastping);
 
             //clocksync
             _this._serverClockDiv = datenow - thistime;
@@ -313,15 +313,15 @@ var obj = {
 
         if (this.fps > 25) {
             this.ctx.fillStyle = "#0a0";
-            this.ctx.fillText( this.fps, this.cw - 30, 15);
+            this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
         } else {
             this.ctx.fillStyle = "#a00";
-            this.ctx.fillText( this.fps, this.cw - 30, 15);
+            this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
         }
 
         //Latency anzeigen
-        this.ctx.fillStyle = "#66f";
-        this.ctx.fillText( this.latency, this.cw - 30, 30);
+        this.ctx.fillStyle = "#ccc";
+        this.ctx.fillText( this.latency.toString(), this.cw - 30, 30);
 
 
     },
