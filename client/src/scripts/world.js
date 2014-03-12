@@ -26,77 +26,26 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
         cfg: {},
 
-        astack: {},
-
         _init: function(name) {
             //name = Worldname
 
         },
 
-        setPlayerAction: function(playername, action, num) {
-/*
-            var playeractionstack = this.astack[playername];
-
-            if(!playeractionstack) {
-                playeractionstack = [];
-            }
-
-            playeractionstack.push({ action: action, num: num });
-
-            this.astack[playername] = playeractionstack;
-*/
-        },
 
         /*
              Ein neues Update kam vom Server
          */
-        updateFromServer: function(worldobjects, oldplayer, playername) {
-
-            var newplayer = _.find(worldobjects, function(obj) { return obj.type == "player" && obj.name == playername; });
-
-            /*
-            if(oldplayer) {
-
-                // Änderungen am Spieler nur, wenn noch nicht lokal durchgeführt
-                if(newplayer.lastaction < oldplayer.lastaction) {
-
-
-                    //Werte nicht annehmen
-                    var keys = ["thrusting",
-                                "breaking",
-                                "rturning",
-                                "lturning",
-                                "stopping",
-                                "shooting",
-                                "shooting2"];
-
-                    _.each(keys, function(key) {
-                        if(newplayer[key] != oldplayer[key]) {
-                            newplayer[key] = oldplayer[key];
-                        }
-                    });
-
-                    //Werte interpolieren
-                    var keys = ["va",
-                                "ma",
-                                "s",
-                                "x", "y"];
-
-                    _.each(keys, function(key) {
-                        if(newplayer[key] != oldplayer[key]) {
-                            newplayer[key] = (oldplayer[key] + newplayer[key]) / 2;
-                        }
-                    });
-
-                }
-            }
-            */
+        updateFromServer: function(worldobjects) {
 
             this.objects = this.localobjects.concat(worldobjects);
 
             this.lastupdate = getTime();
 
-            return newplayer;
+        },
+
+        updatePlayerFromServer: function(player) {
+            this.objects = _.reject(this.objects, function(obj) { return obj.type == "player" && obj.name == player.name; });
+            this.objects.push(player);
         },
 
         /*

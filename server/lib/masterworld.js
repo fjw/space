@@ -115,8 +115,7 @@ exports = module.exports = function(worldname) {
             });
 
             req.on("setplayeraction", function(data, respond) {
-                _this.setPlayerAction(data.name, data.action, data.actiontime);
-                respond(null);
+                _this.setPlayerAction(data.name, data.action, respond);
             });
 
             // Masterzeit initial und regelmässig synchen
@@ -147,7 +146,14 @@ exports = module.exports = function(worldname) {
 
             });
 
-            //Actionstack leeren
+            //Actionstack Responses ausführen und dann leeren
+            for(var playername in this.astack) {
+                var player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
+
+                _.each(this.astack[playername], function(ao) {
+                    ao.respond({player:player});
+                });
+            }
             this.astack = {};
         },
 
@@ -169,7 +175,7 @@ exports = module.exports = function(worldname) {
             return player;
         },
 
-        setPlayerAction: function(playername, action, actiontime) {
+        setPlayerAction: function(playername, action, respond) {
 
             var playeractionstack = this.astack[playername];
 
@@ -177,12 +183,7 @@ exports = module.exports = function(worldname) {
                 playeractionstack = [];
             }
 
-            var timediff = getTime() - actiontime;
-
-            if(timediff < 0) { timediff = 0; }
-            if(timediff > 1000) { timediff = 1000; }
-
-            playeractionstack.push({ action: action, timediff: timediff });
+            playeractionstack.push({ action: action, respond: respond });
 
             this.astack[playername] = playeractionstack;
         },

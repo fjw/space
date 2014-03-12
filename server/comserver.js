@@ -88,7 +88,8 @@ new USERCONNECTOR(port, function(c) {
                      world.getVisibleObjects(c.username, function(objects, player) {
 
                          c.emit("wu", {
-                             objects: objects
+                             objects: objects,
+                             player: player
                          });
                      });
 
@@ -103,7 +104,9 @@ new USERCONNECTOR(port, function(c) {
             c.on("pa", function(data) {
                 // Playeraction
 
-                world.setPlayerAction(c.username, data.a, data.t);
+                world.setPlayerAction(c.username, data.a, function(nplayer) {
+                    c.emit("wpu", { player: nplayer });
+                });
             });
 
             c.on("pi", function(datenow) {
