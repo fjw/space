@@ -9,10 +9,8 @@ var zmq = require('zmq');
 // ----------------------------------------------
 
 var starttime = 0;
-var getTime = function() { // holt die aktuelle Zeit der Welt in ms, auf 4 Nachkommastellen genau
-    var t = process.hrtime();
-    var tt = ((t[0] * 1e9 + t[1]) / 1e6) - starttime;
-    return ((tt * 1e4)|0)/1e4;
+var getTime = function() {
+    return Date.now() - starttime;
 };
 
 var lasttime = 0;
@@ -60,7 +58,12 @@ exports = module.exports = function(worldname) {
         // ------------
 
         statics: [],
-        objects: [],
+        objects: [
+
+            //debug
+            {  type: "player", x:0, y:0, s:0, ma:0, va:0, cr:18, e:100, name: "monkey" }
+
+        ],
         cfg: {},
 
         // -----------
@@ -151,12 +154,20 @@ exports = module.exports = function(worldname) {
             // aktuelle Zeit
             var thistime = getTime(); //todo: alle Zeitmessungen auf Sekunden umstellen (weniger Berechnungen!!)
             var secselapsed = (thistime - lasttime) / 1000;
+
+            if (secselapsed > 1 || secselapsed < -1) {
+                console.log("l: "+lasttime);
+                console.log("t: "+thistime);
+                console.log("sss"+secselapsed);
+            }
+
             lasttime = thistime;
 
             _.each(this.objects, function(obj) {
 
                 if(obj.type == "player") {
                     _this.checkPlayerEvents(obj, thistime);
+                    _this.checkPlayerCollisions(obj, thistime);
                 }
 
                 gl.updateObj(_this.cfg, obj, secselapsed, _this.statics);
@@ -179,10 +190,10 @@ exports = module.exports = function(worldname) {
             var player = {
                 type: "player",
 
-                x: 0, y: 0,             //Koordinaten
-                ma: 45,                 //Bewegungswinkel
-                s: 0,//100              //Speed
-                va: 135.9234567890123,  //Sichtwinkel
+                x: -106, y: -494,       //Koordinaten
+                ma: 188,                //Bewegungswinkel
+                s:  this.cfg.player.maxspeed / 2, //Speed
+                va: 188,                //Sichtwinkel
 
                 cr: this.cfg.player.cr,          //Kollisionsradius
                 e:  this.cfg.player.maxenergy,   //Starte mit max. Energie
@@ -279,6 +290,8 @@ exports = module.exports = function(worldname) {
 
         },
 
+
+
         playerShoot: function(player, type, thistime) {
 
             // Config und Zeitpunkt des letzten Schußes holen
@@ -301,9 +314,9 @@ exports = module.exports = function(worldname) {
                     ma: bas.a,
                     s: bas.s,
                     o: player.name,
-                    cr: bcfg.cr, //todo: performance: alle crs über config und nicht mit übertragen! (auch bei player)
+                    cr: bcfg.cr,
                     t: thistime,
-                    ad: bcfg.lifetime //todo: performance: alle lifetimes über config und nicht mit übertragen! (auch bei player)
+                    ad: bcfg.lifetime
                 };
 
                 // Objekt hinzu
@@ -314,6 +327,81 @@ exports = module.exports = function(worldname) {
 
                 // Energie für Schuß abziehen
                 player.e -= bcfg.edrain;
+            }
+
+        },
+
+        checkPlayerCollisions: function(obj, thistime) {
+            var _this = this;
+
+            // wenn Spieler nicht inaktiv oder am explodieren
+            if(!obj.inactive && !obj.exploding) {
+
+                // alle objekte durchgehen
+                _.each(this.objects, function(proj) {
+
+                    // wenn es ein Projektiltyp ist && Spieler nicht der Besitzer && Radien überlappen
+                    if( (proj.type == "bullet" || proj.type == "bomb" || proj.type == "explosion") &&
+                        proj.o != obj.name &&
+                        vector.vectorAbs(proj.x - obj.x, proj.y - obj.y) < obj.cr + proj.cr) {
+
+                        // Spieler getroffen!!
+
+                        if (proj.type == "bullet") {
+                            //direkter Treffer mit Bullet
+
+                            //emitiere einen partikel
+                            var r = vector.getRandomNumber(5, 6);
+
+                            var particle = {
+                                type: "bullethit",
+
+                                x: proj.x,
+                                y: proj.y,
+                                ma: proj.ma,
+                                s: 200,
+                                o: obj.name,
+                                cr: r,
+                                t: thistime,
+                                isanim: true,
+                                ad: 0.5,
+                                scale: (2*r) / 12
+                            };
+
+                            _this.objects.push(particle);
+
+                        }
+
+                        if (proj.type == "bomb") {
+                            //direkter Treffer mit Bombe
+
+
+                        }
+
+                        if (proj.type == "explosion") {
+                            //Kollateralschaden durch Explosion
+
+
+
+                        }
+
+                        // Projektil beim nächsten durchlauf löschen
+                        proj.dead = true;
+
+                        // Energie abziehen
+                        obj.e = obj.e - _this.cfg.projectiles[proj.type].dmg;
+
+
+                        if(obj.e < 0) {
+                            obj.dead = true;
+                        }
+
+
+                    }
+
+
+                });
+
             }
 
         },

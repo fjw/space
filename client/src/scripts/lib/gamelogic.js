@@ -130,6 +130,7 @@
             v = vector.angleAbs2vector( vector.angleInBoundaries(obj.va-180), cfgp.backacceleration * secselapsed );
         }
 
+
         if (obj.thrusting || obj.breaking) {
             // Beschleunigungsvektor addieren (falls vorhanden)
             var m = vector.angleAbs2vector(obj.ma, obj.s);
@@ -147,6 +148,7 @@
                 obj.s = cfgp.maxspeed;
             }
         }
+
 
         // Bremsen (zum Stoppen)
         if (obj.stopping) {

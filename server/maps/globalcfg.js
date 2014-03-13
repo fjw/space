@@ -18,7 +18,7 @@ exports = module.exports = {
         cr: 18                      // Kollisionsradius (px)
     },
 
-    // ---- Projektile / Partikel
+    // ---- Projektile
     projectiles: {
 
         bullet: {                   // --- einfacher Schuß
@@ -31,5 +31,6 @@ exports = module.exports = {
         }
 
     }
+
 
 };

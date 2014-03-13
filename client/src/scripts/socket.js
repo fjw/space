@@ -3,7 +3,7 @@ var obj = {
 
 	sock: null,
 
-    hostname: "ws://localhost:4004",
+    hostname: "ws://"+document.location.hostname+":4004",
     username: false,
 
     lastping: 0,
@@ -11,7 +11,7 @@ var obj = {
     _init: function() {
 
         if(window.env && window.env == "production") {
-            this.hostname = "ws://109.239.49.151:443";
+            this.hostname = "ws://"+document.location.hostname+":443";
         }
 
     },

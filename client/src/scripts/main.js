@@ -28,7 +28,10 @@ require([
 
     window.debug = 1; // 3 = logge auch updates, 2 = Zeige Vektorlinien
 
-    if (document.location.href == "http://localhost:8090/" || document.location.href == "http://192.168.178.27:8090/") {
+    if (document.location.href == "http://localhost:8090/" ||
+        document.location.href == "http://192.168.178.27:8090/" ||
+        document.location.href == "http://bitbox:8090/") {
+
         window.env = "dev";
     } else {
         window.env = "production";

@@ -87,5 +87,13 @@ exports = module.exports = function() {
     };
 
 
+    this.getRandomNumber = function(min, max) {
+        return Math.round(min + (Math.random()*(max-min)));
+    };
+
+    this.getRandomFloat = function(min, max) {
+        return min + (Math.random()*(max-min));
+    };
+
     return this;
 };
