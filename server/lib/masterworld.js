@@ -1,5 +1,6 @@
 var _ = require( __dirname + "/lodash.js");
 var gl = require( __dirname + "/gamelogic.js");
+var vector = new require( __dirname + "/vector.js")();
 var zmq = require('zmq');
 
 
@@ -60,7 +61,6 @@ exports = module.exports = function(worldname) {
 
         statics: [],
         objects: [],
-        astack: {},
         cfg: {},
 
         // -----------
@@ -101,64 +101,68 @@ exports = module.exports = function(worldname) {
                 });
             });
 
-            // Responder Events
+            // ----------------------------------------------------------------------
+            // ----------------------------------------------------------------------
+
+            // slave verlangt die aktuellen Objekte der Welt
             req.on("getobjects", function(data, respond) {
                 respond({ objects: _this.objects, time: getTime() });
             });
 
+            // slave verlangt die statics und die config, um sich zu initialisieren
             req.on("getstaticdata", function(data, respond) {
                 respond({ statics: _this.statics, cfg: _this.cfg, mastertime: getTime()});
             });
 
+            // slave möchte einen spieler spawnen
             req.on("spawnplayer", function(data, respond) {
                 respond({ player: _this.spawnPlayer(data.name) });
             });
 
+            // slave hat eine action empfangen, möchte diese verarbeiten lassen und braucht dann den verarbeiteten spieler
             req.on("setplayeraction", function(data, respond) {
                 var player = _this.setPlayerAction(data.name, data.action);
                 respond({player: player});
             });
 
-            // Masterzeit initial und regelmässig synchen
+            // ----------------------------------------------------------------------
+            // ----------------------------------------------------------------------
+
+            // Synchronisere die masterzeit mit allen slaves
             publish("timesync", {mastertime: getTime()});
             setInterval(function(){
                 publish("timesync", {mastertime: getTime()});
             }, 10000);
 
+            // ----------------------------------------------------------------------
+            // ----------------------------------------------------------------------
 
         },
 
         // ----------
 
         /*
-            Main-Loop, update die Welt
+            Main-Loop, updated die Welt
          */
         update: function() {
             var _this = this;
 
             // aktuelle Zeit
             var thistime = getTime();
-            var mselapsed = thistime - lasttime;
+            var secselapsed = (thistime - lasttime) / 1000;
             lasttime = thistime;
 
             _.each(this.objects, function(obj) {
 
-                gl.updateObj(_this.cfg, obj, mselapsed / 1000, _this.astack); //todo: saubermachen (ms)
+                gl.updateObj(_this.cfg, obj, secselapsed, _this.statics);
 
             });
 
-            //Actionstack Responses ausführen und dann leeren
-            /*
-            for(var playername in this.astack) {
-                var player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
-
-                _.each(this.astack[playername], function(ao) {
-                    ao.respond({player:player});
-                });
-            }*/
-            this.astack = {};
         },
 
+        /*
+            Spawnt einen Spieler in der Welt
+         */
         spawnPlayer: function(playername) {
 
             var player = {
@@ -177,92 +181,76 @@ exports = module.exports = function(worldname) {
             return player;
         },
 
+
+        /*
+            Wendet eine Änderung je nach Actioncode auf den Spieler an und gibt diesen zurück
+         */
         setPlayerAction: function(playername, action) {
-/*
-            var playeractionstack = this.astack[playername];
-
-            if(!playeractionstack) {
-                playeractionstack = [];
-            }
-
-            playeractionstack.push({ action: action, respond: respond });
-
-            this.astack[playername] = playeractionstack;
-  */
 
             var player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
 
+            switch(action) {
 
-            var setactioncode = function(action, ao) {
+                case "t1":
+                    player.thrusting = true;
+                    break;
+                case "t0":
+                    player.thrusting = false;
+                    break;
+                case "b1":
+                    player.breaking = true;
+                    break;
+                case "b0":
+                    player.breaking = false;
+                    break;
 
-                switch(action) {
+                case "r1":
+                    player.rturning = true;
+                    break;
+                case "r0":
+                    player.rturning = false;
+                    break;
+                case "l1":
+                    player.lturning = true;
+                    break;
+                case "l0":
+                    player.lturning = false;
+                    break;
 
-                    case "t1":
-                        ao.thrusting = true;
-                        break;
-                    case "t0":
-                        ao.thrusting = false;
-                        break;
-                    case "b1":
-                        ao.breaking = true;
-                        break;
-                    case "b0":
-                        ao.breaking = false;
-                        break;
+                case "s1":
+                    player.stopping = true;
+                    break;
+                case "s0":
+                    player.stopping = false;
+                    break;
 
-                    case "r1":
-                        ao.rturning = true;
-                        break;
-                    case "r0":
-                        ao.rturning = false;
-                        break;
-                    case "l1":
-                        ao.lturning = true;
-                        break;
-                    case "l0":
-                        ao.lturning = false;
-                        break;
+                case "sa1":
+                    player.shooting = true;
+                    break;
+                case "sa0":
+                    player.shooting = false;
+                    break;
 
-                    case "s1":
-                        ao.stopping = true;
-                        break;
-                    case "s0":
-                        ao.stopping = false;
-                        break;
+                case "sb1":
+                    player.shooting2 = true;
+                    break;
+                case "sb0":
+                    player.shooting2 = false;
+                    break;
 
-                    case "sa1":
-                        ao.shooting = true;
-                        break;
-                    case "sa0":
-                        ao.shooting = false;
-                        break;
+                case "as":
+                    player.thrusting = false;
+                    player.breaking = false;
+                    player.rturning = false;
+                    player.lturning = false;
+                    player.stopping = false;
+                    player.shooting = false;
+                    player.shooting2 = false;
+                    break;
 
-                    case "sb1":
-                        ao.shooting2 = true;
-                        break;
-                    case "sb0":
-                        ao.shooting2 = false;
-                        break;
+            }
 
-                    case "as":
-                        ao.thrusting = false;
-                        ao.breaking = false;
-                        ao.rturning = false;
-                        ao.lturning = false;
-                        ao.stopping = false;
-                        ao.shooting = false;
-                        ao.shooting2 = false;
-                        break;
-
-                }
-
-                return ao;
-
-            };
-
-            setactioncode(action, player);
             return player;
-
         },
 
         // ---------

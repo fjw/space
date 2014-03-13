@@ -5,12 +5,11 @@ if( env == 'production' ) { require('newrelic'); }
 // -----------------------------------
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
-vector = new require( __dirname + "/lib/vector.js")();
+_ = require( __dirname + "/lib/lodash.js");
 
 var zmq = require('zmq');
 var servercfg = require( __dirname + "/lib/servercfg.js");
 var colors  = require('colors');
-var _ = require( __dirname + "/lib/lodash.js");
 var WORLD = require( __dirname + "/lib/masterworld.js");
 // -----------------------------------
 

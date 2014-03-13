@@ -105,98 +105,6 @@
 
     /* ---------------------------------------------------------------------------------------------- */
 
-    var setactioncode = function(action, ao) {
-
-        switch(action) {
-
-            case "t1":
-                ao.thrusting = true;
-                break;
-            case "t0":
-                ao.thrusting = false;
-                break;
-            case "b1":
-                ao.breaking = true;
-                break;
-            case "b0":
-                ao.breaking = false;
-                break;
-
-            case "r1":
-                ao.rturning = true;
-                break;
-            case "r0":
-                ao.rturning = false;
-                break;
-            case "l1":
-                ao.lturning = true;
-                break;
-            case "l0":
-                ao.lturning = false;
-                break;
-
-            case "s1":
-                ao.stopping = true;
-                break;
-            case "s0":
-                ao.stopping = false;
-                break;
-
-            case "sa1":
-                ao.shooting = true;
-                break;
-            case "sa0":
-                ao.shooting = false;
-                break;
-
-            case "sb1":
-                ao.shooting2 = true;
-                break;
-            case "sb0":
-                ao.shooting2 = false;
-                break;
-
-            case "as":
-                ao.thrusting = false;
-                ao.breaking = false;
-                ao.rturning = false;
-                ao.lturning = false;
-                ao.stopping = false;
-                ao.shooting = false;
-                ao.shooting2 = false;
-                break;
-
-        }
-
-        return ao;
-
-    };
-
-    /* ---------------------------------------------------------------------------------------------- */
-
-
-    /*
-        Wendet Userbasierte Änderungen auf ein PlayerObjekt an.
-
-        Änderungen des Status kommen aus dem Actionstack.
-     */
-    var setPlayerActions = function(obj, astack) {
-
-        //neue Action
-        var playeractionstack = astack[obj.name];
-
-        if (playeractionstack) {
-
-            for( var i = 0; i < playeractionstack.length; i++ ) {
-
-                setactioncode(playeractionstack[i].action, obj);
-
-            }
-
-        }
-
-    };
-
 
     /*
         Wendet Änderungen auf einen Player an
@@ -260,24 +168,106 @@
 
     };
 
+
+    var checkStaticCollisions = function(cfg, obj, statics) {
+
+
+        var collided = false;
+
+        for( var i = 0, len = statics.length; i < len; i++ ) {
+
+            var stat = statics[i];
+
+            // dieser static hat cp? => kann kollidieren?
+            // es kann immer nur mit EINEM static pro Loop kollidiert werden!
+            // Reichweite abchecken durch BoundingBox
+            if( stat.cps && !collided && vector.isBoxOverlap(obj.x - obj.cr, obj.y - obj.cr,
+                obj.cr * 2, obj.cr * 2,
+                stat.x, stat.y,
+                stat.w, stat.h)) {
+
+
+                // Kollisionen suchen
+                var clplist = [];
+                _.each(stat.cps, function(cp) {
+                    var dpp = vector.distancePointFromPath(obj.x, obj.y, cp.x1 + stat.x, cp.y1 + stat.y, cp.x2 + stat.x, cp.y2 + stat.y);
+
+                    if (dpp.d < obj.cr) {
+
+                        clplist.push({
+                            dpp: dpp,
+                            cp: cp
+                        });
+                    }
+                });
+
+                if (clplist.length > 0) {
+
+                    var clpa, sx, sy;
+                    if (clplist.length > 1) {
+                        //mehrere Kollisionen, zwischenwinkel ermitteln
+                        var sum = _.reduce(clplist, function(memo, item){ return memo + vector.directionlessAngle(item.cp.a); }, 0);
+                        clpa = sum / clplist.length;
+
+                        var xsum = _.reduce(clplist, function(memo, item){ return memo + item.dpp.sx; }, 0);
+                        sx = xsum / clplist.length;
+
+                        var ysum = _.reduce(clplist, function(memo, item){ return memo + item.dpp.sy; }, 0);
+                        sy = ysum / clplist.length;
+
+                    } else {
+                        clpa = clplist[0].cp.a;
+                        sx = clplist[0].dpp.sx;
+                        sy = clplist[0].dpp.sy;
+                    }
+
+                    // !Kollision!
+
+                    // Einfallswinkel gleich Ausfallswinkel
+                    obj.ma = vector.angleInBoundaries(2 * clpa - obj.ma);
+
+                    // Objekt im rechten Winkel verschieben aus dem Kollisionsradius schieben
+                    var cdx = obj.x - sx;
+                    var cdy = obj.y - sy;
+                    var b = vector.vectorAbs(cdx, cdy);
+                    obj.x = sx + (cdx / b * (obj.cr + 2)); // 2 mehr für die spitzen winkel
+                    obj.y = sy + (cdy / b * (obj.cr + 2));
+
+                    obj.s *= cfg.staticbouncefactor;
+                    collided = true;
+
+                }
+
+            }
+
+
+            if (collided) {
+                break;
+            }
+
+        }
+
+    };
+
+    /* ---------------------------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------------------------------- */
     /* ---------------------------------------------------------------------------------------------- */
 
     /*
         Aktualisiert ein Objekt in der Welt und wendet phys. Änderungen an
      */
-    exports.updateObj = function(cfg, obj, secselapsed, astack) { //todo: umstellen auf millisecs
+    exports.updateObj = function(cfg, obj, secselapsed, statics) { //todo: umstellen auf millisecs
 
 
         if(obj.cr) {
-            //this._checkStaticCollisions(obj, secselapsed, thistime);
+            checkStaticCollisions(cfg, obj, statics);
         }
 
 
         if(obj.type == "player") {
-            //this._checkPlayerCollisions(obj, secselapsed, thistime);
-            if(astack) {
-                //setPlayerActions(obj,astack);
-            }
+
+            //checkPlayerCollisions(obj, secselapsed, thistime);
             updatePlayerObject(cfg, obj, secselapsed);
         }
 

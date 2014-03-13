@@ -44,7 +44,13 @@ var obj = {
     //---------------------------
     _fpsInterval: null,
     _countFrames: 0,
-    fps: 0,
+    fps: 0,             // FPS
+    //---------------------------
+
+    latency: 0,         // aktuelle Ping-Zeit
+    _lastping: 0,
+    _serverClockDiv: 0,
+
     //---------------------------
 
     _init: function() {
@@ -133,10 +139,7 @@ var obj = {
 
     },
 
-    _lastping: 0,
-    latency: 0,
 
-    _serverClockDiv: 0,
     getServerTime: function() {
         return getTime() + this._serverClockDiv;
     },

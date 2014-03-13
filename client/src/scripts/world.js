@@ -13,6 +13,8 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
         }
     }
 
+    var lasttime = 0;
+
     var obj = {
 
         objects: [],
@@ -34,15 +36,15 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
         /*
              Ein neues Update kam vom Server
-         */
+        */
         updateFromServer: function(worldobjects) {
-
             this.objects = this.localobjects.concat(worldobjects);
-
             this.lastupdate = getTime();
-
         },
 
+        /*
+            Ein neues Update kam vom Server, nur der Player
+        */
         updatePlayerFromServer: function(player) {
             this.objects = _.reject(this.objects, function(obj) { return obj.type == "player" && obj.name == player.name; });
             this.objects.push(player);
@@ -52,22 +54,19 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
              Clientseitiges Updaten der Physik und der Welt
 
              der aktuelle Spieler wird übergeben und zurückgegeben
-         */
-        update: function(playername, latency) {
+        */
+        update: function(playername) {
             var _this = this;
 
-            if(!latency) { latency = 0; } //todo: saubermachen
-
-            var thistime = getTime(); // + latency; //todo: saubermachen
-            var secselapsed = (thistime - this.lastupdate) / 1000;
-            this.lastupdate = thistime;
-
+            var thistime = getTime();
+            var secselapsed = (thistime - lasttime) / 1000;
+            lasttime = thistime;
 
             var act = null;
 
             _.each(this.objects, function(obj) {
 
-                gl.updateObj(_this.cfg, obj, secselapsed, _this.astack); //todo: saubermachen
+                gl.updateObj(_this.cfg, obj, secselapsed, _this.statics);
 
                 //ist es der aktuelle spieler
                 if(obj.type == "player" && obj.name == playername) {
@@ -76,8 +75,6 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
             });
 
-            //actionstack leeren
-            this.astack = {};
 
             return act;
 
