@@ -212,13 +212,13 @@ var obj = {
 
                 var pa = null;
 
-                if(code == 38) { pa = "t"; }
-                if(code == 40) { pa = "b"; }
-                if(code == 39) { pa = "r"; }
-                if(code == 37) { pa = "l"; }
-                if(code == 78) { pa = "s"; }
-                if(code == 32) { pa = "sa"; }
-                if(code == 225)  { pa = "sb"; }
+                if(code == 38) { pa = "t"; }    // up
+                if(code == 40) { pa = "b"; }    // down
+                if(code == 39) { pa = "r"; }    // right
+                if(code == 37) { pa = "l"; }    // left
+                if(code == 78) { pa = "s"; }    // n
+                if(code == 32) { pa = "sa"; }   // space
+                if(code == 225)  { pa = "sb"; }  // todo: ?
                 //if(code == 84) { socket.emit("test", "start"); }
 
                 if (pa) {
@@ -228,11 +228,11 @@ var obj = {
 
         }
 
-        if (code == 48) { window.debug = 0; console.log("debug set to "+window.debug);  }
-        if (code == 49) { window.debug = 1; console.log("debug set to "+window.debug);  }
-        if (code == 50) { window.debug = 2; console.log("debug set to "+window.debug);  }
-        if (code == 51) { window.debug = 3; console.log("debug set to "+window.debug);  }
-        if (code == 52) { window.debug = 4; console.log("debug set to "+window.debug);  }
+        if (code == 48) { window.debug = 0; console.log("debug set to "+window.debug);  } // 0
+        if (code == 49) { window.debug = 1; console.log("debug set to "+window.debug);  } // 1
+        if (code == 50) { window.debug = 2; console.log("debug set to "+window.debug);  } // 2
+        if (code == 51) { window.debug = 3; console.log("debug set to "+window.debug);  } // 3
+        if (code == 52) { window.debug = 4; console.log("debug set to "+window.debug);  } // 4
 
     },
 

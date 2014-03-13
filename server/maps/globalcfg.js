@@ -13,7 +13,9 @@ exports = module.exports = {
         maxspeed: 300,              // max Geschwindigkeit ( px/s )
 
         maxenergy: 100,             // max Energie ( eu )
-        energygen: 14               // Energie Aufladung ( eu/s )
+        energygen: 14,              // Energie Aufladung ( eu/s )
+
+        cr: 18                      // Kollisionsradius (px)
     },
 
     // ---- Projektile / Partikel

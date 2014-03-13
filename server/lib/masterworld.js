@@ -73,16 +73,17 @@ exports = module.exports = function(worldname) {
 
             this.name = worldname;   //Name der Welt
 
-            // Einstellungen holen! Map-Einstellungen überschreiben globale //todo: stimmt dieser Kommentar? Bestimmt! Trotzdem nochmal prüfen
+            // Einstellungen holen! Map-Einstellungen überschreiben globale
             var map = require( __dirname + "/../maps/"+worldname+".js");  // Map-Einstellungen
-            this.cfg = _.extend(require( __dirname + "/../maps/globalcfg.js"), map.cfg); // globale einstellungen
+            this.cfg = _.merge(require( __dirname + "/../maps/globalcfg.js"), map.cfg); // globale einstellungen
+
 
             this._loadStatics(map);
 
             // Weltzeit initial setzen
             starttime = getTime();
 
-            // Pubisher verbinden
+            // Publisher verbinden
             publisher.bindSync("ipc://ipc/"+worldname+"2.ipc");
 
             // Responder verbinden
@@ -148,16 +149,26 @@ exports = module.exports = function(worldname) {
             var _this = this;
 
             // aktuelle Zeit
-            var thistime = getTime();
+            var thistime = getTime(); //todo: alle Zeitmessungen auf Sekunden umstellen (weniger Berechnungen!!)
             var secselapsed = (thistime - lasttime) / 1000;
             lasttime = thistime;
 
             _.each(this.objects, function(obj) {
 
+                if(obj.type == "player") {
+                    _this.checkPlayerEvents(obj, thistime);
+                }
+
                 gl.updateObj(_this.cfg, obj, secselapsed, _this.statics);
 
             });
 
+            // tote Objekte entfernen
+            this.objects = _.reject(this.objects, function(obj) {
+
+                return obj.dead || (obj.ad && (obj.t + (obj.ad * 1000) < thistime));
+
+            });
         },
 
         /*
@@ -167,12 +178,14 @@ exports = module.exports = function(worldname) {
 
             var player = {
                 type: "player",
-                x: 0, y: 0,      //Koordinaten
-                ma: 45,           //Bewegungswinkel
-                s: 0,//100            //Speed
-                va: 135.9234567890123,         //Sichtwinkel
-                cr: 18,          //Kollisionsradius
-                e: 100,          //Energie
+
+                x: 0, y: 0,             //Koordinaten
+                ma: 45,                 //Bewegungswinkel
+                s: 0,//100              //Speed
+                va: 135.9234567890123,  //Sichtwinkel
+
+                cr: this.cfg.player.cr,          //Kollisionsradius
+                e:  this.cfg.player.maxenergy,   //Starte mit max. Energie
                 name: playername
             };
 
@@ -189,68 +202,120 @@ exports = module.exports = function(worldname) {
 
             var player = _.find(this.objects, function(obj) { return obj.type == "player" && obj.name == playername; });
 
-            switch(action) {
+            if(player) {
+                switch(action) {
 
-                case "t1":
-                    player.thrusting = true;
-                    break;
-                case "t0":
-                    player.thrusting = false;
-                    break;
-                case "b1":
-                    player.breaking = true;
-                    break;
-                case "b0":
-                    player.breaking = false;
-                    break;
+                    case "t1":
+                        player.thrusting = true;
+                        break;
+                    case "t0":
+                        player.thrusting = false;
+                        break;
+                    case "b1":
+                        player.breaking = true;
+                        break;
+                    case "b0":
+                        player.breaking = false;
+                        break;
 
-                case "r1":
-                    player.rturning = true;
-                    break;
-                case "r0":
-                    player.rturning = false;
-                    break;
-                case "l1":
-                    player.lturning = true;
-                    break;
-                case "l0":
-                    player.lturning = false;
-                    break;
+                    case "r1":
+                        player.rturning = true;
+                        break;
+                    case "r0":
+                        player.rturning = false;
+                        break;
+                    case "l1":
+                        player.lturning = true;
+                        break;
+                    case "l0":
+                        player.lturning = false;
+                        break;
 
-                case "s1":
-                    player.stopping = true;
-                    break;
-                case "s0":
-                    player.stopping = false;
-                    break;
+                    case "s1":
+                        player.stopping = true;
+                        break;
+                    case "s0":
+                        player.stopping = false;
+                        break;
 
-                case "sa1":
-                    player.shooting = true;
-                    break;
-                case "sa0":
-                    player.shooting = false;
-                    break;
+                    case "sa1":
+                        player.shooting = true;
+                        break;
+                    case "sa0":
+                        player.shooting = false;
+                        break;
 
-                case "sb1":
-                    player.shooting2 = true;
-                    break;
-                case "sb0":
-                    player.shooting2 = false;
-                    break;
+                    case "sb1":
+                        player.shooting2 = true;
+                        break;
+                    case "sb0":
+                        player.shooting2 = false;
+                        break;
 
-                case "as":
-                    player.thrusting = false;
-                    player.breaking = false;
-                    player.rturning = false;
-                    player.lturning = false;
-                    player.stopping = false;
-                    player.shooting = false;
-                    player.shooting2 = false;
-                    break;
+                    case "as":
+                        player.thrusting = false;
+                        player.breaking = false;
+                        player.rturning = false;
+                        player.lturning = false;
+                        player.stopping = false;
+                        player.shooting = false;
+                        player.shooting2 = false;
+                        break;
 
+                }
             }
 
             return player;
+        },
+
+        checkPlayerEvents: function(player, thistime) {
+
+
+            if( player.shooting ) {
+
+                this.playerShoot(player, "bullet", thistime);
+
+            }
+
+        },
+
+        playerShoot: function(player, type, thistime) {
+
+            // Config und Zeitpunkt des letzten Schußes holen
+            var bcfg = this.cfg.projectiles[type];
+            var lastshot = player["lastshot_"+type];
+
+            // Checken, ob Spieler genug Energie hat und ob der letzte Schuß lange genug her ist
+            if( player.e > bcfg.edrain && (!lastshot || lastshot + bcfg.firerate * 1000 < thistime)) {
+
+                var pv = vector.angleAbs2vector(player.ma, player.s); // Spieler Bewegungsvektor
+                var bv = vector.angleAbs2vector(player.va, bcfg.speed); // Projektil-Vektor (in Sichtrichtung d. Spielers)
+
+                // Vektoren addieren
+                var bas = vector.vector2angleAbs(pv.x + bv.x, pv.y + bv.y);
+
+                var projectile = {
+                    type: type,
+                    x: player.x,
+                    y: player.y,
+                    ma: bas.a,
+                    s: bas.s,
+                    o: player.name,
+                    cr: bcfg.cr, //todo: performance: alle crs über config und nicht mit übertragen! (auch bei player)
+                    t: thistime,
+                    ad: bcfg.lifetime //todo: performance: alle lifetimes über config und nicht mit übertragen! (auch bei player)
+                };
+
+                // Objekt hinzu
+                this.objects.push(projectile);
+
+                // Schußzeit am Spieler markieren
+                player["lastshot_"+type] = thistime;
+
+                // Energie für Schuß abziehen
+                player.e -= bcfg.edrain;
+            }
+
         },
 
         // ---------

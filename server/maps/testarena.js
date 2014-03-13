@@ -1,23 +1,23 @@
 exports = module.exports = {
 
+    // Weltconfig (mapspezifische überschreibt globale)
+    cfg: {},
 
-    /*
-
-         statische Objekte der Welt
-
-         {
-             type: "meinstatic",     // id der ressource ("ni" = static ohne Bild)
-             x:-300, y:-900,         // Koordinaten
-             w: 432, h: 600,         // Größe
-             ps: [                   // Polygone (für Kollision)
-                [{x: 0, y: 0}, {x:0, y: 10}, {x:10, y:10}],
-                [{x: 20, y: 20}, {x:20, y: 40}, {x:40, y:40}]
-             ],
-             bg: false               // Objekt im Background-Layer?
-         }
-
-    */
+    // statische Objekte der Welt
     statics: [
+        /*
+            Beispiel:
+            {
+                type: "meinstatic",     // id der ressource ("ni" = static ohne Bild)
+                x:-300, y:-900,         // Koordinaten
+                w: 432, h: 600,         // Größe
+                ps: [                   // Polygone (für Kollision)
+                    [{x: 0, y: 0}, {x:0, y: 10}, {x:10, y:10}],
+                    [{x: 20, y: 20}, {x:20, y: 40}, {x:40, y:40}]
+                ],
+                bg: false               // Objekt im Background-Layer?
+            }
+        */
 
         //Station
         {

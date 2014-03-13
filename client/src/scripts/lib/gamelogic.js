@@ -176,6 +176,9 @@
     };
 
 
+    /*
+        Prüft die Kollision eines dynamischen Objekts mit einem static (Abpraller)
+    */
     var checkStaticCollisions = function(cfg, obj, statics) {
 
 
