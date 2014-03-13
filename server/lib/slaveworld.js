@@ -25,7 +25,6 @@ var decode = function(ser) {
 
 var timeouttime = 2000;
 var retrytime = 4000;
-var maxRetrys = 10;
 
 var requester = zmq.socket('req');
 
@@ -51,10 +50,7 @@ var request = function(msg, data, callback) {
 var requestReliable = function(msg, data, callback) {
 
     var retryTimeOut;
-    var retryCount = 0;
     var tryrequest = function() {
-
-        retryCount++;
 
         clearTimeout(retryTimeOut);
         retryTimeOut = setTimeout(function(){

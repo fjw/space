@@ -111,21 +111,23 @@
     */
     var updatePlayerObject = function(cfg, obj, secselapsed) {
 
-        //Actions anwenden
         var v = {x:0,y:0};
+        var cfgp = cfg.player;
 
+        // Drehen
         if (obj.rturning) {
-            obj.va = vector.angleInBoundaries(obj.va + cfg.playerrotationspeed * secselapsed);
+            obj.va = vector.angleInBoundaries(obj.va + cfgp.rotationspeed * secselapsed);
         }
         if (obj.lturning) {
-            obj.va = vector.angleInBoundaries(obj.va - cfg.playerrotationspeed * secselapsed);
+            obj.va = vector.angleInBoundaries(obj.va - cfgp.rotationspeed * secselapsed);
         }
 
+        // Beschleunigen / Bremsen
         if (obj.thrusting) {
-            v = vector.angleAbs2vector(obj.va, cfg.playeracceleration * secselapsed );
+            v = vector.angleAbs2vector(obj.va, cfgp.acceleration * secselapsed );
         }
         if (obj.breaking) {
-            v = vector.angleAbs2vector( vector.angleInBoundaries(obj.va-180), cfg.playerbackacceleration * secselapsed );
+            v = vector.angleAbs2vector( vector.angleInBoundaries(obj.va-180), cfgp.backacceleration * secselapsed );
         }
 
         if (obj.thrusting || obj.breaking) {
@@ -141,15 +143,20 @@
             obj.s = as.s;
             obj.ma = as.a;
 
-            if (obj.s > cfg.playermaxspeed) {
-                obj.s = cfg.playermaxspeed;
+            if (obj.s > cfgp.maxspeed) {
+                obj.s = cfgp.maxspeed;
             }
         }
 
+        // Bremsen (zum Stoppen)
         if (obj.stopping) {
-            obj.s = obj.s - cfg.playerstopacceleration * secselapsed;
+            obj.s = obj.s - cfgp.stopacceleration * secselapsed;
             if (obj.s < 5) { obj.s = 0; }
         }
+
+        // Energie aufladen
+        obj.e += cfgp.energygen * secselapsed;
+        if (obj.e > cfgp.maxenergy) { obj.e = cfgp.maxenergy; }
 
     };
 
