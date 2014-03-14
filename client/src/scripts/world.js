@@ -20,10 +20,6 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
         objects: [],
         statics: [],
 
-        localobjects: [
-
-        ],
-
         lastupdate: getTime(),
 
         cfg: {},
@@ -33,12 +29,15 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
         },
 
+        getTime: function() {
+            return getTime();
+        },
 
         /*
              Ein neues Update kam vom Server
         */
         updateFromServer: function(worldobjects) {
-            this.objects = this.localobjects.concat(worldobjects);
+            this.objects = worldobjects;
             this.lastupdate = getTime();
         },
 
@@ -68,16 +67,87 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
                 gl.updateObj(_this.cfg, obj, secselapsed, _this.statics);
 
-                //ist es der aktuelle spieler
-                if(obj.type == "player" && obj.name == playername) {
-                    act = obj;
+                if(obj.type == "player") {
+
+                    _this.localPlayerFunctions(obj, secselapsed, thistime);
+
+                    //ist es der aktuelle spieler
+                    if(obj.name == playername) {
+                        act = obj;
+                    }
                 }
 
             });
 
 
+            // tote Objekte entfernen
+            this.objects = _.reject(this.objects, function(obj) {
+                return obj.dead || (obj.ad && (obj.t + (obj.ad * 1000) < thistime));
+            });
+
+
             return act;
 
+        },
+
+        localPlayerFunctions: function(obj, secselapsed, thistime) {
+
+            if(obj.thrusting || obj.breaking) {
+
+                if(!obj.lastthrust || obj.lastthrust + 30 < thistime ) {
+
+
+                    var r = 12;
+
+                    var dist_h = 4;
+                    var dist_v = 20;
+                    if(obj.breaking) {
+                        dist_h = 12;
+                        dist_v = 0;
+                    }
+
+                    var va = gl.vector.angleAbs2vector(obj.va, dist_v);
+                    var vp = gl.vector.angleAbs2vector(obj.va + 90, dist_h);
+
+                    var particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x + vp.x,
+                        y: obj.y - va.y + vp.y,
+                        ma: obj.va,
+                        s: 100,
+                        o: obj.name,
+                        cr: r,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.3,
+                        scale: (2*r) / 30
+                    };
+
+                    this.objects.push(particle);
+
+
+                    var particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x - vp.x,
+                        y: obj.y - va.y - vp.y,
+                        ma: obj.va,
+                        s: 100,
+                        o: obj.name,
+                        cr: r,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.3,
+                        scale: (2*r) / 30
+                    };
+
+                    this.objects.push(particle);
+
+                    obj.lastthrust = thistime;
+
+                }
+            }
         }
 
     };

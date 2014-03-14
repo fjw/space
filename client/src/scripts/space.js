@@ -382,7 +382,7 @@ var obj = {
 
                 }
                 if (obj.isanim)  {
-                    cfg.anim = ((_this.getServerTime() - obj.t) / 1000) / obj.ad;
+                    cfg.anim = ((_this.world.getTime() - obj.t) / 1000) / obj.ad;
 
                 }
 
