@@ -1,6 +1,8 @@
 /*!
+
     fTools
     Copyright: Frederic Worm
+
  */
 ;(function(window) {
 
