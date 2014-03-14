@@ -293,11 +293,7 @@ var obj = {
             res.flush();
 
 
-            //todo: gescheiter Enegergy-HUD
-            //Energielevel anzeigen
-            this.ctx.fillStyle = "#ccf";
-            this.ctx.fillText(Math.floor(this.player.e), 10, 15);
-
+            // ----
 
             //Position anzeigen
             this.ctx.fillStyle = "#fcf";
@@ -334,9 +330,17 @@ var obj = {
         // 8 - HUD                              - keine translation
 
 
-        var eb = Math.floor((this.cw * (this.player.e / 100))/2);
-        var ecol = "#00a"; //todo: Schicke Farben
-        res.drawRect(8, this.mx - eb, this.ch - 4, 2 * eb, 4, ecol, true);
+        var pe = this.player.e / 100;
+        var eb = Math.floor((this.cw * pe)/2);
+
+        var r = Math.floor(255 - 255 * pe);
+        var g = Math.floor(100 * pe);
+        var b = Math.floor(255 * pe);
+
+
+        var ecol = "rgb("+r+","+g+","+b+")";
+
+        res.drawRect(8, this.mx - eb, this.ch - 6, 2 * eb, 6, ecol, true);
 
     },
 
@@ -420,7 +424,7 @@ var obj = {
 
             } else {
 
-                if (obj.bm) {
+                if (obj.bg) {
 
                     // Static im Hintergrund
                     res.drawSprite(1, obj.type, obj.x, obj.y);

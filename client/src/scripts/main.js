@@ -99,7 +99,7 @@ require([
             // regelmässig Pingen
             var pingInterval = window.setInterval(function() {
 
-                window.socket.ping(function(ping) {
+                window.socket.ping(function(ping) { //todo: ping reparieren
 
                     $("#ping").html(ping);
 
