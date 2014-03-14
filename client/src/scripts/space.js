@@ -11,7 +11,7 @@ var getTime = function() {
     } else {
         return Date.now();
     }
-}
+};
 
 
 var obj = {
@@ -276,7 +276,7 @@ var obj = {
             this.player = this.world.update(this.playername, this.latency);
 
 
-            res.setViewport(this.ctx, this.player.x - this.mx, this.player.y - this.my, this.cw, this.ch)
+            res.setViewport(this.ctx, this.player.x - this.mx, this.player.y - this.my, this.cw, this.ch);
 
 
             this._updateStars();
@@ -295,33 +295,35 @@ var obj = {
 
             // ----
 
-            //Position anzeigen
-            this.ctx.fillStyle = "#fcf";
-            this.ctx.fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
-
+            if (window.debug > 1) {
+                //Position anzeigen
+                this.ctx.fillStyle = "#fcf";
+                this.ctx.fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
+            }
         }
 
         //FPS
-        _this._countFrames++;
-        if (!this._fpsInterval) {
-            this._fpsInterval = setInterval(function() {
-                _this.fps = _this._countFrames * 2;
-                _this._countFrames = 0;
-            }, 500);
+        if(window.debug > 1) {
+            _this._countFrames++;
+            if (!this._fpsInterval) {
+                this._fpsInterval = setInterval(function() {
+                    _this.fps = _this._countFrames * 2;
+                    _this._countFrames = 0;
+                }, 500);
+            }
+
+            if (this.fps > 25) {
+                this.ctx.fillStyle = "#0a0";
+                this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
+            } else {
+                this.ctx.fillStyle = "#a00";
+                this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
+            }
+
+            //Latency anzeigen
+            this.ctx.fillStyle = "#ccc";
+            this.ctx.fillText( this.latency.toString(), this.cw - 30, 30);
         }
-
-        if (this.fps > 25) {
-            this.ctx.fillStyle = "#0a0";
-            this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
-        } else {
-            this.ctx.fillStyle = "#a00";
-            this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
-        }
-
-        //Latency anzeigen
-        this.ctx.fillStyle = "#ccc";
-        this.ctx.fillText( this.latency.toString(), this.cw - 30, 30);
-
 
     },
 
@@ -407,7 +409,7 @@ var obj = {
     },
 
     _updateStatics: function() {
-        var _this = this;
+
 
         ft.each(this.world.statics, function(obj) {
 
@@ -536,7 +538,7 @@ var obj = {
         this._mapbuffer.width = w * zoom;
         this._mapbuffer.height = h * zoom;
 
-        var _this = this;
+
         _.each(this.world.statics, function(obj) {
 
             if(obj.type == "ni") {
@@ -591,7 +593,7 @@ var obj = {
             var layer = document.createElement("canvas");
             var lctx = layer.getContext("2d");
             layer.width = layersize;
-            layer.height = layersize;00
+            layer.height = layersize;
 
             var r = 2;
 

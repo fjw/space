@@ -244,15 +244,15 @@ var obj = {
         Layer-Konfiguration
     */
     layercfg: [
-        0, // 0 - Sterne                           - ultradyn
-        0.5, // 1 - Hintergrund Statics              - modifizierte welt-translation
-        1, // 2 - Rückseiten Statics               - welt-translation
-        1, // 3 - Partikel / Effekte Hintergrund   - welt-translation
-        1, // 4 - dynamische Objekte               - welt-translation
-        1, // 5 - aktueller Spieler                - welt-translation
-        1, // 6 - Vordergrund Statics              - welt-translation
-        1, // 7 - Partikel / Effekte Vordergrund   - welt-translation
-        0  // 8 - HUD                              - keine translation
+        0,      // 0 - Sterne                           - ultradyn
+        0.5,    // 1 - Hintergrund Statics              - modifizierte welt-translation
+        1,      // 2 - Rückseiten Statics               - welt-translation
+        1,      // 3 - Partikel / Effekte Hintergrund   - welt-translation
+        1,      // 4 - dynamische Objekte               - welt-translation
+        1,      // 5 - aktueller Spieler                - welt-translation
+        1,      // 6 - Vordergrund Statics              - welt-translation
+        1,      // 7 - Partikel / Effekte Vordergrund   - welt-translation
+        0       // 8 - HUD                              - keine translation
     ],
 
     /*
@@ -550,7 +550,6 @@ var obj = {
 
         var r = Math.floor(size/2);
 
-
         var cnv = document.createElement("canvas");
         cnv.width = size;
         cnv.height = size;
@@ -560,7 +559,7 @@ var obj = {
         var innercolor = '#fdf';
         var outercolor = 'rgba(255,50,255,0.5)';
         var coloralpha = 'rgba(255,50,255,0.5)';
-        var blackalpha = 'rgba(255,0,255,0)';
+        var blackalpha = 'rgba(0,0,0,0)';
 
         var gr = ctx.createRadialGradient(r, r ,0, r, r, 6);
 
@@ -571,7 +570,7 @@ var obj = {
         a = 0;
         b = 0.6;
         c = 0.7;
-        d = 1;
+        d = 0.75;
 
         gr.addColorStop(a, innercolor);
         gr.addColorStop(b, outercolor);
