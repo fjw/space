@@ -269,7 +269,7 @@
     /*
         Aktualisiert ein Objekt in der Welt und wendet phys. Änderungen an
      */
-    exports.updateObj = function(cfg, obj, secselapsed, statics) { //todo: umstellen auf millisecs
+    exports.updateObj = function(cfg, obj, secselapsed, statics) {
 
 
         if(obj.cr) {
@@ -297,9 +297,6 @@
         }
 
     };
-
-
-
 
     return exports;
 

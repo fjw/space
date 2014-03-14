@@ -284,12 +284,13 @@ var obj = {
             this._updateObjects();
 
 
+            //this._updateMinimap(); //todo: refaktor
+
+            this._updateHud();
+
             // -----
 
             res.flush();
-
-
-            this._updateMinimap();
 
 
             //todo: gescheiter Enegergy-HUD
@@ -328,6 +329,16 @@ var obj = {
 
     },
 
+    _updateHud: function() {
+        // HUD zeichnen
+        // 8 - HUD                              - keine translation
+
+
+        var eb = Math.floor((this.cw * (this.player.e / 100))/2);
+        var ecol = "#00a"; //todo: Schicke Farben
+        res.drawRect(8, this.mx - eb, this.ch - 4, 2 * eb, 4, ecol, true);
+
+    },
 
     _updateObjects: function() {
         var _this = this;

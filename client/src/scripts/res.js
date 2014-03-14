@@ -241,7 +241,7 @@ var obj = {
 
 
     /*
-        Layer-Konfiguration //todo: Kommentare anpassen
+        Layer-Konfiguration
     */
     layercfg: [
         0, // 0 - Sterne                           - ultradyn
@@ -325,7 +325,7 @@ var obj = {
 
     /*
         Stacked eine Zeichen-Operation (einen Pfad) für den nächsten Flush
-        !! unperformant, nur für dev !!
+        //todo: !! unperformant, nur für dev !!
      */
     drawPath: function(layer, p, x, y, color, fill) {
 
@@ -346,6 +346,27 @@ var obj = {
         }
 
     },
+
+
+    drawRect: function(layer, x, y, w, h, color, fill) {
+
+        if (ft.isBoxOverlap(this._layerViewportX[layer], this._layerViewportY[layer], this._viewportW, this._viewportH, x, y, w, h)) {
+
+            this._drawOperations.push({
+                layer: layer,
+                w: w,
+                h: h,
+                rect: true,
+                x: x,
+                y: y,
+                color: color,
+                fill: fill
+            });
+
+        }
+
+    },
+
 
 
     /*
@@ -369,6 +390,9 @@ var obj = {
             } else if (item.p) {
                 // Pfad
                 _this._flushPath(item.layer, item.p, item.x, item.y, item.color, item.fill);
+            } else if (item.rect) {
+                // Rect
+                _this._flushRect(item.layer, item.w, item.h, item.x, item.y, item.color, item.fill);
             } else {
                 // Image
                 _this._flushImage(item.layer, item.image, item.x, item.y);
@@ -379,6 +403,22 @@ var obj = {
 
         //leere Oprations-Objekt
         this._drawOperations = [];
+    },
+
+    _flushRect: function(layer, w, h, x, y, color, fill) {
+
+        var ctx = this._layerViewportCtx;
+        var fx = x - this._layerViewportX[layer];
+        var fy = y - this._layerViewportY[layer];
+
+        if(fill) {
+            ctx.fillStyle = color;
+            ctx.fillRect(fx,fy,w,h);
+        } else {
+            ctx.strokeStyle = color;
+            ctx.strokeRect(fx,fy,w,h);
+        }
+
     },
 
     _flushPath: function(layer, p, x, y, color, fill) {

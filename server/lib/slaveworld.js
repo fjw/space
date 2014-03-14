@@ -7,14 +7,12 @@ var zmq = require('zmq');
 // ----------------------------------------------
 
 var servertimediff = 0;
-var getTime = function() { // holt die aktuelle Zeit der Welt in ms, auf 4 Nachkommastellen genau
-    var t = process.hrtime();
-    var tt = ((t[0] * 1e9 + t[1]) / 1e6) - servertimediff;
-    return ((tt * 1e4)|0)/1e4;
+var getTime = function() { // holt die aktuelle Zeit der Welt in ms
+    return Date.now() - servertimediff;
 };
 
 var encode = function(objs) {
-    return JSON.stringify(objs); //todo: msgpack?
+    return JSON.stringify(objs);
 };
 
 var decode = function(ser) {

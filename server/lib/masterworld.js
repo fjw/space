@@ -18,7 +18,7 @@ var lasttime = 0;
 // ---
 
 var encode = function(objs) {
-    return JSON.stringify(objs); //todo: msgpack?
+    return JSON.stringify(objs);
 };
 
 var decode = function(ser) {
@@ -152,7 +152,7 @@ exports = module.exports = function(worldname) {
             var _this = this;
 
             // aktuelle Zeit
-            var thistime = getTime(); //todo: alle Zeitmessungen auf Sekunden umstellen (weniger Berechnungen!!)
+            var thistime = getTime();
             var secselapsed = (thistime - lasttime) / 1000;
 
             if (secselapsed > 1 || secselapsed < -1) {
@@ -359,7 +359,7 @@ exports = module.exports = function(worldname) {
                                 x: proj.x,
                                 y: proj.y,
                                 ma: proj.ma,
-                                s: 200,
+                                s: 60,
                                 o: obj.name,
                                 cr: r,
                                 t: thistime,
