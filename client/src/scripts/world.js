@@ -18,6 +18,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
     var obj = {
 
         objects: [],
+        localobjects: [],
         statics: [],
 
         lastupdate: getTime(),
@@ -79,9 +80,20 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
             });
 
+            _.each(this.localobjects, function(obj) {
+
+                gl.updateObj(_this.cfg, obj, secselapsed, _this.statics);
+
+            });
+
 
             // tote Objekte entfernen
             this.objects = _.reject(this.objects, function(obj) {
+                return obj.dead || (obj.ad && (obj.t + (obj.ad * 1000) < thistime));
+            });
+
+            // tote lokale Objekte entfernen
+            this.localobjects = _.reject(this.localobjects, function(obj) {
                 return obj.dead || (obj.ad && (obj.t + (obj.ad * 1000) < thistime));
             });
 
@@ -96,58 +108,138 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
                 if(!obj.lastthrust || obj.lastthrust + 30 < thistime ) {
 
-
                     var r = 12;
 
                     var dist_h = 4;
-                    var dist_v = 20;
+                    var dist_v = 24;
                     if(obj.breaking) {
                         dist_h = 12;
-                        dist_v = 0;
+                        dist_v = -3;
                     }
 
                     var va = gl.vector.angleAbs2vector(obj.va, dist_v);
                     var vp = gl.vector.angleAbs2vector(obj.va + 90, dist_h);
+
+                    var scale = (2*r) / 30;
 
                     var particle = {
                         type: "thruster",
 
                         x: obj.x - va.x + vp.x,
                         y: obj.y - va.y + vp.y,
-                        ma: obj.va,
-                        s: 100,
-                        o: obj.name,
-                        cr: r,
+                        ma: obj.ma,
+                        s: obj.s - 100,
                         t: thistime,
                         isanim: true,
                         ad: 0.3,
-                        scale: (2*r) / 30
+                        scale: scale
                     };
 
-                    this.objects.push(particle);
-
+                    this.localobjects.push(particle);
 
                     var particle = {
                         type: "thruster",
 
                         x: obj.x - va.x - vp.x,
                         y: obj.y - va.y - vp.y,
-                        ma: obj.va,
-                        s: 100,
-                        o: obj.name,
-                        cr: r,
+                        ma: obj.ma,
+                        s: obj.s - 100,
                         t: thistime,
                         isanim: true,
                         ad: 0.3,
-                        scale: (2*r) / 30
+                        scale: scale
                     };
 
-                    this.objects.push(particle);
+                    this.localobjects.push(particle);
 
                     obj.lastthrust = thistime;
 
                 }
             }
+
+            if(obj.stopping) {
+
+                if(!obj.lastthrust || obj.lastthrust + 30 < thistime ) {
+
+                    var r = 6;
+
+                    var va = gl.vector.angleAbs2vector(obj.va, 24);
+                    var vp = gl.vector.angleAbs2vector(obj.va + 90, 4);
+
+                    var scale = (2*r) / 30;
+                    var s = obj.s - 200;
+                    if(s < 0) { s=0; }
+
+                    var particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x + vp.x,
+                        y: obj.y - va.y + vp.y,
+                        ma: obj.va - 30,
+                        s: s,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.2,
+                        scale: scale
+                    };
+
+                    this.localobjects.push(particle);
+
+                    particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x - vp.x,
+                        y: obj.y - va.y - vp.y,
+                        ma: obj.va + 30,
+                        s: s,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.2,
+                        scale: scale
+                    };
+
+                    this.localobjects.push(particle);
+
+                    obj.lastthrust = thistime;
+
+                    va = gl.vector.angleAbs2vector(obj.va, -3);
+                    vp = gl.vector.angleAbs2vector(obj.va + 90, 12);
+
+                    particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x + vp.x,
+                        y: obj.y - va.y + vp.y,
+                        ma: obj.va + 210,
+                        s: s,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.2,
+                        scale: scale
+                    };
+
+                    this.localobjects.push(particle);
+
+                    particle = {
+                        type: "thruster",
+
+                        x: obj.x - va.x - vp.x,
+                        y: obj.y - va.y - vp.y,
+                        ma: obj.va - 210,
+                        s: s,
+                        t: thistime,
+                        isanim: true,
+                        ad: 0.2,
+                        scale: scale
+                    };
+
+                    this.localobjects.push(particle);
+
+                    obj.lastthrust = thistime;
+
+                }
+            }
+
         }
 
     };

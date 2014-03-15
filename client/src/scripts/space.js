@@ -349,7 +349,7 @@ var obj = {
     _updateObjects: function() {
         var _this = this;
 
-        ft.each(this.world.objects, function(obj) {
+        ft.each(this.world.objects.concat(this.world.localobjects), function(obj) {
 
             if (!obj.inactive) {
 
@@ -379,11 +379,9 @@ var obj = {
                 }
                 if (typeof(obj.va) != "undefined") {
                     cfg.angle = obj.va;
-
                 }
                 if (obj.isanim)  {
                     cfg.anim = ((_this.world.getTime() - obj.t) / 1000) / obj.ad;
-
                 }
 
                 // Objekt zeichnen

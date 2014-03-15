@@ -155,12 +155,6 @@ exports = module.exports = function(worldname) {
             var thistime = getTime();
             var secselapsed = (thistime - lasttime) / 1000;
 
-            if (secselapsed > 1 || secselapsed < -1) {
-                console.log("l: "+lasttime);
-                console.log("t: "+thistime);
-                console.log("sss"+secselapsed);
-            }
-
             lasttime = thistime;
 
             _.each(this.objects, function(obj) {
