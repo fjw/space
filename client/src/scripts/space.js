@@ -281,7 +281,7 @@ var obj = {
             this._updateObjects();
 
 
-            //this._updateMinimap(); //todo: refaktor
+
 
             this._updateHud();
 
@@ -324,6 +324,7 @@ var obj = {
 
     },
 
+    _lastMapUpdate: 0,
     _updateHud: function() {
         // HUD zeichnen
         // 8 - HUD                              - keine translation
@@ -342,7 +343,16 @@ var obj = {
 
         // Minimap
         if(this.minimapimg) {
-            res.drawImage(8, this.minimapimg, 10, 10);
+
+            //todo: besseres System finden, vielleicht aktivierbare Map
+            var thistime = getTime();
+
+            if (this._lastMapUpdate + 200 < thistime) {
+                this._lastMapUpdate = thistime;
+                this._updateMinimap();
+            }
+
+            res.drawImage(8, this.minimap, 10, this.ch - this.minimap_h - 16);
         }
     },
 
@@ -479,34 +489,59 @@ var obj = {
 
     },
 
+    minimap: null,
+    minimap_ctx: null,
+    minimap_w: 200,
+    minimap_h: 100,
 
-    _updateMinimap: function() {
+    _updateMinimap: function() {  //todo: mathe refakturierung
+
+        //todo: map ist irgendwie minimal verschoben...
+
+        var mapctx = this.minimap_ctx;
+        var zoom = this.minimapzoom;
 
         // Minimap updaten
-        this.mapctx.clearRect(0, 0, this.mapcanvas.width, this.mapcanvas.height);
+        mapctx.clearRect(0, 0, this.minimap_w, this.minimap_h);
 
-        var mx = Math.round((this.player.x - this._mapX) * this.zoom);
-        var my = Math.round((this.player.y - this._mapY) * this.zoom);
-        var px = Math.round(this.mapcanvas.width / 2);
-        var py = Math.round(this.mapcanvas.height / 2);
+        mapctx.fillStyle = "#111";
+        mapctx.fillRect(0, 0, this.minimap_w, this.minimap_h);
 
-        this.mapctx.drawImage(this._mapbuffer, px - mx, py - my);
+        var mx = ft.round(this.player.x  * zoom);
+        var my = ft.round(this.player.y  * zoom);
+
+        var px = ft.round(this.minimap_w / 2); // Mittelpunkt des Kartenviewports
+        var py = ft.round(this.minimap_h / 2);
+
+        var ix = ft.round(this.minimapimg.width / 2);
+        var iy = ft.round(this.minimapimg.height / 2);
+
+        mapctx.drawImage(this.minimapimg, px - mx - ix, py - my - iy);
 
         // Mittelpunkt
-        this.mapctx.fillStyle = "#f00";
-        this.mapctx.fillRect(px - 1, py - 1, 3, 3);
+        mapctx.fillStyle = "#f00";
+        mapctx.fillRect(px, py, 1, 1);
 
         // Rahmen
-        var cw = Math.round(this.cw * this.zoom);
-        var ch = Math.round(this.ch * this.zoom);
-        this.mapctx.strokeStyle = "#222";
-        this.mapctx.strokeRect(px - Math.round(cw / 2), py - Math.round(ch / 2), cw, ch );
+        var cw = ft.round(this.cw * zoom);
+        var ch = ft.round(this.ch * zoom);
+        mapctx.strokeStyle = "#888";
+        mapctx.lineWidth = 1;
+        mapctx.strokeRect(ft.round(px - (cw / 2))+0.5, ft.round(py - (ch / 2))+0.5, cw, ch );
+
+        mapctx.strokeRect(0,0, this.minimap_w, this.minimap_h);
 
     },
 
     minimapimg: null,
     minimapzoom: 0.05,
     _prepareMinimap: function() {
+
+        // Minimap-Canvas einrichten
+        this.minimap = document.createElement("canvas");
+        this.minimap_ctx = this.minimap.getContext("2d");
+        this.minimap.width = this.minimap_w;
+        this.minimap.height = this.minimap_h;
 
         // Grenzen finden
         var max_x = _.max(this.world.statics, function(item) { return item.x + item.w; });
@@ -520,11 +555,12 @@ var obj = {
         var mx = min_x.x;
         var my = min_y.y;
 
-        // Canvas einrichten
+        // Img  Canvas einrichten
         this.minimapimg = document.createElement("canvas");
         var mctx = this.minimapimg.getContext("2d");
 
         var zoom = this.minimapzoom;
+
         this.minimapimg.width = w * zoom;
         this.minimapimg.height = h * zoom;
 
