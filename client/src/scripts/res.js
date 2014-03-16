@@ -467,8 +467,8 @@ var obj = {
         } else if ( cfg && typeof(cfg.anim) != "undefined") {
 
             // Animationframe
-
-            if (cfg.anim > 1) { cfg.anim = 1 } // auf letztem frame stehen bleiben
+            if (cfg.anim > 1) { cfg.anim = 1; } // auf letztem frame stehen bleiben
+            if (cfg.anim < 0) { cfg.anim = 0; }
 
 
             img = sprite.animimgs[ft.round(cfg.anim * (sprite.frames-1))];
