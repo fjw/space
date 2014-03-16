@@ -25,13 +25,16 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
         cfg: {},
 
-        _init: function(name) {
-            //name = Worldname
+        _init: function(name) {},
 
+        clockDiff: 0,
+
+        getLocalTime: function() {
+            return getTime();
         },
 
-        getTime: function() {
-            return getTime();
+        getServerTime: function() {
+            return getTime() + this.clockDiff;
         },
 
         /*
@@ -58,7 +61,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
         update: function(playername) {
             var _this = this;
 
-            var thistime = getTime();
+            var thistime = this.getServerTime();
             var secselapsed = (thistime - lasttime) / 1000;
             lasttime = thistime;
 
@@ -104,6 +107,7 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
 
         localPlayerFunctions: function(obj, secselapsed, thistime) {
 
+            //todo: irgendwie muss das sauberer werden mit den particeln
             if(obj.thrusting || obj.breaking) {
 
                 if(!obj.lastthrust || obj.lastthrust + 30 < thistime ) {
@@ -241,6 +245,8 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
             }
 
         }
+
+
 
     };
 

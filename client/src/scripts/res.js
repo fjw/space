@@ -484,8 +484,9 @@ var obj = {
         if(!img) {
             console.error("sprite problem: "+spritename);
 
-            console.log(ft.round(cfg.anim * (sprite.frames-1)));
-            console.log("="+sprite.animimgs.length);
+            console.log("anim="+cfg.anim);
+            console.log("imgindex="+ft.round(cfg.anim * (sprite.frames-1)));
+            console.log("indexcount="+sprite.animimgs.length);
         } else {
 
             var fx = x - this._layerViewportX[layer];

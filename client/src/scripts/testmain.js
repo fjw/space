@@ -14,8 +14,8 @@ require.config({
 
 
 require([   "jquery",
-            "lodash",
-            "res"
+    "lodash",
+    "res"
 ], function( $, _, RES) {
 
 
@@ -26,7 +26,6 @@ require([   "jquery",
     var cnv = $("#test")[0];
     var ctx = cnv.getContext("2d");
 
-/*
     cnv.width = 1000;
     cnv.height = 1000;
 
@@ -81,7 +80,7 @@ require([   "jquery",
             ctx.globalCompositeOperation = "lighter";
             ctx.drawImage(atmo,0,0);
 
-            angle = angle + 0.0001;
+            angle = angle + 0.0002;
             if (angle >= 360) { angle -= 360; }
 
         }, 14);
@@ -98,7 +97,7 @@ require([   "jquery",
     $("body").css("position","static");
 
 
-*/
+    /*
 
 
 
@@ -107,28 +106,28 @@ require([   "jquery",
 
 
 
-    res.setViewport(ctx,0,0,50,50);
+     res.setViewport(ctx,0,0,50,50);
 
 
-    var drawFrame = function(f) {
+     var drawFrame = function(f) {
 
-        res.drawSprite(0,"thruster",10,10,{anim:f});
+     res.drawSprite(0,"thruster",10,10,{anim:f});
 
-        res.flush();
-    };
-
-
-
-    var mf = 30;
-    var f = 0;
-    var inte = setInterval(function() {
-        drawFrame(f / mf);
-        f++
-
-        if (f == mf) { f = 0; }
-    }, 50);
+     res.flush();
+     };
 
 
 
+     var mf = 30;
+     var f = 0;
+     var inte = setInterval(function() {
+     drawFrame(f / mf);
+     f++
+
+     if (f == mf) { f = 0; }
+     }, 50);
+
+
+     */
 
 });

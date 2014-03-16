@@ -19,7 +19,7 @@ require([   "jquery",
 ], function( $, _, RES) {
 
 
-
+    /*
     var res = new RES();
 
 
@@ -106,7 +106,7 @@ require([   "jquery",
 
 
 
-
+/*
     res.setViewport(ctx,0,0,50,50);
 
 
@@ -127,8 +127,26 @@ require([   "jquery",
 
         if (f == mf) { f = 0; }
     }, 50);
+*/
 
 
+    var sock = new WebSocket("ws://127.0.0.1:4004");
 
+
+    sock.onopen = function() {
+
+    };
+
+    sock.onmessage = function() {
+
+    };
+
+    sock.onclose = function() {
+
+    };
+
+    sock.send("foo");
+
+    sock.close();
 
 });

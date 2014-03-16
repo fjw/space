@@ -49,7 +49,6 @@ var obj = {
 
     latency: 0,         // aktuelle Ping-Zeit
     _lastping: 0,
-    _serverClockDiv: 0,
 
     //---------------------------
 
@@ -101,6 +100,10 @@ var obj = {
             //register worldconfig
             _this.world.cfg = data.cfg;
 
+            //initialisiere die Minimap
+            _this._prepareMinimap();
+            //todo: das sollte vor dem spawn, am besten vor launchbutton schon passieren
+
         });
 
 
@@ -116,17 +119,17 @@ var obj = {
 
 
         socket.on("po", function(datenow) {
-            var thistime = getTime();
+            var thistime = _this.world.getLocalTime();
 
             //momentaner Lag
             _this.latency = ft.round(thistime - _this._lastping);
 
             //clocksync
-            _this._serverClockDiv = datenow - thistime;
+            _this.world.clockDiff = datenow - thistime;
         });
 
         var ping = function() {
-            var thistime = getTime();
+            var thistime = _this.world.getLocalTime();
             _this._lastping = thistime;
             socket.emit("pi", thistime);
         };
@@ -140,17 +143,11 @@ var obj = {
     },
 
 
-    getServerTime: function() {
-        return getTime() + this._serverClockDiv;
-    },
 
     start: function() {
         var _this = this;
 
         if (this.initiated && res.complete) {
-
-            //Map zeichnen
-            this._prepareMinimap();
 
 
 
@@ -332,6 +329,7 @@ var obj = {
         // 8 - HUD                              - keine translation
 
 
+        // Energieanzeige
         var pe = this.player.e / 100;
         var eb = Math.floor((this.cw * pe)/2);
 
@@ -339,11 +337,13 @@ var obj = {
         var g = Math.floor(100 * pe);
         var b = Math.floor(255 * pe);
 
-
         var ecol = "rgb("+r+","+g+","+b+")";
-
         res.drawRect(8, this.mx - eb, this.ch - 6, 2 * eb, 6, ecol, true);
 
+        // Minimap
+        if(this.minimapimg) {
+            res.drawImage(8, this.minimapimg, 10, 10);
+        }
     },
 
     _updateObjects: function() {
@@ -368,7 +368,6 @@ var obj = {
                     alpha = 1 - obj.expp;
                 }
 
-
                 var cfg = {};
 
                 if (alpha != 1) {
@@ -381,7 +380,7 @@ var obj = {
                     cfg.angle = obj.va;
                 }
                 if (obj.isanim)  {
-                    cfg.anim = ((_this.world.getTime() - obj.t) / 1000) / obj.ad;
+                    cfg.anim = ((_this.world.getServerTime() - obj.t) / 1000) / obj.ad;
                 }
 
                 // Objekt zeichnen
@@ -407,7 +406,6 @@ var obj = {
     },
 
     _updateStatics: function() {
-
 
         ft.each(this.world.statics, function(obj) {
 
@@ -455,8 +453,6 @@ var obj = {
     _updateStars: function() {
         var _this = this;
 
-
-
         if (this.starlayers) {
 
             var ls = this.starlayers[0].width;
@@ -479,11 +475,10 @@ var obj = {
 
             });
 
-
-
         }
 
     },
+
 
     _updateMinimap: function() {
 
@@ -509,14 +504,11 @@ var obj = {
 
     },
 
-    zoom: 0.05,
-    _mapX: 0,
-    _mapY: 0,
-    _mapbuffer: null,
-    _prepareMinimap: function() { //todo: diese Function refakturisieren
+    minimapimg: null,
+    minimapzoom: 0.05,
+    _prepareMinimap: function() {
 
-
-        var zoom = this.zoom;
+        // Grenzen finden
         var max_x = _.max(this.world.statics, function(item) { return item.x + item.w; });
         var max_y = _.max(this.world.statics, function(item) { return item.y + item.h; });
         var min_x = _.min(this.world.statics, function(item) { return item.x; });
@@ -528,42 +520,54 @@ var obj = {
         var mx = min_x.x;
         var my = min_y.y;
 
-        this._mapX = mx;
-        this._mapY = my;
+        // Canvas einrichten
+        this.minimapimg = document.createElement("canvas");
+        var mctx = this.minimapimg.getContext("2d");
 
-        this._mapbuffer = document.createElement("canvas");
-        var mctx = this._mapbuffer.getContext("2d");
-        this._mapbuffer.width = w * zoom;
-        this._mapbuffer.height = h * zoom;
+        var zoom = this.minimapzoom;
+        this.minimapimg.width = w * zoom;
+        this.minimapimg.height = h * zoom;
 
-
+        // Statics durchgehen
         _.each(this.world.statics, function(obj) {
 
             if(obj.type == "ni") {
 
-                // Static ohne Bild mit Pfad
-                mctx.beginPath();
+                // Static Pfad ohne Bild
+                _.each(obj.ps, function(poli) {
 
-                _.each(obj.p, function(p, i) {
-                    if( i == 0 ) {
-                        mctx.moveTo( (p.x + obj.x - mx)*zoom, (p.y + obj.y - my)*zoom);
-                    } else {
-                        mctx.lineTo( (p.x + obj.x - mx)*zoom, (p.y + obj.y - my)*zoom);
-                    }
+                    mctx.beginPath();
+
+                    _.each(poli, function(p, i) {
+                        if( i == 0 ) {
+                            mctx.moveTo( (p.x + obj.x - mx)*zoom, (p.y + obj.y - my)*zoom);
+                        } else {
+                            mctx.lineTo( (p.x + obj.x - mx)*zoom, (p.y + obj.y - my)*zoom);
+                        }
+                    });
+
+                    mctx.closePath();
+                    mctx.fillStyle = obj.c;
+                    mctx.fill();
                 });
 
-                mctx.closePath();
-                mctx.fillStyle = obj.c;
-                mctx.fill();
 
             } else {
 
-                // Static mit Bild, nicht im Hintergrund (bm)
-                if (!obj.bm) {
+                // Static mit Bild, nicht im Hintergrund (bg)
+                if (!obj.bg) {
 
-                    //mctx.drawImage(sprite.img)
+                    var sprite = res.resitems[obj.type];
+                    if(sprite) {
+                        var img = sprite.img;
 
-                    //res.drawSprite(mctx,  obj.type, (obj.x - mx), (obj.y - my), { zoom:zoom });
+                        if(img) {
+
+                            mctx.drawImage(img, (obj.x - mx)*zoom, (obj.y - my)*zoom, img.width * zoom, img.height * zoom );
+
+                        }
+                    }
+
                 }
             }
 
@@ -600,13 +604,9 @@ var obj = {
             star.height = r*2;
             var sctx = star.getContext("2d");
 
-
             // point
             sctx.fillStyle = 'rgba('+color+','+color+','+color+',1)';
             sctx.fillRect(r, r, 1, 1);
-
-
-
 
             for(var i = 0; i < starsperlayer; i++) {
                 var x = getRandom(layersize-(2*r));
@@ -617,8 +617,6 @@ var obj = {
 
             _this.starlayers.push(layer);
         });
-
-
 
     }
 

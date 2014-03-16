@@ -30,6 +30,7 @@ exports = module.exports = {
         },
 
         //Station
+        /*
         {
             type: "station",
             x:20000, y:-20000,       //Koordinaten
@@ -39,6 +40,7 @@ exports = module.exports = {
 
             ]]
         },
+        */
 
         //Planet1
         {
