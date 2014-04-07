@@ -448,8 +448,8 @@ var obj = {
     _flushText: function(layer, x, y, color, text, font) {
 
         var ctx = this._layerViewportCtx;
-        var fx = x - this._layerViewportX[layer];
-        var fy = y - this._layerViewportY[layer];
+        var fx = ft.round(x - this._layerViewportX[layer]);
+        var fy = ft.round(y - this._layerViewportY[layer]);
 
         ctx.fillStyle = color;
         ctx.font = font;

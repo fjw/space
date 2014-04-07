@@ -97,8 +97,6 @@ var CONNECTION = function(ws) {
         emit: function(type, data) {
             if(this.open) {
                 this.ws.send(msgpack.encode({i:type, d:data}), {binary: true});
-            } else {
-                log("warn", "emit on closed connection");
             }
         },
 

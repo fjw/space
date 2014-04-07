@@ -282,21 +282,11 @@ var obj = {
             this._updateObjects();
 
 
-
-
             this._updateHud();
 
             // -----
 
             res.flush();
-
-        }
-
-        //Debug-Infos
-        if(window.debug >= 1) {
-
-
-
 
         }
 
@@ -376,7 +366,7 @@ var obj = {
                 // 5 - aktueller Spieler                - welt-translation
                 // 7 - Partikel / Effekte Vordergrund   - welt-translation
                 var layer = 4;
-                if (obj.type != "player" || obj.name != _this.playername) { layer = 5; }
+                if (obj.type == "player" && obj.name == _this.playername) { layer = 5; }
 
                 var alpha = 1;
 
@@ -403,20 +393,28 @@ var obj = {
                 // Objekt zeichnen
                 res.drawSprite(layer, obj.type, obj.x, obj.y, cfg);
 
-            }
+                if (obj.type == "player" && obj.name != _this.playername) {
+                    // feindlicher Spieler
 
-            // ---- Debug Vektoren
-            if (window.debug >= 2) {
-                //zeichne vektor
-                var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
-                var vy = Math.sin((obj.ma-90) * 0.0174532) * obj.s * 0.5;
+                    // Name
+                    res.drawText(layer, obj.x - 10, obj.y + 26, "#888", obj.name, "12px Play");
+                }
 
-                res.drawPath(7,[
-                    { x: 0 , y: 0  },
-                    { x: vx, y: vy }
-                ], obj.x, obj.y, "#f00", false);
+
+                // ---- Debug Vektoren
+                if (window.debug >= 2) {
+                    //zeichne vektor
+                    var vx = Math.cos((obj.ma-90) * 0.0174532) * obj.s * 0.5;
+                    var vy = Math.sin((obj.ma-90) * 0.0174532) * obj.s * 0.5;
+
+                    res.drawPath(7,[
+                        { x: 0 , y: 0  },
+                        { x: vx, y: vy }
+                    ], obj.x, obj.y, "#f00", false);
+                }
+                // ----
+
             }
-            // ----
 
         });
 
