@@ -282,9 +282,74 @@ exports = module.exports = function(worldname) {
 
             }
 
+            if( player.exploding ) {
+
+                this.playerExplode(player, thistime);
+
+            }
+
         },
 
+        playerExplode: function(player, thistime) {
 
+            //Anfangsbedingung
+            if(!player.expst) {
+                player.expst = thistime; //Startzeit
+                player.expem = 0;        //bereits emitierte Partikel
+            }
+
+            var duration = this.cfg.player.explosionduration;
+            var particlecount = this.cfg.player.explosionparticles;
+
+            player.expp = ((thistime - player.expst) / 1000) / duration; //aktueller Stand 0-1
+
+            var emitcount = (particlecount * player.expp - player.expem); //jetzt zu emitierende Partikel
+
+            for( var i = 0; i < emitcount; i++ ) {
+
+                //emitiere einen partikel
+                var r = vector.getRandomNumber(5, 15);
+
+                var particle = {
+                    type: "explosion",
+
+                    x: player.x + vector.getRandomNumber(-20, 20),
+                    y: player.y + vector.getRandomNumber(-20, 20),
+                    ma: player.ma,
+                    s: player.s * vector.getRandomFloat(0.6, 1),
+                    o: player.name,
+                    cr: r,
+                    t: thistime,
+                    isanim: true,
+                    ad: this.cfg.projectiles.explosion.lifetime,
+                    scale: (2*r) / 30
+                };
+
+                player.expem++;
+                this.objects.push(particle);
+
+            }
+
+            if (player.expp >= 1) {
+
+                player.exploding = false;
+                player.expst = null;
+                player.inactive = true;
+                player.breakingtostop = true;
+                player.breaking = false;
+                player.thrusting = false;
+                player.shooting = false;
+                player.shooting2 = false;
+
+                var _this = this;
+                setTimeout(function() {
+                    player.dead = true;
+                    _this.spawnPlayer(player.name);
+                }, this.cfg.player.respawntime * 1000);
+
+            }
+
+        },
 
         playerShoot: function(player, type, thistime) {
 
@@ -369,13 +434,10 @@ exports = module.exports = function(worldname) {
                         if (proj.type == "bomb") {
                             //direkter Treffer mit Bombe
 
-
                         }
 
                         if (proj.type == "explosion") {
                             //Kollateralschaden durch Explosion
-
-
 
                         }
 
@@ -385,9 +447,9 @@ exports = module.exports = function(worldname) {
                         // Energie abziehen
                         obj.e = obj.e - _this.cfg.projectiles[proj.type].dmg;
 
-
+                        // Prüfen, ob Spieler noch lebt
                         if(obj.e < 0) {
-                            obj.dead = true;
+                            obj.exploding = true;
                         }
 
 

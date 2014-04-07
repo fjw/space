@@ -15,7 +15,12 @@ exports = module.exports = {
         maxenergy: 100,             // max Energie ( eu )
         energygen: 14,              // Energie Aufladung ( eu/s )
 
-        cr: 18                      // Kollisionsradius (px)
+        cr: 18,                     // Kollisionsradius (px)
+
+        explosionduration: 1,       // Zeit wie lange bei einer Explosion emittiert wird ( s )
+        explosionparticles: 25,     // Anzahl emittierter Partikel
+
+        respawntime: 10             // Zeit bis zum Respawn nach dem Tode ( s )
     },
 
     // ---- Projektile
@@ -28,6 +33,11 @@ exports = module.exports = {
             edrain: 15,             // Energiekosten ( eu/shot )
             dmg: 30,                // angerichteter Schaden ( eu )
             lifetime: 6             // Lebensdauer ( s )
+        },
+
+        explosion: {
+            dmg: 10,
+            lifetime: 1
         }
 
     }

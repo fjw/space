@@ -261,12 +261,10 @@ var obj = {
 
         this._keysdown = [];
 
-        this.playeractionnum++;
         socket.emit("pa", {a:"as"}); //allstop!!
     },
 
     _update: function() {
-        var _this = this;
 
         if (this.player) { // Spiel läuft nur bei definiertem Spieler
 
@@ -370,6 +368,9 @@ var obj = {
 
                 var alpha = 1;
 
+                if(obj.type == "explosion") {
+                    console.log(obj);
+                }
 
                 if( obj.exploding ) {
                     alpha = 1 - obj.expp;
