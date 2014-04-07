@@ -21,11 +21,15 @@ define(["lodash", "gamelogic"], function(_, gl) { return function(name) {
         localobjects: [],
         statics: [],
 
+        name: "-noname-",
+
         lastupdate: getTime(),
 
         cfg: {},
 
-        _init: function(name) {},
+        _init: function(name) {
+            this.name = name;
+        },
 
         clockDiff: 0,
 

@@ -367,12 +367,33 @@ var obj = {
 
     },
 
+    drawText: function(layer, x, y, color, text, font) {
+
+        var w = 200;
+        var h = 30;
+
+        if (ft.isBoxOverlap(this._layerViewportX[layer], this._layerViewportY[layer], this._viewportW, this._viewportH, x, y, w, h)) {
+
+            this._drawOperations.push({
+                layer: layer,
+                x: x,
+                y: y,
+                color: color,
+                text: text,
+                font: font
+            });
+
+        }
+
+    },
 
 
     /*
         Zeichnet alle gestackten Operationen auf den Bildschirm und leert den Stack
      */
     flush: function() {
+
+        //todo: perfomance testen, fillStyle und font etc nur setzen wenn geändert oder sortieren
 
         // Layer clearen
         this._layerViewportCtx.clearRect(0, 0, this._viewportW, this._viewportH);
@@ -393,6 +414,9 @@ var obj = {
             } else if (item.rect) {
                 // Rect
                 _this._flushRect(item.layer, item.w, item.h, item.x, item.y, item.color, item.fill);
+            } else if (item.text) {
+                // Text
+                _this._flushText(item.layer, item.x, item.y, item.color, item.text, item.font);
             } else {
                 // Image
                 _this._flushImage(item.layer, item.image, item.x, item.y);
@@ -418,6 +442,18 @@ var obj = {
             ctx.strokeStyle = color;
             ctx.strokeRect(fx,fy,w,h);
         }
+
+    },
+
+    _flushText: function(layer, x, y, color, text, font) {
+
+        var ctx = this._layerViewportCtx;
+        var fx = x - this._layerViewportX[layer];
+        var fy = y - this._layerViewportY[layer];
+
+        ctx.fillStyle = color;
+        ctx.font = font;
+        ctx.fillText(text,fx,fy);
 
     },
 

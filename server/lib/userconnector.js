@@ -15,6 +15,8 @@ var CONNECTION = function(ws) {
 
         onclose: null,
 
+        open: false,
+
         lastping: 0,
 
         _init: function(ws) {
@@ -37,6 +39,7 @@ var CONNECTION = function(ws) {
                 if (_this.onclose) {
                     _this.onclose(code, message);
                 }
+                _this.open = false;
                 log("info", "client disconnected");
             });
 
@@ -92,7 +95,11 @@ var CONNECTION = function(ws) {
         },
 
         emit: function(type, data) {
-            this.ws.send(msgpack.encode({i:type, d:data}), {binary: true});
+            if(this.open) {
+                this.ws.send(msgpack.encode({i:type, d:data}), {binary: true});
+            } else {
+                log("warn", "emit on closed connection");
+            }
         },
 
         _cbs: [],
@@ -133,6 +140,7 @@ exports = module.exports = function(port, connectioncallback) {
             this.sock.on('connection', function(ws) {
 
                 var conn = new CONNECTION(ws);
+                conn.open = true;
                 connectioncallback(conn);
 
             });

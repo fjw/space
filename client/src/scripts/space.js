@@ -61,6 +61,7 @@ var obj = {
         this.canvas.id = "maincanvas";
         this.ctx = this.canvas.getContext("2d");
         this.ctx.translate(0.5, 0.5);
+
         $(this.canvas).appendTo("body");
 
 
@@ -289,37 +290,14 @@ var obj = {
 
             res.flush();
 
-
-            // ----
-
-            if (window.debug > 1) {
-                //Position anzeigen
-                this.ctx.fillStyle = "#fcf";
-                this.ctx.fillText(Math.floor(this.player.x) + "," + Math.floor(this.player.y) , 10, 30);
-            }
         }
 
-        //FPS
-        if(window.debug > 1) {
-            _this._countFrames++;
-            if (!this._fpsInterval) {
-                this._fpsInterval = setInterval(function() {
-                    _this.fps = _this._countFrames * 2;
-                    _this._countFrames = 0;
-                }, 500);
-            }
+        //Debug-Infos
+        if(window.debug >= 1) {
 
-            if (this.fps > 25) {
-                this.ctx.fillStyle = "#0a0";
-                this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
-            } else {
-                this.ctx.fillStyle = "#a00";
-                this.ctx.fillText( this.fps.toString(), this.cw - 30, 15);
-            }
 
-            //Latency anzeigen
-            this.ctx.fillStyle = "#ccc";
-            this.ctx.fillText( this.latency.toString(), this.cw - 30, 30);
+
+
         }
 
     },
@@ -328,7 +306,7 @@ var obj = {
     _updateHud: function() {
         // HUD zeichnen
         // 8 - HUD                              - keine translation
-
+        var _this = this;
 
         // Energieanzeige
         var pe = this.player.e / 100;
@@ -341,10 +319,12 @@ var obj = {
         var ecol = "rgb("+r+","+g+","+b+")";
         res.drawRect(8, this.mx - eb, this.ch - 6, 2 * eb, 6, ecol, true);
 
+        // Map-Name
+        res.drawText(8, 15, this.ch - this.minimap_h - 20, "#888", this.world.name, "12px Play");
+
         // Minimap
         if(this.minimapimg) {
 
-            //todo: besseres System finden, vielleicht aktivierbare Map
             var thistime = getTime();
 
             if (this._lastMapUpdate + 100 < thistime) {
@@ -354,6 +334,33 @@ var obj = {
 
             res.drawImage(8, this.minimap, 10, this.ch - this.minimap_h - 16);
         }
+
+        //Debug-Infos
+        if(window.debug >= 1) {
+
+            //Position anzeigen
+            res.drawText(8, 10, 15, "#fcf", "pos: " + Math.floor(this.player.x) + "," + Math.floor(this.player.y), "12px Play");
+
+            //FPS anzeigen
+            this._countFrames++;
+            if (!this._fpsInterval) {
+                this._fpsInterval = setInterval(function() {
+                    _this.fps = _this._countFrames * 2;
+                    _this._countFrames = 0;
+                }, 500);
+            }
+
+            if (this.fps > 25) {
+                res.drawText(8, this.cw - 60, 15, "#0a0", "fps: " + this.fps.toString(), "12px Play");
+            } else {
+                res.drawText(8, this.cw - 60, 15, "#a00", "fps: " + this.fps.toString(), "12px Play");
+            }
+
+            //Latency anzeigen
+            res.drawText(8, this.cw - 60, 30, "#ccc", "ping: " + this.latency.toString(), "12px Play");
+
+        }
+
     },
 
     _updateObjects: function() {
