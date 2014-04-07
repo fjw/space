@@ -347,7 +347,7 @@ var obj = {
             //todo: besseres System finden, vielleicht aktivierbare Map
             var thistime = getTime();
 
-            if (this._lastMapUpdate + 200 < thistime) {
+            if (this._lastMapUpdate + 100 < thistime) {
                 this._lastMapUpdate = thistime;
                 this._updateMinimap();
             }
@@ -492,49 +492,47 @@ var obj = {
     minimap: null,
     minimap_ctx: null,
     minimap_w: 200,
-    minimap_h: 100,
+    minimap_h: 200,
 
-    _updateMinimap: function() {  //todo: mathe refakturierung
 
-        //todo: map ist irgendwie minimal verschoben...
+    _updateMinimap: function() {
 
         var mapctx = this.minimap_ctx;
         var zoom = this.minimapzoom;
 
-        // Minimap updaten
+        // Minimap leeren
         mapctx.clearRect(0, 0, this.minimap_w, this.minimap_h);
 
+        // Background
         mapctx.fillStyle = "#111";
         mapctx.fillRect(0, 0, this.minimap_w, this.minimap_h);
 
-        var mx = ft.round(this.player.x  * zoom);
-        var my = ft.round(this.player.y  * zoom);
+        var mx = ft.round((this.player.x - this.minimapimg_minx) * zoom);
+        var my = ft.round((this.player.y - this.minimapimg_miny) * zoom);
 
-        var px = ft.round(this.minimap_w / 2); // Mittelpunkt des Kartenviewports
-        var py = ft.round(this.minimap_h / 2);
+        var kx = ft.round(this.minimap_w / 2); // Mittelpunkt des Kartenviewports
+        var ky = ft.round(this.minimap_h / 2);
 
-        var ix = ft.round(this.minimapimg.width / 2);
-        var iy = ft.round(this.minimapimg.height / 2);
-
-        mapctx.drawImage(this.minimapimg, px - mx - ix, py - my - iy);
+        mapctx.drawImage(this.minimapimg, kx - mx, ky - my);
 
         // Mittelpunkt
         mapctx.fillStyle = "#f00";
-        mapctx.fillRect(px, py, 1, 1);
+        mapctx.fillRect(kx, ky, 1, 1);
 
         // Rahmen
         var cw = ft.round(this.cw * zoom);
         var ch = ft.round(this.ch * zoom);
         mapctx.strokeStyle = "#888";
         mapctx.lineWidth = 1;
-        mapctx.strokeRect(ft.round(px - (cw / 2))+0.5, ft.round(py - (ch / 2))+0.5, cw, ch );
+        mapctx.strokeRect(ft.round(kx - (cw / 2))+0.5, ft.round(ky - (ch / 2))+0.5, cw, ch );
 
         mapctx.strokeRect(0,0, this.minimap_w, this.minimap_h);
-
     },
 
     minimapimg: null,
-    minimapzoom: 0.05,
+    minimapzoom: 0.06,
+    minimapimg_minx:0,
+    minimapimg_miny:0,
     _prepareMinimap: function() {
 
         // Minimap-Canvas einrichten
@@ -554,6 +552,9 @@ var obj = {
 
         var mx = min_x.x;
         var my = min_y.y;
+
+        this.minimapimg_minx = mx;
+        this.minimapimg_miny = my;
 
         // Img  Canvas einrichten
         this.minimapimg = document.createElement("canvas");

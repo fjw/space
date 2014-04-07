@@ -3,7 +3,14 @@
 
 body {
     background: #000;
+    color: #444;
     position: relative;
+
+    font-family: 'Play', sans-serif;
+}
+
+.clear {
+    clear: both;
 }
 
 #maincanvas {
@@ -18,44 +25,113 @@ body {
 
 #site {
     width: 930px;
-    background: #ccc;
+    background: #eee;
     border: 2px solid #fff;
     border-radius: 2px;
-    min-height: 500px;
+    min-height: 300px;
 
     margin: 60px auto;
     padding: 10px;
+}
+
+h1 {
+    font-size: 40px;
+    margin: 30px 10px;
 }
 
 #joinbox {
 
 }
 
-#joinbox #userloginform,
-#joinbox #guestloginform {
+#joinbox #userloginform {
     float: left;
     margin: 10px;
-    border: 1px solid #fff;
+    border: 2px solid #fff;
     width: 443px;
 
     border-radius: 2px;
 }
 
-#joinbox #userloginform div,
-#joinbox #guestloginform div {
+#joinbox #userloginform div {
     margin: 10px;
 }
 
-#joinbox #userloginform h2,
-#joinbox #guestloginform h2 {
+#joinbox #userloginform input {
+    margin: 5px;
+}
+
+#joinbox #userloginform h2 {
     font-size: 30px;
-    color: #fff;
+    color: #4096ee;
 }
 
 input {
     padding: 10px;
     border: 1px solid #888;
-    border-radius: 3px;
+    border-radius: 2px;
+
+    font-size: 19px;
+    height: 22px;
+}
+
+input:hover {
+    border: 1px solid #666;
+}
+
+button, .button {
+
+    padding: 10px;
+    border: 1px solid #4096ee;
+
+    border-radius: 2px;
+
+    background: #6db3f2;
+    background: -moz-linear-gradient(top, #6db3f2 0%, #54a3ee 50%, #3690f0 51%, #1e69de 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6db3f2), color-stop(50%,#54a3ee), color-stop(51%,#3690f0), color-stop(100%,#1e69de));
+    background: -webkit-linear-gradient(top, #6db3f2 0%,#54a3ee 50%,#3690f0 51%,#1e69de 100%);
+    background: -o-linear-gradient(top, #6db3f2 0%,#54a3ee 50%,#3690f0 51%,#1e69de 100%);
+    background: -ms-linear-gradient(top, #6db3f2 0%,#54a3ee 50%,#3690f0 51%,#1e69de 100%);
+    background: linear-gradient(to bottom, #6db3f2 0%,#54a3ee 50%,#3690f0 51%,#1e69de 100%);
+
+    font-size: 15px;
+    color: #fff;
+
+    cursor: pointer;
+}
+
+button.disabled, .button.disabled {
+    border: 1px solid #b5c6d0;
+
+    background: #f2f6f8;
+    background: -moz-linear-gradient(top, #f2f6f8 0%, #d8e1e7 50%, #b5c6d0 51%, #e0eff9 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f2f6f8), color-stop(50%,#d8e1e7), color-stop(51%,#b5c6d0), color-stop(100%,#e0eff9));
+    background: -webkit-linear-gradient(top, #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%);
+    background: -o-linear-gradient(top, #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%);
+    background: -ms-linear-gradient(top, #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%);
+    background: linear-gradient(to bottom, #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%);
+
+    color: #fff;
+
+    cursor: default;
+}
+
+button:hover, .button:hover {
+
+    border: 1px solid #1e69de;
+}
+
+button.disabled:hover, .button.disabled:hover {
+    border: 1px solid #b5c6d0;
+}
+
+button:active, .button:active, button.active, .button.active {
+    background: #47a1ef;
+    background: -moz-linear-gradient(top, #47a1ef 0%, #258ced 39%, #077bef 40%, #0058dd 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#47a1ef), color-stop(39%,#258ced), color-stop(40%,#077bef), color-stop(100%,#0058dd));
+    background: -webkit-linear-gradient(top, #47a1ef 0%,#258ced 39%,#077bef 40%,#0058dd 100%);
+    background: -o-linear-gradient(top, #47a1ef 0%,#258ced 39%,#077bef 40%,#0058dd 100%);
+    background: -ms-linear-gradient(top, #47a1ef 0%,#258ced 39%,#077bef 40%,#0058dd 100%);
+    background: linear-gradient(to bottom, #47a1ef 0%,#258ced 39%,#077bef 40%,#0058dd 100%);
 }
 
 /* ---- */
@@ -65,9 +141,9 @@ input {
     background: #ccc;
     border: 2px solid #fff;
     border-radius: 2px;
-    min-height: 500px;
+    min-height: 300px;
 
-    margin: 60px auto;
+    margin: 60px auto 0;
     padding: 10px;
 }
 
@@ -75,20 +151,18 @@ input {
     float: left;
     width: 150px;
     text-align: center;
-    padding: 10px;
-    border: 1px solid #fff;
-    border-radius: 2px;
-    cursor: pointer;
     margin: 5px;
 }
 
-#interface .tabbutton:hover {
-    border: 1px solid #00f;
+#interface .tabmain {
+    margin: 10px 5px;
+    width: 720px;
+    float: left;
 }
 
-#interface .tabbutton.active {
-    border: 1px solid #000;
-    cursor: default;
+#interface .tabmain p {
+    line-height: 22px;
+    margin-bottom: 8px;
 }
 
 #interface .mainarea {
@@ -96,31 +170,13 @@ input {
 }
 
 #interface .launchgame {
-
     float: right;
 
     width: 150px;
     text-align: center;
-    padding: 10px;
-    border: 1px solid #fff;
-    border-radius: 2px;
-    cursor: pointer;
     margin: 5px;
 }
 
-#interface .launchgame.disabled {
-    border: 1px solid #ddd;
-    color: #ddd;
-    cursor: default;
-}
-
-#interface .launchgame.disabled:hover {
-    border: 1px solid #ddd;
-}
-
-#interface .launchgame:hover {
-    border: 1px solid #00f;
-}
 
 #interface .resloaded {
     width: 150px;
@@ -129,7 +185,7 @@ input {
 #interface .resloaded .percent {
     height: 4px;
     width: 0;
-    background: #444;
+    background: #fff;
 
     margin-top: 10px;
 }
