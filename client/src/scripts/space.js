@@ -114,6 +114,9 @@ var obj = {
 
         });
 
+        socket.on("newcfg", function(data) {
+            _this.world.cfg = data.cfg;
+        });
 
         socket.on("wu", function(data) {
             _this.world.updateFromServer(data.objects);

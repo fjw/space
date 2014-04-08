@@ -51,7 +51,8 @@ worldnames.forEach(function(wn) {
 
 // --------------------------------- manage connections -----------------------
 
-new USERCONNECTOR(port, function(c) {
+
+new USERCONNECTOR(port, function(c, uc) {
 
     var updateinterval = null;
 
@@ -109,7 +110,7 @@ new USERCONNECTOR(port, function(c) {
                 });
             });
 
-            c.on("pi", function(datenow) {
+            c.on("pi", function() {
                 //Ping, sende Pong
                 c.emit("po", world.getTime());
             });
@@ -118,7 +119,7 @@ new USERCONNECTOR(port, function(c) {
                 if(c.admin) {
                     world.changeWorldConfig(subcfg, function(newcfg) {
 
-                        //todo: broadcast new cfg
+                        uc.broadcast("newcfg", {cfg:newcfg});
 
                     });
                 }
@@ -129,7 +130,7 @@ new USERCONNECTOR(port, function(c) {
     });
 
 
-    c.onclose = function(code, message) {
+    c.onclose = function() {
 
         // Interval entfernen
         if(updateinterval) {

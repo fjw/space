@@ -131,6 +131,8 @@ exports = module.exports = function(worldname) {
 
             // slave möchte die config verändern (Adminfunktion)
             req.on("setcfg", function(data, respond) {
+                log("info", "config changed by admin");
+                oi(data.subcfg);
                 _this.cfg = _.merge(_this.cfg, data.subcfg);
                 respond({cfg: _this.cfg});
             });
