@@ -26,6 +26,10 @@ require([   "jquery",
     var cnv = $("#test")[0];
     var ctx = cnv.getContext("2d");
 
+
+
+    /*
+
     cnv.width = 1000;
     cnv.height = 1000;
 
@@ -97,7 +101,7 @@ require([   "jquery",
     $("body").css("position","static");
 
 
-    /*
+    */
 
 
 
@@ -111,23 +115,23 @@ require([   "jquery",
 
      var drawFrame = function(f) {
 
-     res.drawSprite(0,"thruster",10,10,{anim:f});
+         res.drawSprite(0,"bombexplosion",10,10,{anim:f, cyclicanim: false});
 
-     res.flush();
+         res.flush();
      };
 
 
 
-     var mf = 30;
+     var mf = 60;
      var f = 0;
      var inte = setInterval(function() {
-     drawFrame(f / mf);
-     f++
+         drawFrame(f / (mf / 2));
+         f++;
 
-     if (f == mf) { f = 0; }
+         if (f == mf) { f = 0; }
      }, 50);
 
 
-     */
+
 
 });

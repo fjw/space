@@ -162,6 +162,8 @@ exports = module.exports = function(worldname) {
                 if(obj.type == "player") {
                     _this.checkPlayerEvents(obj, thistime);
                     _this.checkPlayerCollisions(obj, thistime);
+                } else {
+                    _this.checkObjectEvents(obj, thistime);
                 }
 
                 gl.updateObj(_this.cfg, obj, secselapsed, _this.statics);
@@ -282,9 +284,80 @@ exports = module.exports = function(worldname) {
 
             }
 
+            if( player.shooting2 ) {
+
+                this.playerShoot(player, "bomb", thistime);
+
+            }
+
             if( player.exploding ) {
 
                 this.playerExplode(player, thistime);
+
+            }
+
+        },
+
+        checkObjectEvents: function(obj, thistime) {
+
+            if(obj.exploding) {
+
+                this.bombExplode(obj, thistime);
+
+            }
+
+        },
+
+        bombExplode: function(obj, thistime) {
+
+            var type = obj.type;
+            var ocfg = this.cfg.projectiles[type];
+
+            //Anfangsbedingung
+            if(!obj.expst) {
+                obj.expst = thistime; //Startzeit
+                obj.expem = 0;        //bereits emitierte Partikel
+
+                obj.ad = ocfg.explosionduration;
+                obj.t = thistime;
+            }
+
+
+            var duration = ocfg.explosionduration;
+            var particlecount = ocfg.explosionparticles;
+
+            obj.expp = ((thistime - obj.expst) / 1000) / duration; //aktueller Stand 0-1
+
+            var emitcount = (particlecount * obj.expp - obj.expem); //jetzt zu emitierende Partikel
+
+            for( var i = 0; i < emitcount; i++ ) {
+
+                //emitiere einen partikel
+                var r = vector.getRandomNumber(5, 10);
+
+                var bulletspeed = vector.getRandomNumber(this.cfg.projectiles.bombexplosion.speedmin, this.cfg.projectiles.bombexplosion.speedmax);
+
+                var pv = vector.angleAbs2vector(obj.ma, obj.s);
+                var bv = vector.angleAbs2vector(vector.getRandomNumber(0, 359), bulletspeed);
+                var bas = vector.vector2angleAbs(pv.x + bv.x, pv.y + bv.y);
+
+                var particle = {
+                    type: "bombexplosion",
+
+                    x: obj.x + vector.getRandomNumber(-10, 10),
+                    y: obj.y + vector.getRandomNumber(-10, 10),
+                    ma: bas.a,
+                    s: bas.s,
+                    //o: player.name, // kein owner
+                    cr: r,
+                    t: thistime,
+                    isanim: true, // todo: sollte vom client eigentlich eingestellt sein
+                    ad: this.cfg.projectiles.bombexplosion.lifetime,
+                    scale: (2*r) / 30
+                };
+
+                obj.expem++;
+                this.objects.push(particle);
 
             }
 
@@ -320,7 +393,7 @@ exports = module.exports = function(worldname) {
                     o: player.name,
                     cr: r,
                     t: thistime,
-                    isanim: true,
+                    isanim: true,// todo: sollte vom client eigentlich eingestellt sein
                     ad: this.cfg.projectiles.explosion.lifetime,
                     scale: (2*r) / 30
                 };
@@ -331,6 +404,38 @@ exports = module.exports = function(worldname) {
             }
 
             if (player.expp >= 1) {
+
+                //emitiere finale partikel
+                for( var i = 0; i < this.cfg.player.explosionfinalparticles; i++ ) {
+
+                    //emitiere einen partikel
+                    var r = vector.getRandomNumber(5, 15);
+
+                    var bulletspeed = vector.getRandomNumber(this.cfg.projectiles.explosion.speedmin, this.cfg.projectiles.explosion.speedmax);
+
+                    var pv = vector.angleAbs2vector(player.ma, player.s);
+                    var bv = vector.angleAbs2vector(vector.getRandomNumber(0, 359), bulletspeed);
+                    var bas = vector.vector2angleAbs(pv.x + bv.x, pv.y + bv.y);
+
+                    var particle = {
+                        type: "explosion",
+
+                        x: player.x + vector.getRandomNumber(-10, 10),
+                        y: player.y + vector.getRandomNumber(-10, 10),
+                        ma: bas.a,
+                        s: bas.s,
+                        o: player.name,
+                        cr: r,
+                        t: thistime,
+                        isanim: true, // todo: sollte vom client eigentlich eingestellt sein
+                        ad: this.cfg.projectiles.explosion.lifetime,
+                        scale: (2*r) / 30
+                    };
+
+                    obj.expem++;
+                    this.objects.push(particle);
+                }
+
 
                 player.exploding = false;
                 player.expst = null;
@@ -358,7 +463,7 @@ exports = module.exports = function(worldname) {
             var lastshot = player["lastshot_"+type];
 
             // Checken, ob Spieler genug Energie hat und ob der letzte Schuß lange genug her ist
-            if( player.e > bcfg.edrain && (!lastshot || lastshot + bcfg.firerate * 1000 < thistime)) {
+            if( player.e > bcfg.edrain && (!lastshot || lastshot + 1000 / bcfg.firerate < thistime)) {
 
                 var pv = vector.angleAbs2vector(player.ma, player.s); // Spieler Bewegungsvektor
                 var bv = vector.angleAbs2vector(player.va, bcfg.speed); // Projektil-Vektor (in Sichtrichtung d. Spielers)
@@ -377,6 +482,11 @@ exports = module.exports = function(worldname) {
                     t: thistime,
                     ad: bcfg.lifetime
                 };
+
+                if( type == "bomb") {
+                    projectile.isanim = true; // todo: sollte vom client eigentlich eingestellt sein
+                    projectile.cyclicanim = 0.4; // todo: sollte vom client eigentlich eingestellt sein
+                }
 
                 // Objekt hinzu
                 this.objects.push(projectile);
@@ -400,49 +510,50 @@ exports = module.exports = function(worldname) {
                 _.each(this.objects, function(proj) {
 
                     // wenn es ein Projektiltyp ist && Spieler nicht der Besitzer && Radien überlappen
-                    if( (proj.type == "bullet" || proj.type == "bomb" || proj.type == "explosion") &&
+                    if( (proj.type == "bullet" || proj.type == "bomb" || proj.type == "explosion" || proj.type == "bombexplosion") &&
+                        !proj.dead &&
                         proj.o != obj.name &&
                         vector.vectorAbs(proj.x - obj.x, proj.y - obj.y) < obj.cr + proj.cr) {
 
                         // Spieler getroffen!!
 
-                        if (proj.type == "bullet") {
-                            //direkter Treffer mit Bullet
 
-                            //emitiere einen partikel
-                            var r = vector.getRandomNumber(5, 6);
 
-                            var particle = {
-                                type: "bullethit",
+                        //emitiere einen rauchpartikel
+                        var r = vector.getRandomNumber(5, 6);
 
-                                x: proj.x,
-                                y: proj.y,
-                                ma: proj.ma,
-                                s: 60,
-                                o: obj.name,
-                                cr: r,
-                                t: thistime,
-                                isanim: true,
-                                ad: 0.5,
-                                scale: (2*r) / 12
-                            };
-
-                            _this.objects.push(particle);
-
+                        if(proj.type == "bomb") {
+                            r = vector.getRandomNumber(10, 15);
                         }
 
-                        if (proj.type == "bomb") {
-                            //direkter Treffer mit Bombe
+                        var particle = {
+                            type: "bullethit",
 
+                            x: proj.x,
+                            y: proj.y,
+                            ma: proj.ma,
+                            s: 60,
+                            o: obj.name,
+                            cr: r,
+                            t: thistime,
+                            isanim: true,
+                            ad: 0.5,
+                            scale: (2*r) / 12
+                        };
+                        _this.objects.push(particle);
+
+
+                        if(proj.type == "bomb") {
+
+                            // lasse explodieren
+                            proj.exploding = true;
+
+                        } else {
+
+                            // Projektil beim nächsten durchlauf löschen
+                            proj.dead = true;
                         }
 
-                        if (proj.type == "explosion") {
-                            //Kollateralschaden durch Explosion
-
-                        }
-
-                        // Projektil beim nächsten durchlauf löschen
-                        proj.dead = true;
 
                         // Energie abziehen
                         obj.e = obj.e - _this.cfg.projectiles[proj.type].dmg;

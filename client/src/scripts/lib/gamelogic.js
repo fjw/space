@@ -248,6 +248,11 @@
                     obj.s *= cfg.staticbouncefactor;
                     collided = true;
 
+                    // Explosion?
+                    if(cfg.projectiles && cfg.projectiles[obj.type] && cfg.projectiles[obj.type].explosionparticles) {
+                        obj.exploding = true;
+                    }
+
                 }
 
             }

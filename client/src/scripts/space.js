@@ -216,7 +216,7 @@ var obj = {
                 if(code == 37) { pa = "l"; }    // left
                 if(code == 78) { pa = "s"; }    // n
                 if(code == 32) { pa = "sa"; }   // space
-                if(code == 225)  { pa = "sb"; }  // todo: ?
+                if(code == 66)  { pa = "sb"; }  // b
                 //if(code == 84) { socket.emit("test", "start"); }
 
                 if (pa) {
@@ -247,7 +247,7 @@ var obj = {
             if(code == 37) { pa = "l"; }
             if(code == 78) { pa = "s"; }
             if(code == 32) { pa = "sa"; }
-            if(code == 225)  { pa = "sb"; }
+            if(code == 66)  { pa = "sb"; }
             //if(code == 84) { socket.emit("test", "stop"); }
 
             if (pa) {
@@ -368,10 +368,6 @@ var obj = {
 
                 var alpha = 1;
 
-                if(obj.type == "explosion") {
-                    console.log(obj);
-                }
-
                 if( obj.exploding ) {
                     alpha = 1 - obj.expp;
                 }
@@ -388,7 +384,14 @@ var obj = {
                     cfg.angle = obj.va;
                 }
                 if (obj.isanim)  {
-                    cfg.anim = ((_this.world.getServerTime() - obj.t) / 1000) / obj.ad;
+
+                    if(obj.cyclicanim) {
+                        cfg.anim = ((_this.world.getServerTime() - obj.t) / 1000) / obj.cyclicanim;
+                        cfg.cyclicanim = true;
+                    } else {
+                        cfg.anim = ((_this.world.getServerTime() - obj.t) / 1000) / obj.ad;
+                    }
+
                 }
 
                 // Objekt zeichnen
