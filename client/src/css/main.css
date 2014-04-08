@@ -2,7 +2,7 @@
 
 
 body {
-    background: #000;
+    background: #060606;
     color: #444;
     position: relative;
 
@@ -15,6 +15,7 @@ body {
 
 #maincanvas {
     position: fixed;
+    background: #000;
 }
 
 #map {

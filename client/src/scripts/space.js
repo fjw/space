@@ -1,4 +1,4 @@
-define(["lodash", "jquery", "rafpolyfill", "world", "ftools"], function(_, $, rafpolyfill, WORLD, ft) { return function() {
+define(["lodash", "jquery", "rafpolyfill", "world", "ftools"], function(_, $, rafpolyfill, WORLD, ft) { return function(options) {
 
 // Zeitfunktion
 var supportsPerformanceNow = false;
@@ -16,9 +16,13 @@ var getTime = function() {
 
 var obj = {
 
+    options: {},
+
     //--------------------
     layers: [],
     ctxs: [],
+
+    //todo: obsolet?
     mapcanvas: null,
     mapctx: null,
 
@@ -55,6 +59,8 @@ var obj = {
     _init: function() {
         var _this = this;
 
+        if(options) { this.options = options; }
+
         //einrichten und Listener starten... geloopt wird erst später
 
         this.canvas = document.createElement("canvas");
@@ -64,12 +70,13 @@ var obj = {
 
         $(this.canvas).appendTo("body");
 
-
+/* todo: obsolet?? oder doch die bessere lösung?
         this.mapcanvas = document.createElement("canvas");
         this.mapctx = this.mapcanvas.getContext("2d");
         this.mapctx.translate(0.5, 0.5);
         $(this.mapcanvas).appendTo("body");
         $(this.mapcanvas).attr("id", "map");
+        */
 
 
         //inital einen resize triggern
@@ -180,11 +187,31 @@ var obj = {
         var w = window.innerWidth;
         var h = window.innerHeight;
 
+        var $cnv = $(this.canvas);
+        if(options && options.screensize) {
+            var oss = options.screensize;
+
+            if (w > oss) { w = oss; }
+            if (h > oss) { h = oss; }
+
+            var top = (window.innerHeight - oss) / 2;
+            var left = (window.innerWidth - oss) / 2;
+
+            if (top < 0) { top = 0; }
+            if (left < 0) { left = 0; }
+
+            $cnv.css({ top: top + "px", left: left + "px" });
+        } else {
+            $cnv.css({ top: 0, left: 0 });
+        }
+
         this.canvas.width = w;
         this.canvas.height = h;
 
+        /* //todo: obsolet?
         this.mapcanvas.width = 0.2 * w;
         this.mapcanvas.height = 0.2 * h;
+        */
 
         this.cw = w;
         this.ch = h;
@@ -296,34 +323,38 @@ var obj = {
         // 8 - HUD                              - keine translation
         var _this = this;
 
-        // Energieanzeige
-        var pe = this.player.e / 100;
-        var eb = Math.floor((this.cw * pe)/2);
+        if(!this.player.exploding && !this.player.inactive) {
 
-        var r = Math.floor(255 - 255 * pe);
-        var g = Math.floor(100 * pe);
-        var b = Math.floor(255 * pe);
+            // Energieanzeige
+            var pe = this.player.e / 100;
+            var eb = Math.floor((this.cw * pe)/2);
 
-        var ecol = "rgb("+r+","+g+","+b+")";
-        res.drawRect(8, this.mx - eb, this.ch - 6, 2 * eb, 6, ecol, true);
+            var r = Math.floor(255 - 255 * pe);
+            var g = Math.floor(100 * pe);
+            var b = Math.floor(255 * pe);
 
-        // Map-Name
-        res.drawText(8, 15, this.ch - this.minimap_h - 20, "#888", this.world.name, "12px Play");
+            var ecol = "rgb("+r+","+g+","+b+")";
+            res.drawRect(8, this.mx - eb, this.ch - 6, 2 * eb, 6, ecol, true);
 
-        // Player-Name
-        res.drawText(8, 15, this.ch - this.minimap_h - 40, "#d00", this.player.name, "12px Play");
+            // Map-Name
+            res.drawText(8, 15, this.ch - this.minimap_h - 20, "#888", this.world.name, "12px Play");
 
-        // Minimap
-        if(this.minimapimg) {
+            // Player-Name
+            res.drawText(8, 15, this.ch - this.minimap_h - 40, "#d00", this.player.name, "12px Play");
 
-            var thistime = getTime();
+            // Minimap
+            if(this.minimapimg) {
 
-            if (this._lastMapUpdate + 100 < thistime) {
-                this._lastMapUpdate = thistime;
-                this._updateMinimap();
+                var thistime = getTime();
+
+                if (this._lastMapUpdate + 100 < thistime) {
+                    this._lastMapUpdate = thistime;
+                    this._updateMinimap();
+                }
+
+                res.drawImage(8, this.minimap, 10, this.ch - this.minimap_h - 16);
             }
 
-            res.drawImage(8, this.minimap, 10, this.ch - this.minimap_h - 16);
         }
 
         //Debug-Infos

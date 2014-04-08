@@ -151,7 +151,7 @@
 
 
         // Bremsen (zum Stoppen)
-        if (obj.stopping) {
+        if (obj.stopping || obj.inactive) {
             obj.s = obj.s - cfgp.stopacceleration * secselapsed;
             if (obj.s < 5) { obj.s = 0; }
         }

@@ -776,14 +776,14 @@ var obj = {
 
                 a = m * 0.3;
                 b = 0.3;
-                d = 1 - m * 0.3;
+                c = 1 - m * 0.3;
 
-                if (a < 0) { a = 0; } if (b < 0) { b = 0; } if (c < 0) { c = 0; } if (d < 0) { d = 0; }
-                if (a > 1) { a = 1; } if (b > 1) { b = 1; } if (c > 1) { c = 1; } if (d > 1) { d = 1; }
+                if (a < 0) { a = 0; } if (b < 0) { b = 0; } if (c < 0) { c = 0; }
+                if (a > 1) { a = 1; } if (b > 1) { b = 1; } if (c > 1) { c = 1; }
 
                 gr.addColorStop(a, blackalpha);
                 gr.addColorStop(b, smoke);
-                gr.addColorStop(d, blackalpha);
+                gr.addColorStop(c, blackalpha);
             }
 
 

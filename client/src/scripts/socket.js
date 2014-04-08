@@ -85,6 +85,9 @@ var obj = {
 
     },
 
+    ping: function(callback) {
+        //todo: ping reparieren?
+    },
 
     emit: function(msg, data) {
         if(this.sock) {

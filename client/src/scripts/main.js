@@ -74,6 +74,7 @@ require([
 
         };
 
+        var options = {};
 
         // Game ---------------------------------------------------
         var startGame = function() {
@@ -81,8 +82,10 @@ require([
             // Interface entfernen
             $("#interface").remove();
 
+
+
             if(!window.space) {
-                window.space = new SPACE();
+                window.space = new SPACE(options);
                 window.space.start();
             }
 
@@ -159,6 +162,19 @@ require([
                     });
                 }
             });
+
+            $("#option_screensize").bind("change", function() {
+                var osss = parseInt($("#option_screensize").val());
+                ft.setCookie("option_screensize", osss, 100);
+                options.screensize = osss;
+            });
+
+            var oss = ft.getCookie("option_screensize");
+
+            if(oss) {
+                options.screensize = parseInt(oss);
+                $("#option_screensize").val(oss);
+            }
 
 
         };
