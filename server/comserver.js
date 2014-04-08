@@ -114,6 +114,15 @@ new USERCONNECTOR(port, function(c) {
                 c.emit("po", world.getTime());
             });
 
+            c.on("changeconfig", function(subcfg) {
+                if(c.admin) {
+                    world.changeWorldConfig(subcfg, function(newcfg) {
+
+                        //todo: broadcast new cfg
+
+                    });
+                }
+            });
 
         }
 

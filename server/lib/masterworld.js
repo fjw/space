@@ -129,6 +129,12 @@ exports = module.exports = function(worldname) {
                 respond({player: player});
             });
 
+            // slave möchte die config verändern (Adminfunktion)
+            req.on("setcfg", function(data, respond) {
+                _this.cfg = _.merge(_this.cfg, data.subcfg);
+                respond({cfg: _this.cfg});
+            });
+
             // ----------------------------------------------------------------------
             // ----------------------------------------------------------------------
 

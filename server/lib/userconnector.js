@@ -183,6 +183,8 @@ exports = module.exports = function(port, connectioncallback) {
 
     };
 
+    //todo: broadcast
+
     //mach den _init und gib das objekt aus
     obj._init(port, connectioncallback);
     return obj;

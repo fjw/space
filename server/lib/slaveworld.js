@@ -216,6 +216,17 @@ exports = module.exports = function(worldname) {
                 callback(data.player);
             });
 
+        },
+
+        changeWorldConfig: function(subcfg, callback) {
+            var _this = this;
+
+            //setzt eine neue config für diese Welt (adminfunktion)
+            request("setcfg", { subcfg: subcfg }, function(data) {
+                _this.cfg = data.cfg;
+                callback(data.cfg);
+            });
+
         }
 
     };
