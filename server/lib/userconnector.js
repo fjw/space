@@ -58,7 +58,43 @@ var CONNECTION = function(ws) {
 
                     _this.username = data.u;
 
-                } else if (data.u == "user" && data.p == "s") {
+                } else if (data.u == "user1" && data.p == "s1") {
+
+                    // allowed guest
+                    _this.emit("auth", {allowed: 1});
+                    _this.member = true;
+                    _this.logedin = true;
+
+                    _this.username = data.u;
+
+                } else if (data.u == "user2" && data.p == "s2") {
+
+                    // allowed guest
+                    _this.emit("auth", {allowed: 1});
+                    _this.member = true;
+                    _this.logedin = true;
+
+                    _this.username = data.u;
+
+                } else if (data.u == "user3" && data.p == "s3") {
+
+                    // allowed guest
+                    _this.emit("auth", {allowed: 1});
+                    _this.member = true;
+                    _this.logedin = true;
+
+                    _this.username = data.u;
+
+                } else if (data.u == "user4" && data.p == "s4") {
+
+                    // allowed guest
+                    _this.emit("auth", {allowed: 1});
+                    _this.member = true;
+                    _this.logedin = true;
+
+                    _this.username = data.u;
+
+                } else if (data.u == "user5" && data.p == "s5") {
 
                     // allowed guest
                     _this.emit("auth", {allowed: 1});

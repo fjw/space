@@ -310,6 +310,9 @@ var obj = {
         // Map-Name
         res.drawText(8, 15, this.ch - this.minimap_h - 20, "#888", this.world.name, "12px Play");
 
+        // Player-Name
+        res.drawText(8, 15, this.ch - this.minimap_h - 40, "#d00", this.player.name, "12px Play");
+
         // Minimap
         if(this.minimapimg) {
 
@@ -505,6 +508,7 @@ var obj = {
 
 
     _updateMinimap: function() {
+        var _this = this;
 
         var mapctx = this.minimap_ctx;
         var zoom = this.minimapzoom;
@@ -522,11 +526,28 @@ var obj = {
         var kx = ft.round(this.minimap_w / 2); // Mittelpunkt des Kartenviewports
         var ky = ft.round(this.minimap_h / 2);
 
-        mapctx.drawImage(this.minimapimg, kx - mx, ky - my);
+        var mapx = kx - mx;
+        var mapy = ky - my;
+
+        mapctx.drawImage(this.minimapimg, mapx, mapy);
 
         // Mittelpunkt
-        mapctx.fillStyle = "#f00";
+        mapctx.fillStyle = "#d00";
         mapctx.fillRect(kx, ky, 1, 1);
+
+        // Explosionsblipps
+        var explodingobjects = _.filter(this.world.objects, function(obj) { return obj.exploding; });
+        _.each(explodingobjects, function(obj) {
+
+            var ox = ft.round((obj.x - _this.minimapimg_minx) * zoom);
+            var oy = ft.round((obj.y - _this.minimapimg_miny) * zoom);
+
+            mapctx.fillStyle = "#d00";
+            mapctx.beginPath();
+            mapctx.arc( mapx + ox, mapy + oy, 2, 0, 6.283185307179586, false);
+            mapctx.fill();
+
+        });
 
         // Rahmen
         var cw = ft.round(this.cw * zoom);
