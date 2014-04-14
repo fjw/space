@@ -37,7 +37,6 @@ body {
 
 h1 {
     font-size: 40px;
-    margin: 30px 10px;
 }
 
 #joinbox {
@@ -46,7 +45,7 @@ h1 {
 
 #joinbox #userloginform {
     float: left;
-    margin: 10px;
+    margin: 30px 10px;
     border: 2px solid #fff;
     width: 443px;
 
@@ -62,7 +61,7 @@ h1 {
 }
 
 #joinbox #userloginform h2 {
-    font-size: 30px;
+    font-size: 28px;
     color: #4096ee;
 }
 
@@ -72,7 +71,7 @@ input {
     border-radius: 2px;
 
     font-size: 19px;
-    height: 22px;
+
 }
 
 input:hover {
@@ -161,7 +160,7 @@ button:active, .button:active, button.active, .button.active {
     float: left;
 }
 
-#interface .tabmain p {
+p {
     line-height: 22px;
     margin-bottom: 8px;
 }

@@ -19,9 +19,11 @@ exports = module.exports = {
 
         explosionduration: 1,        // Zeit wie lange bei einer Explosion emittiert wird ( s )
         explosionparticles: 25,      // Anzahl emittierter Partikel
-        explosionfinalparticles: 20, // Anzahl emittierter Partikel zum Schluß (gestreut)
+        explosionfinalparticles: 4,  // Anzahl emittierter Partikel zum Schluß (gestreut)
 
-        respawntime: 10              // Zeit bis zum Respawn nach dem Tode ( s )
+        respawntime: 6,              // Zeit bis zum Respawn nach dem Tode ( s )
+
+        idletime: 1800 //30min       // Zeit bis zur Selbstzerstörung bei Idle ( s )
     },
 
     // ---- Projektile
@@ -41,15 +43,15 @@ exports = module.exports = {
             firerate: 0.5,           // Feuerrate ( shots/s )
             cr: 12,                  // Kollisionsradius ( px )
             edrain: 40,              // Energiekosten ( eu/shot )
-            dmg: 3,                 // angerichteter Schaden ( eu )
+            dmg: 40,                 // angerichteter Schaden ( eu )
             lifetime: 300,           // Lebensdauer ( s )
 
-            explosionduration: 0.3,  // Zeit wie lange bei einer Explosion emittiert wird ( s )
+            explosionduration: 0.1,  // Zeit wie lange bei einer Explosion emittiert wird ( s )
             explosionparticles: 35   // Anzahl emittierter Partikel, wenn gesetzt explodiert der Particel an einer Wand
         },
 
         bombexplosion: {             // --- Explosionsfragment einer Bombe
-            dmg: 2,
+            dmg: 10,
             lifetime: 0.6,
 
             speedmin: 30,           // min Geschwindigkeit eines Fragments ( px/s )

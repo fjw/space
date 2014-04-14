@@ -26,6 +26,10 @@ var obj = {
             uri: "/res/gasplanet1.png"
         },
 
+        greenplanet: {
+            uri: "/res/greenplanet.png"
+        },
+
         asteroid1: {
             uri: "/res/asteroid1.png"
         },

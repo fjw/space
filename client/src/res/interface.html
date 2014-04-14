@@ -2,24 +2,26 @@
 
     <div>
         <div class="button tabbutton active" data-id="info">Info</div>
-        <div class="button tabbutton" data-id="keys">Keys / Config</div>
-        <div class="button tabbutton" data-id="otherfoo">otherfoo</div>
+        <div class="button tabbutton" data-id="about">About / Future Plans</div>
+        <div class="button tabbutton" data-id="donate">Donate</div>
     </div>
 
     <div class="mainarea">
         <div class="tabmain" data-id="info">
-            <p>Project SPACE</p>
-            <p>&copy; 2013-2014 Frédéric Worm</p>
+            <p>Project SPACE - ultraalpha Version</p>
+            <p>&copy; 2013-2014 <a href="https://www.xing.com/profile/Frederic_Worm">Frédéric Worm</a></p>
 
-            <p>Everything is still very alpha.</p>
-        </div>
-        <div class="tabmain" data-id="keys">
+            <p><br></p>
+
+            <p>This game needs a fast browser preferable on a machine with a good GPU. Use Chrome or Firefox.</p>
+            <p><br></p>
+
             <p>up, down - <b>accelerate, brake</b></p>
             <p>left, right - <b>rotate</b></p>
             <p>N - <b>brake to stop</b></p>
             <p>space - <b>blast</b></p>
             <p>B - <b>bomb</b></p>
-
+            <p><br></p>
             <p>
                 maximum viewport
                 <select id="option_screensize">
@@ -35,11 +37,25 @@
                 (selected configuration will be saved in a cookie)
             </p>
         </div>
-        <div class="tabmain" data-id="otherfoo">
-            <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.</p>
-            <p>Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus.</p>
-            <p>Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi.</p>
-            <p>Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc.</p>
+        <div class="tabmain" data-id="about">
+            <p>I developed this game just for fun. Main problem is that the actual browsers are still not fast enough to handle a fast realtime multiplayer action game like this.<br>
+               I made several benchmarks, performance tests and rewrote the entire game several times to make it faster.</p>
+
+            <p>If you like this game and want to support it's development, please donate.<br>
+               Also, if I get enough donations, I will release the sourcecode on github.</p>
+            <p>If you have feedback: Plase send me a mail to fjw@garx.de</p>
+        </div>
+        <div class="tabmain" data-id="donate">
+            <p>If you like this game and want to support it's development, please donate.<br>
+               Also, if I get enough donations, I will release the sourcecode on github.</p>
+            <p>
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="hosted_button_id" value="N33DK7FH5ZZ8E">
+                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                    <img alt="" border="0" src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif" width="1" height="1">
+                </form>
+            </p>
         </div>
     </div>
 

@@ -45,6 +45,13 @@ exports = module.exports = {
         //Planet1
         {
             type: "gasplanet1",
+            x: -600, y: -600,
+            bg: true //Hintergrund Modifier
+        },
+
+        //Planet2
+        {
+            type: "greenplanet",
             x: 600, y: 200,
             bg: true //Hintergrund Modifier
         },

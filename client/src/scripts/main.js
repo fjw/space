@@ -54,6 +54,8 @@ require([
 
     $(document).ready(function() {
 
+        $(".guestinputbox").val("guest"+ ft.getRandomNumber(0, 10000));
+
         // Error --------------------------------------------------
         window.errorMsg = function(msg, title) {
 

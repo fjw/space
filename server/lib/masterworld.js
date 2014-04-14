@@ -61,7 +61,7 @@ exports = module.exports = function(worldname) {
         objects: [
 
             //debug
-            {  type: "player", x:0, y:0, s:0, ma:0, va:0, cr:18, e:100, name: "monkey" }
+            //{  type: "player", x:0, y:0, s:0, ma:0, va:0, cr:18, e:100, name: "monkey" }
 
         ],
         cfg: {},
@@ -182,6 +182,8 @@ exports = module.exports = function(worldname) {
                 return obj.dead || (obj.ad && (obj.t + (obj.ad * 1000) < thistime));
 
             });
+
+
         },
 
         /*
@@ -199,7 +201,9 @@ exports = module.exports = function(worldname) {
 
                 cr: this.cfg.player.cr,          //Kollisionsradius
                 e:  this.cfg.player.maxenergy,   //Starte mit max. Energie
-                name: playername
+                name: playername,
+
+                la: getTime()    // Letzte Aktion
             };
 
             this.objects.push(player);
@@ -276,12 +280,22 @@ exports = module.exports = function(worldname) {
                         break;
 
                 }
+
+                player.la = getTime(); // letzte Aktion updaten
             }
 
             return player;
         },
 
         checkPlayerEvents: function(player, thistime) {
+
+
+            if( player.la + (this.cfg.player.idletime * 1000) < thistime ) {
+
+                // Idle-Player vernichten
+                player.dead = true;
+
+            }
 
 
             if( player.shooting ) {

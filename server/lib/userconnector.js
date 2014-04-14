@@ -48,6 +48,7 @@ var CONNECTION = function(ws) {
 
                 //todo: user über datenbank verwalten
 
+                /*
                 if(data.u == "frederic" && data.p == "master") {
 
                     // allowed Admin
@@ -117,6 +118,13 @@ var CONNECTION = function(ws) {
                     _this.emit("auth", {error: "wrong credentials", allowed: 0});
 
                 }
+                */
+
+                //todo: dies ist im moment nur der guest login
+                _this.emit("auth", {allowed: 1});
+                _this.logedin = true;
+
+                _this.username = data.u;
 
 
             });
