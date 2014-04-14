@@ -1,9 +1,11 @@
 var WEBSOCKET = require('ws');
 var msgpack = require('msgpack-js');
+var _ = require( __dirname + "/lodash.js");
 
-var CONNECTION = function(ws) {
+var CONNECTION = function(ws, id) {
 
     var obj = {
+        id: id,
 
         member: false,
         logedin: false,
@@ -174,24 +176,40 @@ exports = module.exports = function(port, connectioncallback) {
 
         sock: null,
 
+        connections: [],
 
         _init: function(port, connectioncallback) {
+            var _this = this;
 
             this.sock = new WEBSOCKET.Server({port: port});
 
             this.sock.on('connection', function(ws) {
 
                 var conn = new CONNECTION(ws);
-                conn.open = true;
-                connectioncallback(conn);
+                _this.connections.push(conn);
 
+                conn.open = true;
+                connectioncallback(conn, _this);
+
+                //alte connections bereinigen
+                _this.connections = _.filter(_this.connections, function(cc) { return cc.open; });
+
+            });
+
+        },
+
+        broadcast: function(msg, data) {
+
+            _.each(this.connections, function(c) {
+                if(c.open) {
+                    c.emit(msg, data);
+                }
             });
 
         }
 
     };
 
-    //todo: broadcast
 
     //mach den _init und gib das objekt aus
     obj._init(port, connectioncallback);
