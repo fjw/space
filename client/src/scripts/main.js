@@ -54,7 +54,13 @@ require([
 
     $(document).ready(function() {
 
-        $(".guestinputbox").val("guest"+ ft.getRandomNumber(0, 10000));
+        var oname = ft.getCookie("option_name");
+
+        if(oname) {
+            $(".guestinputbox").val(oname);
+        } else {
+            $(".guestinputbox").val("guest"+ ft.getRandomNumber(0, 10000));
+        }
 
         // Error --------------------------------------------------
         window.errorMsg = function(msg, title) {
@@ -201,6 +207,8 @@ require([
             $("#userloginform").bind("submit", function(){
 
                 var $form = $("#userloginform");
+
+                ft.setCookie("option_name", $("#username", $form).val(), 100);
 
                 var username = $("#username", $form).val();
                 var password = $("#password", $form).val();
