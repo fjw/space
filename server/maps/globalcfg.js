@@ -23,7 +23,7 @@ exports = module.exports = {
 
         respawntime: 6,              // Zeit bis zum Respawn nach dem Tode ( s )
 
-        idletime: 1800 //30min       // Zeit bis zur Selbstzerstörung bei Idle ( s )
+        idletime: 300 //5min       // Zeit bis zur Selbstzerstörung bei Idle ( s )
     },
 
     // ---- Projektile
