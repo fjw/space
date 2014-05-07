@@ -15,6 +15,10 @@ var WORLD = require( __dirname + "/lib/masterworld.js");
 
 var worldname = "testarena";
 
+if(process.env.SPACE_WORLD) {
+    worldname = process.env.SPACE_WORLD;
+}
+
 // -----------------------------------
 
 

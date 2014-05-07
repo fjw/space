@@ -3,6 +3,21 @@ exports = module.exports = {
     // Weltconfig (mapspezifische überschreibt globale)
     cfg: {},
 
+
+    exits: [
+
+        {
+            a: 45, // Winkel
+            d: "testarena2" // Ziel
+        },
+        {
+            a: 180, // Winkel
+            d: "yourmama" // Ziel
+        }
+
+    ],
+
+
     // statische Objekte der Welt
     statics: [
         /*
@@ -488,7 +503,7 @@ exports = module.exports = {
 
 
         //Seitenwände
-
+/*
         {
             type: "ni", x: -2000, y: -2000,
             ps: [[ { x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 4000 }, { x: 0, y: 4000 } ]],
@@ -509,6 +524,7 @@ exports = module.exports = {
             ps: [[ { x: 0, y: 0 }, { x: 4000, y: 0 }, { x: 4000, y: 10 }, { x: 0, y: 10 } ]],
             c: "#444"
         }
+*/
 
 
     ]

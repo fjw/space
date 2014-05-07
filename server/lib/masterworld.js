@@ -87,10 +87,10 @@ exports = module.exports = function(worldname) {
             starttime = getTime();
 
             // Publisher verbinden
-            publisher.bindSync("ipc://ipc/"+worldname+"2.ipc");
+            publisher.bindSync("ipc://ipc/"+worldname+"_pubsub.ipc");
 
             // Responder verbinden
-            responder.bind("ipc://ipc/"+worldname+".ipc", function(err) {
+            responder.bind("ipc://ipc/"+worldname+"_reqrep.ipc", function(err) {
                 if (err) throw err;
 
                 responder.on('message', function(data) {

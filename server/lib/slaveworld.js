@@ -139,10 +139,10 @@ exports = module.exports = function(worldname) {
             this.name = worldname;   //Name der Welt
 
             //requester verbinden
-            requester.connect("ipc://ipc/"+worldname+".ipc");
+            requester.connect("ipc://ipc/"+worldname+"_reqrep.ipc");
 
             //subscriber verbinden
-            subscriber.connect("ipc://ipc/"+worldname+"2.ipc");
+            subscriber.connect("ipc://ipc/"+worldname+"_pubsub.ipc");
 
 
             // Hole initial die Daten

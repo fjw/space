@@ -34,7 +34,7 @@ log("info", "[" + env + "] communication-server listening on " + port);
 
 // --------------------------------- manage worlds -----------------------
 
-var worldnames = ["testarena"];
+var worldnames = ["testarena", "testarena2"];
 var worlds = [];
 
 worldnames.forEach(function(wn) {
