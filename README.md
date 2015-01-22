@@ -19,7 +19,20 @@ The main problem with this project was performance. What you see is the result o
 Since its my first realtime browser action game there was a lot to learn...
 
 
+serverside frameworks used:
+- lodash
+- colors
+- ws
+- node-static
+- msgpack-js
+- zmq
 
+
+clientside frameworks used:
+- require.js
+- lodash (luv it)
+- msgpack
+- a little bit jquery
 
 
 
