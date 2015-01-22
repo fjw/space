@@ -21,3 +21,16 @@ Since its my first realtime browser action game there was a lot to learn...
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+(sorry, all comments are german :D at that time i didn't think of making it opensource)
+
