@@ -1,7 +1,5 @@
 var env = process.env.NODE_ENV;
 
-if( env == 'production' ) { require('newrelic'); }
-
 // -----------------------------------
 log = require( __dirname + "/lib/log.js");
 oi = require( __dirname + "/lib/oi.js");
