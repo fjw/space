@@ -12,7 +12,10 @@ The server part is fully in node.js and divided in 3 parts.
 - worldserver
 - communication server
 
-all 3 servers need to run to make it work. i divided into 3 parts to be able to scale it to a cluster later for making
+you need to install zeromq (http://zeromq.org/intro:get-the-software) to run the server (you need version 3.2.5). after that just run configure to install the npm dependencies.
+then start all 3 servers.
+
+i divided into 3 parts to be able to scale it to a cluster later for making
 one worldserver for each level but one comserver for one chunk of users.
  
 The main problem with this project was performance. What you see is the result of heavy tweaking.
@@ -20,12 +23,12 @@ Since its my first realtime browser action game there was a lot to learn...
 
 
 serverside frameworks used:
+- zmq
 - lodash
 - colors
 - ws
 - node-static
 - msgpack-js
-- zmq
 
 
 clientside frameworks used:
