@@ -3,7 +3,7 @@ by Frederic Worm (MIT-License)
 
 ### space is a fully functional multiplayer asteroids/continuum like shooter in your browser
 
-[click for a screenshot](screenshot.jpg)
+![screenshot](./screenshot.jpg)
 
 You can find it in action on http://space.toolset.io
 
